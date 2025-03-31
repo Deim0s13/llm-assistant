@@ -1,0 +1,9 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Virtual enviornment
+env/
+
+#Environment variables file
+.env
