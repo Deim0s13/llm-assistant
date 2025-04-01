@@ -3,7 +3,7 @@ import gradio as gr
 import torch
 
 # Define your model name
-model_name = "03-mini-high"
+model_name = "distilgpt2"
 
 # Load tokenizer and model from Hugging Face
 tokenizer = AutoTokenizer.from_pretrained(model_name)
