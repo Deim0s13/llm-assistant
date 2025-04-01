@@ -24,7 +24,7 @@ def chat(message):
         input_ids,
         max_length=150,
         do_sample=True,
-        temprature=0.7
+        temprature=0.7,
         top_p=0.9,
         pad_token_id=tokenizer.eos_token_id
     )
