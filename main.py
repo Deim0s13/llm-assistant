@@ -24,7 +24,7 @@ def chat(message):
         input_ids,
         max_length=150,
         do_sample=True,
-        temprature=0.7,
+        temperature=0.7,
         top_p=0.9,
         pad_token_id=tokenizer.eos_token_id
     )
@@ -33,7 +33,7 @@ def chat(message):
     return response
 
 # Create a Gradio interface for interaction
-iface = gr.Interface(fn=chat, inputs="text", outputs="text", title="03-mini-high Chatbot")
+iface = gr.Interface(fn=chat, inputs="text", outputs="text", title="My Test LLM Chatbot")
 
 if __name__ == "__main__":
     iface.launch()
