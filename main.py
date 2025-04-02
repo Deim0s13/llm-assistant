@@ -62,7 +62,8 @@ with gr.Blocks() as demo:
     chatbot = gr.Chatbot()
     state = gr.State([]) # This holds the conversation history
     with gr.Row():
-        txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter").style(container=False)
+        # Removed .style() call to avoid the AttributeError
+        txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter")
     # When the user submits a message, call 'respond'
     txt.submit(respond, [txt, state], [txt, chatbot])
 
