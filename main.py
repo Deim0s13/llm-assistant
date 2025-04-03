@@ -18,7 +18,11 @@ def chat(message, history):
     Build a conversation context history, generate a response, and return the updated history.
     """
     # Construct the prompt by iterating over history
-    context = ""
+    if not history:
+        context = "You are a helpful assistant that responds in English.\n"
+    else:
+        context = ""
+    # Append previous conversation turns
     for user_msg, bot_msg in history:
         context += f"User: {user_msg}\nBot: {bot_msg}\n"
     # Add the latest user message
@@ -32,7 +36,7 @@ def chat(message, history):
         input_ids,
         max_length=max_length,
         do_sample=True,
-        temperature=0.7,
+        temperature=0.5,
         top_p=0.9,
         pad_token_id=tokenizer.eos_token_id
     )
