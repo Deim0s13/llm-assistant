@@ -17,11 +17,16 @@ def chat(message, history):
     """
     Build a conversation context history, generate a response, and return the updated history.
     """
-    # Construct the prompt by iterating over history
+    # Construct the prompt by iterating over history and start with a detailed instruction prompt if the history is empty
     if not history:
-        context = "You are a helpful assistant that responds in English.\n"
+        context = (
+            "You are a helpful assistant that responds in English, and provides useful, detailed information on a wide range of topics."
+            "When asked 'What topics can you help me with?, list topics like technology, science, history, art. literature, and more."
+        )
+
     else:
         context = ""
+        
     # Append previous conversation turns
     for user_msg, bot_msg in history:
         context += f"User: {user_msg}\nBot: {bot_msg}\n"
