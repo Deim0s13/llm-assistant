@@ -2,6 +2,22 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
 
+# Function to load the base prompt template from an external file
+def load_base_prompt(filepath="prompt_template.txt"):
+    try:
+        with open(filepath, "r") as file:
+            return file.read().strip()
+    except Exception as e:
+        print(f"Error loading prompt template: {e}")
+        return ""
+    
+# Function to dynamacially inject additonal instructions based on the users's message.
+def get_dynamic_instructions(message):
+    # If the message asks for a famous historical quote, add extra instructions.
+    if "historical quote" in message.lower():
+        return " Please provide a well-known historical quote, for example: 'The only thing we have to fear is fear itself.'"
+    return ""
+
 # Use an instruction-tuned model: google/flan-t5-small
 model_name = "google/flan-t5-small"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -12,16 +28,13 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 model.to(device)
 
 def chat(message, history):
-    # Build a prompt with conversation history using consistent labels.
-    if not history:
-        # Start with a detailed system prompt to guide responses.
-        context = (
-            "You are a helpful assistant that responds in English. "
-            "Provide clear, detailed answers to user queries. "
-            "When a user asks 'What topics can you help with?', respond with: "
-            "'I can help you with topics such as technology, science, history, art, literature, and more.'"
-        )
+    # Load the base prompt from the external file.
+    base_prompt = load_base_prompt()
+    dynamic_instructions = get_dynamic_instructions(message)
 
+    # If no conversation history exists, start with the base prompt plus any dynamic instructions.
+    if not history:
+        context = base_prompt + dynamic_instructions
     else:
         context = ""
 
@@ -83,4 +96,4 @@ with gr.Blocks() as demo:
         txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter")
     txt.submit(respond, [txt, state], [txt, chatbot])
 
-demo.launch(share=True)
+demo.launch()
