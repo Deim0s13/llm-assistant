@@ -2,11 +2,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import gradio as gr
 import torch
 
-# Use distilgpt2 as our base model
-model_name = "distilgpt2"
+# Use GPT-2 as our base model
+model_name = "gpt2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# Set the pad token to the EOS token if not already set
+# GPT-2 doesn't have a dedicated pad token, so set it to the eos token
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -17,12 +17,7 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 model.to(device)
 
 def chat(message, history):
-    """
-    Build a conversation context history (now using dictionaries),
-    generate a response, and return the updated conversation history.
-    """
-    # Build a prompt string for the model using the conversation history.
-    # Start with a system prompt if no history exists.
+    # Build a prompt with conversation history using consistent labels.
     if not history:
         context = (
             "You are a helpful assistant that responds in English. Provide clear, detailed answers to user queries. "
@@ -55,8 +50,8 @@ def chat(message, history):
     # Generate the response.
     generation_params = {
         "max_new_tokens": 100,
-        "do_sample": False,
-        "temperature": 0.3,
+        "do_sample": True,
+        "temperature": 0.5,
         "top_p": 0.9,
         "pad_token_id": tokenizer.eos_token_id,
         "attention_mask": attention_mask,
