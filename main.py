@@ -25,8 +25,9 @@ def chat(message, history):
     # Start with a system prompt if no history exists.
     if not history:
         context = (
-            "You are a helpful assistant that responds in English"
-            "Provide clear, detailed answers to user queries."
+            "You are a helpful assistant that responds in English. Provide clear, detailed answers to user queries. "
+            "When a user asks 'What topics can you help with?', respond with: "
+            "'I can help you with topics such as technology, science, history, art, literature, and more.'"
         )
 
     else:
@@ -54,8 +55,8 @@ def chat(message, history):
     # Generate the response.
     generation_params = {
         "max_new_tokens": 100,
-        "do_sample": True,
-        "temperature": 0.5,
+        "do_sample": False,
+        "temperature": 0.3,
         "top_p": 0.9,
         "pad_token_id": tokenizer.eos_token_id,
         "attention_mask": attention_mask,
