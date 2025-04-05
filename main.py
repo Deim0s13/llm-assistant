@@ -71,12 +71,12 @@ def chat(message, history):
     encoded_input = tokenizer(context, return_tensors="pt", padding=True, truncation=True)
     input_ids = encoded_input.input_ids.to(device)
     
-    # Generation parameters.
+    # Set generation parameters from UI inputs.
     generation_params = {
-        "max_new_tokens": 100,
-        "do_sample": True,
-        "temperature": 0.5,
-        "top_p": 0.9,
+        "max_new_tokens": int(max_new_tokens),
+        "do_sample": do_sample,
+        "temperature": float(temperature),
+        "top_p": float(top_p),
     }
     
     output_ids = model.generate(input_ids, **generation_params)
@@ -104,12 +104,27 @@ def respond(message, history):
 # Build the Gradio interface.
 with gr.Blocks() as demo:
     gr.Markdown("# Enhanced Chatbot with External Prompt Templates")
-    # Using type="messages" to display conversation history as dictionaries.
+
+    # Chatbot component for displaying structure conversation history
     chatbot = gr.Chatbot(type="messages")
     state = gr.State([])
+
     with gr.Row():
         txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter")
     txt.submit(respond, [txt, state], [txt, chatbot])
+
+    # Add sliders and checkbox for generation parameters
+    with gr.Row():
+        max_new_tokens_slider = gr.Slider(minimum=50, maximum=200, value=100, label="Max New Tokens")
+        temperature_slider = gr.Slider(minimum=0.1, maximum=1.0, value=0.5, label="Temperature")
+        top_p_slider = gr.Slider(minimum=0.5, maximum=1.0, value=0.9, label="Top-p")
+        do_sample_checkbox = gr.Checkbox(value=True, label="Do Sample")
+
+    txt.submit(
+        respond,
+        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox],
+        [txt, chatbot]
+    )
 
 # Launch locally.
 demo.launch()
