@@ -68,7 +68,7 @@ def get_specialized_prompt(message, specialized_prompts):
             return prompt
     return ""
 
-def initialized_model(model_name="MODEL_NAME"):
+def initialized_model(model_name=MODEL_NAME):
     """
         Initialize the tokenizer and model.
     
