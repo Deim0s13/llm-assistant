@@ -68,7 +68,7 @@ def get_specialized_prompt(message, specialized_prompts):
             return prompt
     return ""
 
-def initialized_model(model_name=MODEL_NAME):
+def initialized_model(model_name="MODEL_NAME"):
     """
         Initialize the tokenizer and model.
     
@@ -115,7 +115,7 @@ def prepare_context(message, history, base_prompt, specialized_prompts):
             context += f"\nAssistant: {entry['content']}"
 
     # Append the current user message
-    context += f"nUser: {message}\nAssistant: "
+    context += f"n\User: {message}\nAssistant: "
 
     return context
 
