@@ -115,7 +115,7 @@ def prepare_context(message, history, base_prompt, specialized_prompts):
             context += f"\nAssistant: {entry['content']}"
 
     # Append the current user message
-    context += f"n\User: {message}\nAssistant: "
+    context += f"\nUser: {message}\nAssistant: "
 
     return context
 
