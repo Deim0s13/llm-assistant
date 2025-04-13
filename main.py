@@ -10,7 +10,7 @@ MODEL_NAME = "google/flan-t5-small"
 BASE_PROMPT_PATH = "prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "specialized_prompts.json"
 MAX_HISTORY_TURNS = 5
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -166,6 +166,8 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample):
         if DEBUG_MODE:
             logging.debug("Extracted new response:")
             logging.debug(new_response)
+
+        if DEBUG_MODE:
             logging.debug("Generation parameters:")
             logging.debug(generation_params)
 
