@@ -13,7 +13,7 @@ MAX_HISTORY_TURNS = 5
 DEBUG_MODE = True
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to load the base prompt template from an external file.
 def load_base_prompt(filepath=BASE_PROMPT_PATH):
