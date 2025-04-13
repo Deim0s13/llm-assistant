@@ -166,6 +166,8 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample):
         if DEBUG_MODE:
             logging.debug("Extracted new response:")
             logging.debug(new_response)
+            logging.debug("Generation parameters:")
+            logging.debug(generation_params)
 
         # Update conversation history
         history.append({"role": "user", "content": message})
