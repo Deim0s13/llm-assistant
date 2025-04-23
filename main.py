@@ -62,7 +62,7 @@ def get_specialized_prompt(message, specialized_prompts):
     Returns:
         str: The specialized prompt if a keyword match is found, otherwise an empty string
     """
-    message_lower = message.lower()
+    message_lower = message.lower().replace("'", "'") # Normalise smart quotes
     for keyword, prompt in specialized_prompts.items():
         if keyword in message_lower:
             logging.debug(f"[Prompt match] Using specialized prompt for: '{keyword}'")
