@@ -65,6 +65,7 @@ def get_specialized_prompt(message, specialized_prompts):
     message_lower = message.lower()
     for keyword, prompt in specialized_prompts.items():
         if keyword in message_lower:
+            logging.debug(f"[Prompt match] Using specialized prompt for: '{keyword}'")
             return prompt
     return ""
 
