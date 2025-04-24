@@ -1,33 +1,49 @@
 # LLM Chatbot Starter Kit
 
-This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.1.0) leverages the instruction-tuned model `google/flan-t5-small` to create a robust multi-turn conversation interface.
+This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.2.1) leverages the instruction-tuned model `google/flan-t5-small` to create a robust multi-turn conversation interface with enhanced prompt control.
 
-## Features in Version 0.2.0
+## Features in Version 0.2.1
 
-- **Enhanced Conversation Context:**  
-  The chatbot maintains multi-turn conversation history, enabling more coherent responses by incorporating previous exchanges into the prompt.
+## Key Features
 
-- **Externalized Prompts:**  
-  The base system prompt is stored in an external file (`prompt_template.txt`), allowing easy updates to the assistant’s initial instructions without modifying the code.
+### • Enhanced Conversation Context
 
-- **Dynamic Instruction Injection:**  
-  Specialized prompts are stored in a JSON file (`specialized_prompts.json`) and dynamically injected based on the user's query (e.g., providing a historical quote when requested).
+The chatbot continues to maintain multi-turn conversation history, enabling more coherent responses by incorporating previous exchanges into the prompt.
 
-- **Structured Conversation History:**  
-  Conversation exchanges are maintained in a structured format (using dictionaries with `role` and `content` keys), which is neatly displayed by the Gradio interface.
+### • Externalized Prompts
 
-- **Tunable Generation Parameters:**  
-  New UI controls allow you to adjust key generation parameters on the fly:
+- **Base Prompt** is stored in `prompt_template.txt`, enabling easy iteration on the assistant’s personality and tone.  
+- **Specialized Prompts** are stored in `specialized_prompts.json` and dynamically injected based on user queries to better tailor responses (e.g., “explain like I’m five”, “give me a fun fact”).
 
-  - **Max New Tokens:** Controls the maximum number of tokens generated.
-  
-  - **Temperature:** Controls randomness in output (lower values yield more deterministic results, while higher values foster creativity).
+### • Keyword-Based Prompt Switching
 
-  - **Top-p (Nucleus Sampling):** Adjusts how much probability mass is considered for next-token selection.
-  
-  - **Do Sample:** Toggle between sampling-based and deterministic generation.
+A new mechanism scans user input for relevant keywords and loads a specialized prompt when appropriate, overriding the base instructions for that interaction. This allows lightweight prompt engineering without hardcoding logic into the model.
 
-  These adjustments enable real-time experimentation to refine output quality and response characteristics.
+### • Structured Conversation History
+
+Exchanges are tracked using structured `role`/`content` pairs (user, assistant), improving clarity and ensuring predictable formatting across turns.
+
+### • Tunable Generation Parameters
+
+The Gradio interface allows real-time experimentation with the following controls:
+
+- **Max New Tokens**  
+- **Temperature**  
+- **Top-p** (Nucleus Sampling)  
+- **Do Sample**
+
+These options help shape response style, creativity, and determinism for better control during development.
+
+### • Debug Logging for Development
+
+Debug mode (`DEBUG_MODE = True`) outputs detailed logs showing:
+
+- Which prompt is being used  
+- Full context passed to the model  
+- Raw generated output  
+- Token generation settings  
+
+This allows fine-grained introspection during testing and refinement.
 
 ## Setup
 
@@ -53,10 +69,10 @@ This will launch a local Gradio interface in your browser
 ## External Files
 
 - **prompt_template.txt:**
-  Contains the base prompt that defines the overall behaviour of the assistant
+  Contains the base instruction for the assistant’s behavior and tone.
 
 - **specialized_prompts.json**
-  Contains specialised instructions keyed by certain phrases (e.g., "historical quote", "famous artist" ) that override the base prompt when applicable.
+  Maps trigger keywords (e.g., `“explain like I’m five”`, `“historical quote”`) to alternate system prompts used when those phrases are detected in the input.
 
 ## Testing and Experimentation
 
@@ -69,21 +85,27 @@ Use the sliders and checkbox in the Gradio interface to adjust:
 - **Top-p**: Range: 0.5–1.0  
 - **Do Sample**: Toggle to switch between sampling (creative) and deterministic (greedy) responses.
 
-Experiment by sending the same message with different parameter settings and observe changes in response length, creativity, and coherence.
+Test different values and note how they influence tone, accuracy, and creativity.
 
-### • Conversation Context Testing
+### • Prompt Matching Debugging
 
-Engage in multi-turn conversations to ensure that the conversation history is correctly incorporated into the prompt and that the responses reflect the desired behavior.
+Turn on `DEBUG_MODE` to confirm when a specialized prompt is used. Matched prompts are logged with `[Prompt Match]`, and unmatched queries will fall back to the base.
+
+### • Few-Shot Examples (in prompt_template.txt)
+
+Simple in-context examples improve model grounding. Review and revise thse to better your use case.
 
 ## Next Steps
 
-### • Further Parameter Fine-Tuning and Prompt Refinement
+### • Prompt Refinement and Few-Shot Tuning
 
-Continue experimenting with the sliders and possibly update prompt content based on your observations to further improve output quality.
+Improve the examples and phrasing in both `prompt_template.txt` and `specialized_prompts.json` for more consistent behaviours acros topics.
 
 ### • Future Enhancements
 
 Future versions might include:
 
-- Containerizing the application using **Podman**  
-- Fine-tuning the model on a **custom dataset** for domain-specific improvements
+- Containerizing with **Podman**.
+- Introducing **GitHub Copilot-like suggestions**  
+- Fine-tuning the model with domain-specific samples.
+- Adding support for **chat history saving** or **multi-user session memory**
