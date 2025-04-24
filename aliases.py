@@ -1,31 +1,22 @@
-{
-    "historical quote": "historical_quote",
-    "famous artist": "famous_artist",
-    "fun fact": "fun_fact",
-    "summarise": "summarise",
-    "explain simply": "explain_simple",
-    "like i'm five": "explain_simple",
-    "explain like i'm five": "explain_simple",
-    "like i am five": "explain_simple",
-    "explain like i am five": "explain_simple",
-    "define": "define_term",
-    "definition": "define_term",
-    "compare": "compare_items",
-    "difference between": "compare_items",
-    "how do I": "step_by_step",
-    "step by step": "step_by_step",
-    "joke": "funny_response",
-    "make me laugh": "funny_response",
-    "motivate me": "motivational_quote",
-    "motivation": "motivational_quote",
-    "tech concept": "tech_summary",
-    "history": "historical_event",
-    "book": "book_summary",
-    "book summary": "book_summary",
-    "movie": "movie_explainer",
-    "film": "movie_explainer",
-    "science": "science_fact",
-    "scientific fact": "science_fact",
-    "code": "code_explanation",
-    "explain this code": "code_explanation"
-}
+import json
+import logging
+
+PROMPT_ALIASES_PATH = "prompt_aliases.json"
+
+def load_prompt_aliases(filepath=PROMPT_ALIASES_PATH):
+    """
+    Load prompt aliases from a JSON file.
+
+    Returns:
+        dict: A dictionary mapping alias phrases to canonical concepts.
+    """
+    try:
+        with open(filepath, "r") as f:
+            aliases = json.load(f)
+            logging.info(f"[Prompt Alias Loader] Loaded {len(aliases)} aliases.")
+            return aliases
+    except Exception as e:
+        logging.error(f"[Prompt Alias Loader] Failed to load aliases: {e}")
+        return {}
+
+KEYWORD_ALIASES = load_prompt_aliases()
