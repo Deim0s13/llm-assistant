@@ -6,7 +6,7 @@ import torch
 
 #Configuration constants
 
-MODEL_NAME = "google/flan-t5-base
+MODEL_NAME = "google/flan-t5-base"
 BASE_PROMPT_PATH = "prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "specialized_prompts.json"
 MAX_HISTORY_TURNS = 5
