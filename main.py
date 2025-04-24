@@ -44,10 +44,15 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
         dict: Dictionary of keyword-prompt pairs
     """
     try:
-        with open(filepath, "r") as file:
-            return json.load(file)
+        with open(filepath, "r", encoding="utf-8") as file:
+            prompts = json.load(file)
+            if not isinstance(prompts, dict):
+                raise ValueError("Specialized prompots JSON must be a dictionary")
+            logging.info(f"[Prompt Loader] Loaded {len(prompts)} specialized prompts.")
+            logging.debug(f"[Prompt Loader] Keywords: {list(prompts.keys())}")
+            return prompts
     except Exception as e:
-        logging.error(f"Error loading specialized prompts: {e}")
+        logging.error(f"[Prompt Loader] Error loading specialized prompts: {e}")
         return {}
     
 # Funtion to get specialized prompt based on the user's message
@@ -62,11 +67,12 @@ def get_specialized_prompt(message, specialized_prompts):
     Returns:
         str: The specialized prompt if a keyword match is found, otherwise an empty string
     """
-    message_lower = message.lower().replace("'", "'") # Normalise smart quotes
+    message_lower = message.lower().replace("’", "'") # Normalise smart quotes
     for keyword, prompt in specialized_prompts.items():
         if keyword in message_lower:
-            logging.debug(f"[Prompt match] Using specialized prompt for: '{keyword}'")
+            logging.debug(f"[Prompt Match] Using specialized prompt for: '{keyword}'")
             return prompt
+        logging.debug("[Prompt Match] No specialized prompt matched. Using base prompt.")
     return ""
 
 def initialized_model(model_name=MODEL_NAME):
