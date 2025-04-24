@@ -1,10 +1,30 @@
 # LLM Chatbot Starter Kit
 
-This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.2.1) leverages the instruction-tuned model `google/flan-t5-small` to create a robust multi-turn conversation interface with enhanced prompt control.
+This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.2.2) leverages the instruction-tuned model `google/flan-t5-base` to create a robust multi-turn conversation interface with enhanced prompt control.
+
+## Features in Version 0.2.2
+
+### • Model Upgrade
+
+Upgraded from `google/flan-t5-small` to `google/flan-t5-base` for significantly improved comprehension and output quality.
+
+### • Concept-Based Prompt Matching
+
+- Specialized prompts are now matched using concept _aliases_ (e.g. "explain simple", "like I'm five" → `explain_simple`), ensuring greater flexibility and reducing false negatives.
+
+- Keyword mappings are maintained in `aliases.py`, decoupling logic from prompt content.
+
+### • Diagnostic Logging
+
+- Logs explicitly indicate:
+
+  - Whether a specialized or base prompt was selected
+  - What alias was matched (if any)
+  - Full prompt context sent to the model
+
+- Makes debugging prompt behaviour much easier
 
 ## Features in Version 0.2.1
-
-## Key Features
 
 ### • Enhanced Conversation Context
 
@@ -74,7 +94,20 @@ This will launch a local Gradio interface in your browser
 - **specialized_prompts.json**
   Maps trigger keywords (e.g., `“explain like I’m five”`, `“historical quote”`) to alternate system prompts used when those phrases are detected in the input.
 
+- **aliases.py**
+  Maps common input phrases to those normalised concepts for flexible and reslient keywork matching.
+
 ## Testing and Experimentation
+
+### • Prompt Match Validation
+
+Try input like:
+
+- "Tell me something like I'm five"
+- "Summarise this text"
+- "Can you give me a fun fact"
+
+Then check the logs to verify correct alias mapping and prompt injection.
 
 ### • Generation Parameter Tuning
 
@@ -105,7 +138,8 @@ Improve the examples and phrasing in both `prompt_template.txt` and `specialized
 
 Future versions might include:
 
-- Containerizing with **Podman**.
-- Introducing **GitHub Copilot-like suggestions**  
-- Fine-tuning the model with domain-specific samples.
-- Adding support for **chat history saving** or **multi-user session memory**
+• Containerization with **Podman**
+• Domain-specific model fine-tuning
+• Multi-user or persistent session memory
+• Prompt quality scoring or fallback strategies
+• GitHub Copilot-style suggestion flow
