@@ -3,6 +3,7 @@ import logging
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
+import difflib
 
 #Configuration constants
 
@@ -56,22 +57,35 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
         return {}
     
 # Funtion to get specialized prompt based on the user's message
-def get_specialized_prompt(message, specialized_prompts):
+def get_specialized_prompt(message, specialized_prompts, threshold=0.75):
     """
-        Find a specialized prompt based on keywords in the user's message.
+    Match user message to a specialized prompt using keywork and fuzzy matching.
     
     Args:
-        message (str): The user's input message
-        specialized_prompts (dict): Dictionary of keyword-prompt pairs
+        message (str): The user's message
+        specialized_prompts (dict): Dictionary for keywork-prompt pairs
+        threshold (float): Similarity threshold for fuzzy matching
         
     Returns:
-        str: The specialized prompt if a keyword match is found, otherwise an empty string
+        str: The best-matched specialized prompt or an empty string
     """
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
+
+    # Exact keywork match
     for keyword, prompt in specialized_prompts.items():
         if keyword in message_lower:
             logging.debug(f"[Prompt Match] Using specialized prompt for: '{keyword}'")
             return prompt
+        
+    # Fuzzy match fallback
+    keywords = list(specialized_prompts.keys())
+    best_match = difflib.get_close_matches(message, keyword, n=1, cutoff=threshold)
+
+    if best_match:
+        matched_keyword = best_match[0]
+        logging.debug(f"[Prompt Match] Fuzzy match for: '{matched_keyword}'")
+        return specialized_prompts[matched_keyword]
+
         logging.debug("[Prompt Match] No specialized prompt matched. Using base prompt.")
     return ""
 
