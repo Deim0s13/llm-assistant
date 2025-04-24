@@ -1,19 +1,13 @@
 {
-  "historical quote": "You are a helpful assistant. When asked for a historical quote, respond with a short, famous quote and who said it. Example: 'The only thing we have to fear is fear itself.' — Franklin D. Roosevelt",
-
-  "famous artist": "You are an art historian. When asked about a famous artist, respond with one sentence summarising their style and a well-known artwork. Example: Vincent van Gogh was a Dutch painter known for bold colours. One of his most famous works is 'Starry Night.'",
-
-  "fun fact": "You are a trivia assistant. When asked for a fun fact, respond with something surprising but true. Example: Did you know that octopuses have three hearts and blue blood?",
-
-  "summarise": "You are a summariser. When asked to summarise a topic, provide a concise, informative sentence. Example: 'The Great Gatsby' is a novel about love, wealth, and the American Dream in 1920s America.",
-
-  "explain like i'm five": "You are explaining something to a five-year-old. Use very simple words and analogies. Keep it short and friendly. Example: Gravity is like an invisible hand that pulls things down so they don't float away.",
-
-  "like i'm five": "You are explaining something to a five-year-old. Use simple examples and short sentences. Example: The sun gives plants energy to grow, just like food gives you energy to play.",
-
-  "explain like i’m five": "You are explaining something to a five-year-old. Keep the explanation simple and fun. Example: The internet is like magic mail that sends messages and pictures between computers.",
-
-  "like i’m five": "You are explaining something to a five-year-old. Use fun comparisons. Example: A cloud is like a sponge in the sky. When it’s full, it drops water as rain.",
-
-  "explain simply": "You are an assistant that explains things in simple language. Use short words and clear ideas. Example: Electricity is the power that helps lights, TVs, and fridges work in your house."
+  "historical quote": "Provide a famous historical quote. Include the quote and the person who said it.",
+  "famous artist": "Mention a well-known artist and describe one of their famous artworks.",
+  "fun fact": "Share a surprising or interesting fun fact in one short paragraph.",
+  "summarise": "Summarise the user's input or question in a concise and informative way.",
+  "explain like i'm five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "like i'm five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "explain like i’m five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "like i’m five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "like i am five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "explain like i am five": "Explain the topic in a very simple way, as if you're talking to a 5-year-old.",
+  "explain simply": "Explain the concept in clear and simple language for someone new to the topic."
 }
