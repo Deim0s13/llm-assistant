@@ -58,7 +58,7 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
         return {}
     
 # Funtion to get specialized prompt based on the user's message
-def get_specialized_prompt(message, specialized_prompts, threshold=0.75):
+def get_specialized_prompt(message, specialized_prompts):
     """
     Match user message to a specialized prompt using keywork and fuzzy matching.
     
@@ -71,11 +71,14 @@ def get_specialized_prompt(message, specialized_prompts, threshold=0.75):
         str: The best-matched specialized prompt or an empty string
     """
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
+    
     for alias, concept in KEYWORD_ALIASES.items():
         if alias in message_lower:
-            if DEBUG_MODE:
+            if concept in specialized_prompts:
+                prompt = specialized_prompts[concept]
                 logging.debug(f"[Prompt Match] Matched alias '{alias}' to concept '{concept}'")
-            return specialized_prompts.get(concept, "")
+                logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...") # Preview
+                return prompt
     return ""
 
 def initialized_model(model_name=MODEL_NAME):
