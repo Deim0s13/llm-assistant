@@ -134,6 +134,26 @@ Simple in-context examples improve model grounding. Review and revise thse to be
 
 Improve the examples and phrasing in both `prompt_template.txt` and `specialized_prompts.json` for more consistent behaviours acros topics.
 
+## Naming Convention Update (From v0.2.4 Onwards)
+
+### Previous Format
+
+Branch names were descriptive and focused on what was being delivered, e.g.:
+
+- `specialized-prompts-upgrade`
+- `model-upgrade`
+- `alias-matching`
+
+### New Format (from v0.2.4 onward)
+
+Branch names now include the version for clarity and traceability:
+
+- `feature/v0.2.4-ui-devtools`
+- `bugfix/v0.2.5-token-logging`
+- `docs/v0.2.6-readme-refresh`
+
+This will make versioning clearer during merges and retrospectives, especially as the project grows. If you ever need to roll back or trace changes, this structure makes it easier.
+
 ### • Future Enhancements
 
 Future versions might include:
