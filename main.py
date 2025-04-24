@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
 import difflib
+from aliases import KEYWORD_ALIASES
 
 #Configuration constants
 
@@ -70,23 +71,11 @@ def get_specialized_prompt(message, specialized_prompts, threshold=0.75):
         str: The best-matched specialized prompt or an empty string
     """
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
-
-    # Exact keywork match
-    for keyword, prompt in specialized_prompts.items():
-        if keyword in message_lower:
-            logging.debug(f"[Prompt Match] Using specialized prompt for: '{keyword}'")
-            return prompt
-        
-    # Fuzzy match fallback
-    keywords = list(specialized_prompts.keys())
-    best_match = difflib.get_close_matches(message, keyword, n=1, cutoff=threshold)
-
-    if best_match:
-        matched_keyword = best_match[0]
-        logging.debug(f"[Prompt Match] Fuzzy match for: '{matched_keyword}'")
-        return specialized_prompts[matched_keyword]
-
-        logging.debug("[Prompt Match] No specialized prompt matched. Using base prompt.")
+    for alias, concept in KEYWORD_ALIASES.items():
+        if alias in message_lower:
+            if DEBUG_MODE:
+                logging.debug(f"[Prompt Match] Matched alias '{alias}' to concept '{concept}'")
+            return specialized_prompts.get(concept, "")
     return ""
 
 def initialized_model(model_name=MODEL_NAME):
