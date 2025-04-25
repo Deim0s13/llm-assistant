@@ -108,6 +108,32 @@ def respond(message, history, max_new_tokens, temperature, top_p, do_sample):
     diagnostics = f"Prompt Source: {source}"
     return "", updated_history, diagnostics
 
+def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample):
+    """
+    Simulates the specialized prompt resolution and generation pipeline.
+    """
+    prompt_text, concept = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS)
+    resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
+    context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
+
+    logging.debug("[Playground] Context used:")
+    logging.debug(context)
+
+    encoded_input = tokenizer(context, return_tensors="pt", padding=True, truncation=True)
+    input_ids = encoded_input.input_ids.to(device)
+
+    generation_params = {
+        "max_new_tokens": int(max_new_tokens),
+        "do_sample": do_sample,
+        "temperature": float(temperature),
+        "top_p": float(top_p),
+    }
+
+    output_ids = model.generate(input_ids, **generation_params)
+    generation_output = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
+
+    return concept, resolved_prompt.strip(), generation_output
+
 # Load resources at startup
 BASE_PROMPT = load_base_prompt()
 SPECIALIZED_PROMPTS = load_specialized_prompts()
@@ -128,6 +154,25 @@ with gr.Blocks() as demo:
         temperature_slider = gr.Slider(minimum=0.1, maximum=1.0, value=0.5, label="Temperature")
         top_p_slider = gr.Slider(minimum=0.5, maximum=1.0, value=0.9, label="Top-p")
         do_sample_checkbox = gr.Checkbox(value=True, label="Do Sample")
+
+    with gr.Accordion("🛠️ Developer Prompt Playground", open=False):
+        gr.Markdown("Enter a test input to preview prompt handling and output generation.")
+
+        test_input = gr.Textbox(
+            label="Test Input Message", 
+            placeholder="e.g., Can you explain gravity like I'm five?"
+        )
+        run_button = gr.Button("Run Playground Test")
+
+        matched_concept = gr.Textbox(label="Matched Concept", interactive=False)
+        resolved_prompt_preview = gr.Textbox(label="Resolved Prompt", lines=6, interactive=False)
+        generated_preview = gr.Textbox(label="Generated Output", lines=6, interactive=False)
+
+        run_button.click(
+            run_playground,
+            inputs=[test_input, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox],
+            outputs=[matched_concept, resolved_prompt_preview, generated_preview]
+        )
 
     txt.submit(
         respond,
