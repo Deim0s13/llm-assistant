@@ -38,8 +38,10 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
         return {}
 
 # Function to get specialized prompt based on the user's message
-def get_specialized_prompt(message, specialized_prompts):
+def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled):
     message_lower = message.lower().replace("’", "'")
+
+    # First try direct alias match
     for alias, concept in KEYWORD_ALIASES.items():
         if alias in message_lower:
             if concept in specialized_prompts:
@@ -47,6 +49,20 @@ def get_specialized_prompt(message, specialized_prompts):
                 logging.debug(f"[Prompt Match] Matched alias '{alias}' to concept '{concept}'")
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
                 return prompt, concept
+            
+    # If no direct match and fuzzy matching is enabled
+    if fuzzy_matching_enabled:
+        aliases = list(KEYWORD_ALIASES.keys())
+        best_match = difflib.get_close_matches(message_lower, aliases, n=1, cutoff=0.75)
+        if best_match:
+            alias = best_match[0]
+            concept = KEYWORD_ALIASES[alias]
+            if concept in specialized_prompts:
+                prompt = specialized_prompts[concept]
+                logging.debug(f"[Prompt Match] Fuzzy matched alias '{alias}' to concept '{concept}'")
+                logging.debug(f"[Prompt Match] Prompt snippet: {prompt[80]}...")
+                return prompt, concept
+
     return "", "base_prompt"
 
 # Initialize the model
@@ -59,8 +75,8 @@ def initialized_model(model_name=MODEL_NAME):
     return tokenizer, model, device
 
 # Prepare the context for the model
-def prepare_context(message, history, base_prompt, specialized_prompts):
-    specialized_prompt, source = get_specialized_prompt(message, specialized_prompts)
+def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
+    specialized_prompt, source = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     context = specialized_prompt if specialized_prompt else base_prompt
     recent_history = history[-MAX_HISTORY_TURNS:] if len(history) > MAX_HISTORY_TURNS else history
     for entry in recent_history:
@@ -69,9 +85,9 @@ def prepare_context(message, history, base_prompt, specialized_prompts):
     return context, source
 
 # Generate model response
-def chat(message, history, max_new_tokens, temperature, top_p, do_sample):
+def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
     try:
-        context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS)
+        context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
         if DEBUG_MODE:
             logging.debug("Full context sent to model")
             logging.debug(context)
@@ -102,9 +118,9 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample):
         return history, "error"
 
 # Respond function for Gradio
-def respond(message, history, max_new_tokens, temperature, top_p, do_sample):
+def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
     history = history or []
-    updated_history, source = chat(message, history, max_new_tokens, temperature, top_p, do_sample)
+    updated_history, source = chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled)
     diagnostics = f"Prompt Source: {source}"
     return "", updated_history, diagnostics
 
@@ -154,6 +170,7 @@ with gr.Blocks() as demo:
         temperature_slider = gr.Slider(minimum=0.1, maximum=1.0, value=0.5, label="Temperature")
         top_p_slider = gr.Slider(minimum=0.5, maximum=1.0, value=0.9, label="Top-p")
         do_sample_checkbox = gr.Checkbox(value=True, label="Do Sample")
+        fuzzy_match_checkbox = gr.Checkbox(value=True, label="Enable Fuzzy Matching")
 
     with gr.Accordion("🛠️ Developer Prompt Playground", open=False):
         gr.Markdown("Enter a test input to preview prompt handling and output generation.")
@@ -176,7 +193,7 @@ with gr.Blocks() as demo:
 
     txt.submit(
         respond,
-        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox],
+        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox, fuzzy_match_checkbox],
         [txt, chatbot, diagnostics_box]
     )
 
