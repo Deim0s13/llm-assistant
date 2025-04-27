@@ -68,10 +68,10 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     
     #Default: No match found
     logging.debug("[Prompt Match] No match found. Using base prompt.")
-    return "", "base_prompt"
+    return "", "base_prompt", None
 
 # Initialize the model
-def initialized_model(model_name=MODEL_NAME):
+def initialize_model(model_name=MODEL_NAME):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     device = "mps" if torch.backends.mps.is_available() else "cpu"
@@ -96,8 +96,7 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
         if DEBUG_MODE:
             logging.debug("Full context sent to model")
             logging.debug(context)
-        encoded_input = tokenizer(context, return_tensors="pt", padding=True, truncation=True)
-        input_ids = encoded_input.input_ids.to(device)
+        input_ids = tokenizer(context, return_tensors="pt", padding=True, truncation=True).input_ids.to(device)
         generation_params = {
             "max_new_tokens": int(max_new_tokens),
             "do_sample": do_sample,
@@ -129,10 +128,13 @@ def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuz
     diagnostics = f"Prompt Source: {source}"
     return "", updated_history, diagnostics
 
-def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
+def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled, force_run):
     """
     Simulates the specialized prompt resolution and generation pipeline.
     """
+    if not force_run:
+        return "","","",""
+
     # Updated: Now also handles fuzzy matching and match score
     prompt_text, concept, match_score = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
     resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
@@ -162,7 +164,7 @@ def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fu
 # Load resources at startup
 BASE_PROMPT = load_base_prompt()
 SPECIALIZED_PROMPTS = load_specialized_prompts()
-tokenizer, model, device = initialized_model()
+tokenizer, model, device = initialize_model()
 
 # Build Gradio UI
 with gr.Blocks() as demo:
@@ -180,8 +182,9 @@ with gr.Blocks() as demo:
         top_p_slider = gr.Slider(minimum=0.5, maximum=1.0, value=0.9, label="Top-p")
         do_sample_checkbox = gr.Checkbox(value=True, label="Do Sample")
         fuzzy_match_checkbox = gr.Checkbox(value=True, label="Enable Fuzzy Matching")
+        autopreview_checkbox = gr.Checkbox(value=False, label="Auto-run Playground")
 
-    with gr.Accordion("🛠️ Developer Prompt Playground", open=False):
+    with gr.Accordion("Developer Prompt Playground", open=False):
         gr.Markdown("Enter a test input to preview prompt handling and output generation.")
 
         test_input = gr.Textbox(
@@ -194,10 +197,42 @@ with gr.Blocks() as demo:
         resolved_prompt_preview = gr.Textbox(label="Resolved Prompt", lines=6, interactive=False)
         generated_preview = gr.Textbox(label="Generated Output", lines=6, interactive=False)
 
+        # 1. Button click always forces the playground to run
         run_button.click(
             run_playground,
-            inputs=[test_input, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox],
-            outputs=[matched_concept, resolved_prompt_preview, generated_preview]
+            inputs=[
+                test_input,
+                max_new_tokens_slider,
+                temperature_slider,
+                top_p_slider,
+                do_sample_checkbox,
+                fuzzy_match_checkbox,
+                gr.State(True) # Force_run = True when manually clicking
+            ],
+            outputs=[
+                matched_concept,
+                resolved_prompt_preview,
+                generated_preview
+            ]
+        )
+
+        # 2. Typing triggers playground ONLY if autoprivew is enabled
+        test_input.input(
+            run_playground,
+            inputs=[
+                test_input,
+                max_new_tokens_slider,
+                temperature_slider,
+                top_p_slider,
+                do_sample_checkbox,
+                fuzzy_match_checkbox,
+                autopreview_checkbox # Conditional based on this checkbox
+            ],
+            outputs=[
+                matched_concept,
+                resolved_prompt_preview,
+                generated_preview
+            ]
         )
 
     txt.submit(
@@ -206,6 +241,8 @@ with gr.Blocks() as demo:
         [txt, chatbot, diagnostics_box]
     )
 
+
 if __name__ == "__main__":
+
     logging.debug("🚀 Launching Gradio demo...")
     demo.launch()

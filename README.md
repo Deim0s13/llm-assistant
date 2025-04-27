@@ -2,68 +2,59 @@
 
 This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.2.2) leverages the instruction-tuned model `google/flan-t5-base` to create a robust multi-turn conversation interface with enhanced prompt control.
 
-## Features in Version 0.2.2
+## Naming Convention Update (From v0.2.4 Onwards)
 
-### • Model Upgrade
+### Previous Format
 
-Upgraded from `google/flan-t5-small` to `google/flan-t5-base` for significantly improved comprehension and output quality.
+Branch names were descriptive and focused on what was being delivered, e.g.:
 
-### • Concept-Based Prompt Matching
+- `specialized-prompts-upgrade`
+- `model-upgrade`
+- `alias-matching`
 
-- Specialized prompts are now matched using concept _aliases_ (e.g. "explain simple", "like I'm five" → `explain_simple`), ensuring greater flexibility and reducing false negatives.
+### New Format (from v0.2.4 onward)
 
-- Keyword mappings are maintained in `aliases.py`, decoupling logic from prompt content.
+Branch names now include the version for clarity and traceability:
 
-### • Diagnostic Logging
+- `feature/v0.2.4-ui-devtools`
+- `bugfix/v0.2.5-token-logging`
+- `docs/v0.2.6-readme-refresh`
 
-- Logs explicitly indicate:
+This will make versioning clearer during merges and retrospectives, especially as the project grows. If you ever need to roll back or trace changes, this structure makes it easier.
 
-  - Whether a specialized or base prompt was selected
-  - What alias was matched (if any)
-  - Full prompt context sent to the model
+## Features in Version 0.2.4
 
-- Makes debugging prompt behaviour much easier
+### • Enhanced Prompt Selection
 
-## Features in Version 0.2.1
+- Specialized prompts are triggered by keywords or phrases from user input.
+- **Developer diagnostics** show whether the base or specialized prompt was used.
+- **Fuzzy matching toggle** allows more flexible input matching (e.g., small typos still match).
 
-### • Enhanced Conversation Context
+### • Developer Prompt Playground
 
-The chatbot continues to maintain multi-turn conversation history, enabling more coherent responses by incorporating previous exchanges into the prompt.
-
-### • Externalized Prompts
-
-- **Base Prompt** is stored in `prompt_template.txt`, enabling easy iteration on the assistant’s personality and tone.  
-- **Specialized Prompts** are stored in `specialized_prompts.json` and dynamically injected based on user queries to better tailor responses (e.g., “explain like I’m five”, “give me a fun fact”).
-
-### • Keyword-Based Prompt Switching
-
-A new mechanism scans user input for relevant keywords and loads a specialized prompt when appropriate, overriding the base instructions for that interaction. This allows lightweight prompt engineering without hardcoding logic into the model.
-
-### • Structured Conversation History
-
-Exchanges are tracked using structured `role`/`content` pairs (user, assistant), improving clarity and ensuring predictable formatting across turns.
+- A dedicated panel where developers can test different inputs to:
+  - See matched concept (alias ➔ concept mapping)
+  - View the resolved specialized prompt
+  - Preview the generated output
+- Helpful for testing and improving specialized prompts.
 
 ### • Tunable Generation Parameters
 
-The Gradio interface allows real-time experimentation with the following controls:
+- **Max New Tokens**
+- **Temperature**
+- **Top-p** (nucleus sampling)
+- **Sampling toggle (Do Sample)**
 
-- **Max New Tokens**  
-- **Temperature**  
-- **Top-p** (Nucleus Sampling)  
-- **Do Sample**
+### • Advanced UI Improvements
 
-These options help shape response style, creativity, and determinism for better control during development.
+- Collapsible “Advanced Settings” panel to hide developer options by default.
+- Improved layout separation between user chat and developer controls.
 
-### • Debug Logging for Development
+### • Debug Mode Enhancements
 
-Debug mode (`DEBUG_MODE = True`) outputs detailed logs showing:
-
-- Which prompt is being used  
-- Full context passed to the model  
-- Raw generated output  
-- Token generation settings  
-
-This allows fine-grained introspection during testing and refinement.
+- Full context printed to logs before generation.
+- Fuzzy match candidate suggestions printed in debug logs.
+- Extracted generation result separately logged.
 
 ## Setup
 
@@ -84,7 +75,7 @@ This allows fine-grained introspection during testing and refinement.
    ```bash
    python main.py
 
-This will launch a local Gradio interface in your browser
+Access the Gradio UI locally on `http://127.0.0.1:7860/`
 
 ## External Files
 
@@ -128,31 +119,23 @@ Turn on `DEBUG_MODE` to confirm when a specialized prompt is used. Matched promp
 
 Simple in-context examples improve model grounding. Review and revise thse to better your use case.
 
+### • Debugging Prompt Matches
+
+Turn on DEBUG_MODE = True to see full matching diagnostics in the console.
+
+### • Testing Playground
+
+Use the Developer Playground panel to verify concept matching and output without impacting user conversation history.
+
+### • Testing Fuzzy Matching
+
+Enable or disable fuzzy matching dynamically from the UI to see the effects of relaxed keywork matching.
+
 ## Next Steps
 
 ### • Prompt Refinement and Few-Shot Tuning
 
-Improve the examples and phrasing in both `prompt_template.txt` and `specialized_prompts.json` for more consistent behaviours acros topics.
-
-## Naming Convention Update (From v0.2.4 Onwards)
-
-### Previous Format
-
-Branch names were descriptive and focused on what was being delivered, e.g.:
-
-- `specialized-prompts-upgrade`
-- `model-upgrade`
-- `alias-matching`
-
-### New Format (from v0.2.4 onward)
-
-Branch names now include the version for clarity and traceability:
-
-- `feature/v0.2.4-ui-devtools`
-- `bugfix/v0.2.5-token-logging`
-- `docs/v0.2.6-readme-refresh`
-
-This will make versioning clearer during merges and retrospectives, especially as the project grows. If you ever need to roll back or trace changes, this structure makes it easier.
+Improve the examples and phrasing in both `prompt_template.txt` and `specialized_prompts.json` for more consistent behaviours across topics.
 
 ### • Future Enhancements
 
@@ -163,3 +146,95 @@ Future versions might include:
 • Multi-user or persistent session memory
 • Prompt quality scoring or fallback strategies
 • GitHub Copilot-style suggestion flow
+
+## Previous Versions
+
+### Version History
+
+| Version | Highlights |
+|:--------|:-----------|
+| **v0.1.0** | Basic chatbot with static base prompt, no memory. |
+| **v0.2.0** | Introduced multi-turn conversation memory, tunable generation settings, and externalized prompt files. |
+| **v0.2.1** | Added specialized prompt injection (keyword triggers specialized prompts), and improved debug logging. |
+| **v0.2.2** | Upgraded model from `google/flan-t5-small` ➔ `google/flan-t5-base`, expanded prompt library, improved specialized matching. |
+| **v0.2.3** | Introduced alias mapping for flexible keyword detection, normalized specialized prompts, added prompt match diagnostics in debug mode. |
+| **v0.2.4** | Added fuzzy matching toggle in the UI, Developer Prompt Playground panel, expanded debug output, added Advanced Settings collapsible UI section. |
+
+## Features in Version 0.2.3
+
+### • Keyword Aliases Introduced
+
+Commonly used phrases mapped to a normalized concept (e.g., “explain like i’m five” ➔ `explain_simple`).
+
+### • Normalized Specialized Prompt Structure
+
+Specialized prompts use concepts as keys (e.g., `historical_quote`, `explain_simple`).
+
+### • Improved Specialized Prompt Matching
+
+Instead of relying only on direct string search, aliases enable more robust trigger matching.
+
+### • Prompt Source Diagnostics
+
+When responding, the chatbot now identifies whether it used a base prompt or specialized prompt.
+
+## Features in Version 0.2.2
+
+### • Model Upgrade
+
+Upgraded from `google/flan-t5-small` to `google/flan-t5-base` for significantly improved comprehension and output quality.
+
+### • Concept-Based Prompt Matching
+
+- Specialized prompts are now matched using concept _aliases_ (e.g. "explain simple", "like I'm five" → `explain_simple`), ensuring greater flexibility and reducing false negatives.
+
+- Keyword mappings are maintained in `aliases.py`, decoupling logic from prompt content.
+
+### • Diagnostic Logging
+
+- Logs explicitly indicate:
+  - Whether a specialized or base prompt was selected
+  - What alias was matched (if any)
+  - Full prompt context sent to the model
+- Makes debugging prompt behaviour much easier
+
+## Features in Version 0.2.1
+
+### • Enhanced Conversation Context
+
+The chatbot continues to maintain multi-turn conversation history, enabling more coherent responses by incorporating previous exchanges into the prompt.
+
+### • Externalized Prompts
+
+- **Base Prompt** is stored in `prompt_template.txt`, enabling easy iteration on the assistant’s personality and tone.  
+- **Specialized Prompts** are stored in `specialized_prompts.json` and dynamically injected based on user queries to better tailor responses (e.g., “explain like I’m five”, “give me a fun fact”).
+
+### • Keyword-Based Prompt Switching
+
+A new mechanism scans user input for relevant keywords and loads a specialized prompt when appropriate, overriding the base instructions for that interaction. This allows lightweight prompt engineering without hardcoding logic into the model.
+
+### • Structured Conversation History
+
+Exchanges are tracked using structured `role`/`content` pairs (user, assistant), improving clarity and ensuring predictable formatting across turns.
+
+### • Tunable Generation Parameters
+
+The Gradio interface allows real-time experimentation with the following controls:
+
+- **Max New Tokens**  
+- **Temperature**  
+- **Top-p** (Nucleus Sampling)  
+- **Do Sample**
+
+These options help shape response style, creativity, and determinism for better control during development.
+
+### • Debug Logging for Development
+
+Debug mode (`DEBUG_MODE = True`) outputs detailed logs showing:
+
+- Which prompt is being used  
+- Full context passed to the model  
+- Raw generated output  
+- Token generation settings  
+
+This allows fine-grained introspection during testing and refinement.
