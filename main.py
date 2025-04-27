@@ -40,32 +40,32 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
 
 # Function to get specialized prompt based on the user's message
 def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled):
-    message_lower = message.lower().replace("’", "'")
+    message_lower = message.lower().replace("’", "'") # Normalise smart quotes
 
-    # First try direct alias match
+    # First: Exact alias match
     for alias, concept in KEYWORD_ALIASES.items():
         if alias in message_lower:
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Match] Matched alias '{alias}' to concept '{concept}'")
+                logging.debug(f"[Prompt Match] Matched alias '{alias}' ➔ concept '{concept}'")
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
                 return prompt, concept
             
-    # If no direct match, attempt fuzzy matching
+    # Second: Fuzzy match if enabled
     if fuzzy_matching_enabled:
         all_aliases = list(KEYWORD_ALIASES.keys())
-        best_match = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.75)
-        if best_match:
-            matched_alias = best_match[0]
-            concept = KEYWORD_ALIASES[matched_alias]
-            if concept in specialized_prompts:
+        close_matches = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.7)
+        if close_matches:
+            best_match = close_matches[0]
+            concept = KEYWORD_ALIASES[best_match]
+            if concept and concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Match] Fuzzy matched alias '{matched_alias}' to concept '{concept}' (fuzzy)")
-                logging.debug(f"[Prompt Match] Prompt snippet: {prompt[80]}...")
+                logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
+                logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[80]}...")
                 return prompt, concept
-            
+    
+    #Default: No match found
     logging.debug("[Prompt Match] Not match found. Using base prompt.")
-
     return "", "base_prompt"
 
 # Initialize the model
