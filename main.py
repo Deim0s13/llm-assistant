@@ -3,6 +3,7 @@ import logging
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
+import difflib
 from aliases import KEYWORD_ALIASES
 
 # Configuration constants
@@ -50,16 +51,16 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
                 return prompt, concept
             
-    # If no direct match and fuzzy matching is enabled
+    # If no direct match, attempt fuzzy matching
     if fuzzy_matching_enabled:
-        aliases = list(KEYWORD_ALIASES.keys())
-        best_match = difflib.get_close_matches(message_lower, aliases, n=1, cutoff=0.75)
+        all_aliases = list(KEYWORD_ALIASES.keys())
+        best_match = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.75)
         if best_match:
-            alias = best_match[0]
-            concept = KEYWORD_ALIASES[alias]
+            matched_alias = best_match[0]
+            concept = KEYWORD_ALIASES[matched_alias]
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Match] Fuzzy matched alias '{alias}' to concept '{concept}'")
+                logging.debug(f"[Prompt Match] Fuzzy matched alias '{matched_alias}' to concept '{concept}' (fuzzy)")
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[80]}...")
                 return prompt, concept
 
