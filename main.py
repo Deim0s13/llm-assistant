@@ -49,7 +49,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 prompt = specialized_prompts[concept]
                 logging.debug(f"[Prompt Match] Matched alias '{alias}' ➔ concept '{concept}'")
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
-                return prompt, concept
+                return prompt, concept, None # No match scope for direct match
             
     # Second: Fuzzy match if enabled
     if fuzzy_matching_enabled:
@@ -57,17 +57,17 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
         close_matches = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.7)
 
         if close_matches:
-            logging.debug(f"[Prompt Match - Fuzzy] Close fuzzy matches: {close_matches}")
             best_match = close_matches[0]
+            similarity = difflib.SequenceMatcher(None, message_lower, best_match).ratio()
             concept = KEYWORD_ALIASES[best_match]
             if concept and concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
                 logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
-                logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[80]}...")
-                return prompt, concept
+                logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[:80]}...")
+                return prompt, concept, similarity
     
     #Default: No match found
-    logging.debug("[Prompt Match] Not match found. Using base prompt.")
+    logging.debug("[Prompt Match] No match found. Using base prompt.")
     return "", "base_prompt"
 
 # Initialize the model
@@ -129,11 +129,12 @@ def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuz
     diagnostics = f"Prompt Source: {source}"
     return "", updated_history, diagnostics
 
-def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample):
+def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
     """
     Simulates the specialized prompt resolution and generation pipeline.
     """
-    prompt_text, concept = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS)
+    # Updated: Now also handles fuzzy matching and match score
+    prompt_text, concept, match_score = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
     resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
     context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
 
@@ -153,7 +154,10 @@ def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample):
     output_ids = model.generate(input_ids, **generation_params)
     generation_output = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
 
-    return concept, resolved_prompt.strip(), generation_output
+    # Format match score nicely
+    match_score_display = f"{match_score:.2f}" if match_score is not None else "N/A"
+
+    return concept, match_score_display, resolved_prompt.strip(), generation_output
 
 # Load resources at startup
 BASE_PROMPT = load_base_prompt()
