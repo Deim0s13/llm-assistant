@@ -55,7 +55,9 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     if fuzzy_matching_enabled:
         all_aliases = list(KEYWORD_ALIASES.keys())
         close_matches = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.7)
+
         if close_matches:
+            logging.debug(f"[Prompt Match - Fuzzy] Close fuzzy matches: {close_matches}")
             best_match = close_matches[0]
             concept = KEYWORD_ALIASES[best_match]
             if concept and concept in specialized_prompts:
