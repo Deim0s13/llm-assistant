@@ -63,6 +63,8 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 logging.debug(f"[Prompt Match] Fuzzy matched alias '{matched_alias}' to concept '{concept}' (fuzzy)")
                 logging.debug(f"[Prompt Match] Prompt snippet: {prompt[80]}...")
                 return prompt, concept
+            
+    logging.debug("[Prompt Match] Not match found. Using base prompt.")
 
     return "", "base_prompt"
 
