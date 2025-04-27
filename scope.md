@@ -59,7 +59,7 @@
   - Better formatting for logs.
   - Clearer separation of diagnostics vs normal flow.
 
-## v0.2.5
+## Current Version v0.2.5
 
 **Minor Enhancements and Polish:**
 
@@ -78,8 +78,34 @@
 - **Bug Fixes and Error Handling**:
   - Prevent empty playground generations unless explicitly triggered.
 
----
-
-## Current Version: v0.2.5
-
 ## Upcoming Version: v0.3.0 (Planned)
+
+## Experimentation Playground Expansion
+
+### Objective
+
+Shift focus from only chatbot functionality to hands-on learning with prompt engineering, model reasoning, and generation control.
+
+### Core Focus Areas
+
+- **Prompt Engineering Experiments:**
+  - Introduce and test variations in prompt phrasing.
+  - Explore impact of instructional style and few-shot examples.
+- **Chain-of-Thought Reasoning:**
+  - Implement prompts that encourage step-by-step reasoning (“Let’s solve this step-by-step”).
+  - Compare outputs with and without chain-of-thought prompting.
+- **Decoding Strategy Exploration:**
+  - Systematic experiments with temperature and top-p.
+  - Introduce beam search decoding as a new selectable option.
+  - Observe the trade-offs between creativity and precision.
+- **Output Evaluation Development:**
+  - Begin manual output evaluation for quality, completeness, and reasoning.
+  - (Optional) Simple rating panel within Gradio to capture observations.
+
+### Deliverables
+
+- Experimental prompts and chain-of-thought techniques integrated.
+- Ability to toggle between decoding strategies: Sampling vs Beam Search.
+- Updated Gradio UI (basic if needed) to support experiments.
+- Documentation of findings and examples.
+- Updated README.md reflecting the new experimentation purpose.
