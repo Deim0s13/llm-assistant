@@ -1,4 +1,4 @@
-# LLM Experiments Tracker
+# 🧪 LLM Experiments Tracker
 
 This file tracks all experiments conducted as part of the `feature/v0.3.0-llm-experiments` branch.
 
@@ -22,57 +22,45 @@ This file tracks all experiments conducted as part of the `feature/v0.3.0-llm-ex
 
 ## Experiment Log
 
-### Experiment ID: 1
+### Experiment ID: [Insert ID]
 
-**Title:** Prompt Engineering Basics  
-**Status:** Active  
-**Date:** [Insert Today's Date]
-
-### Objective
-
-_Explore how different prompt phrasings influence the LLM’s behaviour, style, and accuracy._
+**Title:** [Insert Title]  
+**Status:** Planned / Active / Done  
+**Date:** [Insert Date]
 
 ---
 
-### Setup
+## Objective
+
+_What are you aiming to learn, validate, or explore in this experiment?_
+
+---
+
+## Setup
 
 - **Model:** `google/flan-t5-base`
-- **Prompt Example:** [Insert first prompt to test]
+- **Prompt Example:** [Insert Prompt Example]
 - **Parameters:**
-  - Max New Tokens: 150
-  - Temperature: 0.5
-  - Top-p: 0.9
-  - Do Sample: True
-- **Other Settings:**
-  - Using base prompt (`prompt_template.txt`) unless specialized match triggered.
-  - Fuzzy matching enabled.
+  - Max New Tokens: [Insert Value]
+  - Temperature: [Insert Value]
+  - Top-p: [Insert Value]
+  - Do Sample: [True/False]
+- **Other Settings:** [Anything else worth noting]
 
 ---
 
-### Observations
+## Observations
 
-- [Leave empty for now — you’ll populate this during the experiment!]
-- 
----
-
-### Insights
-
-- [Leave empty for now]
+_List notable behaviours, surprises, errors, strong responses, etc._
 
 ---
 
-### Next Actions
+## Insights
 
-- [Optional — any follow-ups you think of during or after running it]
+_Summarise what you learnt about LLM behaviour based on this experiment._
 
 ---
 
-## Experiment ID: 2
-
-**Title:** Context Window Size Effects  
-**Status:** Planned  
-**Date:** TBD
-
-[Copy Experiment Log template here later once you start Experiment 2]
+## Next Actions (Optional)
 
 ---

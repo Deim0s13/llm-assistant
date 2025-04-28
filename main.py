@@ -81,7 +81,7 @@ def initialize_model(model_name=MODEL_NAME):
 
 # Prepare the context for the model
 def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
-    specialized_prompt, source = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
+    specialized_prompt, source, _ = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     context = specialized_prompt if specialized_prompt else base_prompt
     recent_history = history[-MAX_HISTORY_TURNS:] if len(history) > MAX_HISTORY_TURNS else history
     for entry in recent_history:
@@ -138,6 +138,15 @@ def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fu
     # Updated: Now also handles fuzzy matching and match score
     prompt_text, concept, match_score = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
     resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
+
+    # New fallback detection
+    if concept == "base_prompt":
+        concept_display = "Base Prompt Used (no match found)"
+        concept_colour = "yellow"
+    else:
+        concept_display = f" {concept}"
+        concept_colour = "green"
+
     context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
 
     logging.debug("[Playground] Context used:")
@@ -159,7 +168,7 @@ def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fu
     # Format match score nicely
     match_score_display = f"{match_score:.2f}" if match_score is not None else "N/A"
 
-    return concept, match_score_display, resolved_prompt.strip(), generation_output
+    return f"{concept_display} (Confidence: {match_score_display})", resolved_prompt.strip(), generation_output
 
 # Load resources at startup
 BASE_PROMPT = load_base_prompt()
@@ -246,3 +255,4 @@ if __name__ == "__main__":
 
     logging.debug("🚀 Launching Gradio demo...")
     demo.launch()
+
