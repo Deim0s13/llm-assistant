@@ -4,28 +4,6 @@ This project is a starting point for building an LLM-based chatbot using Hugging
 
 ---
 
-## Naming Convention Update (From v0.2.4 Onwards)
-
-### Previous Format
-
-Branch names were descriptive and focused on what was being delivered, e.g.:
-
-- `specialized-prompts-upgrade`
-- `model-upgrade`
-- `alias-matching`
-
-### New Format (from v0.2.4 onward)
-
-Branch names now include the version for clarity and traceability:
-
-- `feature/v0.2.4-ui-devtools`
-- `bugfix/v0.2.5-token-logging`
-- `docs/v0.2.6-readme-refresh`
-
-This will make versioning clearer during merges and retrospectives, especially as the project grows. If you ever need to roll back or trace changes, this structure makes it easier.
-
----
-
 ## Current Version
 
 ### Features in Version 0.3.0
@@ -48,7 +26,35 @@ This experiments phase allowed us to:
 
 ---
 
-## Scope and Feature Tracking
+## Project Structure and Documentation Standards
+
+As part of ongoing improvements, the project now maintains:
+
+- **Structured Documentation:** Each major topic (features, versioning, scope, experiments) has its own dedicated markdown file.
+- **Versioning Model:** Only the current version is detailed in the main README. Historical version details are moved to `release_notes.md`.
+- **Scope Management:** The `scope.md` file captures planned and delivered scope for each version, keeping development focused and visible.
+- **Experiments Tracker:** The `experiments_tracker.md` file logs all structured experiments, findings, and insights as part of hands-on LLM learning.
+
+These changes were progressively introduced around version `v0.3.0` but are considered *foundational practices* going forward rather than tied to any single release.
+
+---
+
+### Documentation Improvements
+
+- **Updated `README.md`**  
+  Refocused to highlight current project goals, clearer versioning, and linked structured experiments.
+
+- **Introduced `release_notes.md`**  
+  Externalised all previous version history (v0.1.0 to v0.2.5) to keep the README concise and maintain detailed changelogs separately.
+
+- **Enhanced `scope.md`**  
+  Added a formal introduction and purpose section to explain its role in planning, version tracking, and decision-making.
+
+- **Linked all major documents** (Scope, Release Notes, Experiments Tracker) for easier navigation and maintainability.
+
+---
+
+### Scope and Feature Tracking
 
 In addition to capturing experiment learnings, this project maintains a [scope.md](scope.md) file.
 
@@ -59,6 +65,15 @@ The `scope.md` file serves as the **official tracker** for:
 - Keeping development aligned with the broader learning goals and project focus.
 
 This ensures we have a clear, evolving roadmap without losing sight of the original hands-on learning objectives.
+
+---
+
+### Documentation Overview
+
+- [`experiments_tracker.md`](./experiments_tracker.md): Records structured LLM experiments, findings, and insights.
+- [`scope.md`](./scope.md): Tracks planned features, changes by version, and priorities.
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md): Development workflow, branching strategy, and naming conventions.
+- [`release_notes.md`](./release_notes.md): Detailed historical summaries of all previous versions.
 
 ---
 
@@ -157,17 +172,6 @@ Enable or disable fuzzy matching dynamically from the UI to see the effects of r
 
 ### Version History
 
-| Version | Highlights |
-|:--------|:-----------|
-| **v0.1.0** | Basic chatbot with static base prompt, no memory. |
-| **v0.2.0** | Introduced multi-turn conversation memory, tunable generation settings, and externalised prompt files. |
-| **v0.2.1** | Added specialised prompt injection (keyword triggers specialised prompts) and improved debug logging. |
-| **v0.2.2** | Upgraded model from `google/flan-t5-small` ➔ `google/flan-t5-base`, expanded prompt library, improved specialised matching. |
-| **v0.2.3** | Introduced alias mapping for flexible keyword detection, normalised specialised prompts, added prompt match diagnostics in debug mode. |
-| **v0.2.4** | Added fuzzy matching toggle in the UI, Developer Prompt Playground panel, expanded debug output, added Advanced Settings collapsible UI section. |
-| **v0.2.5** | Bugfix release: improved internal logging, enhanced error handling for missing specialised prompts, consistency fixes for prompt matching logic. |
-| **v0.3.0** | Shifted focus to experiments and learning: created experiments framework, ran structured tests, updated scope to guide future development. |
-
-> **Full version history available here:** [Release Notes ➔](release_notes.md)
+Looking for earlier versions? See [Release Notes ➔](release_notes.md) for full details of previous features and improvements.
 
 ---
