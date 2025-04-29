@@ -1,4 +1,30 @@
-# Version History and Feature Scope
+# Project Scope and Planning Overview
+
+## Introduction
+
+This document defines the scope, goals, and boundaries for the LLM Chatbot Starter Kit project.  
+It provides a centralised view of what each version aims to achieve, ensuring that the project evolves in a focused and intentional manner over time.
+
+As the chatbot matures, this scope document helps maintain alignment between:
+
+- The initial project vision (hands-on learning about LLMs, prompt design, and behaviour exploration)
+- Technical implementations in each version
+- Strategic choices about future development directions
+
+---
+
+## Purpose of This Document
+
+The `scope.md` exists to:
+
+- **Record the project vision**: Maintain clarity about the *why* behind feature choices and experiments.
+- **Track version goals**: Outline the key objectives, enhancements, and limitations for each project version.
+- **Support future planning**: Serve as a living reference when deciding new feature work, technical improvements, or pivots.
+- **Improve traceability**: Connect learning-focused activities (such as LLM experiments) with formal version deliverables.
+
+It complements the `README.md` (current version overview) and the `release_notes.md` (full version history and detailed feature notes).
+
+---
 
 ## v0.2.0
 
@@ -17,6 +43,8 @@
   - Generated outputs
   - Generation parameters used
 
+---
+
 ## v0.2.1
 
 **Improvements:**
@@ -26,6 +54,8 @@
 - Improved error handling for loading files.
 - Debug output refined with clearer logs.
 
+---
+
 ## v0.2.2
 
 **Enhancements:**
@@ -34,12 +64,16 @@
 - Improved specialised prompt matching reliability.
 - Expanded base prompt examples for stronger in-context learning.
 
+---
+
 ## v0.2.3
 
 **Developer Diagnostics:**
 
 - **Prompt Source Diagnostics**: Now shows whether the assistant used the `base prompt` or a `specialised prompt` in each interaction.
 - Cleaner internal functions for prompt sourcing.
+
+---
 
 ## v0.2.4
 
@@ -59,7 +93,9 @@
   - Better formatting for logs.
   - Clearer separation of diagnostics vs normal flow.
 
-## Current Version v0.2.5
+---
+
+## v0.2.5
 
 **Minor Enhancements and Polish:**
 
@@ -78,15 +114,17 @@
 - **Bug Fixes and Error Handling**:
   - Prevent empty playground generations unless explicitly triggered.
 
-## Upcoming Version: v0.3.0 (Planned)
+---
 
-## Experimentation Playground Expansion
+## Current Version: v0.3.0
 
-### Objective
+### Experimentation Playground Expansion
+
+#### Objective
 
 Shift focus from only chatbot functionality to hands-on learning with prompt engineering, model reasoning, and generation control.
 
-### Core Focus Areas
+#### Core Focus Areas
 
 - **Prompt Engineering Experiments:**
   - Introduce and test variations in prompt phrasing.
@@ -102,10 +140,14 @@ Shift focus from only chatbot functionality to hands-on learning with prompt eng
   - Begin manual output evaluation for quality, completeness, and reasoning.
   - (Optional) Simple rating panel within Gradio to capture observations.
 
-### Deliverables
+#### Deliverables
 
 - Experimental prompts and chain-of-thought techniques integrated.
 - Ability to toggle between decoding strategies: Sampling vs Beam Search.
 - Updated Gradio UI (basic if needed) to support experiments.
 - Documentation of findings and examples.
 - Updated README.md reflecting the new experimentation purpose.
+
+---
+
+## Planned Version: TBC
