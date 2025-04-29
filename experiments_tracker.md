@@ -242,3 +242,58 @@ To observe how varying individual generation parameters — temperature, top-p, 
 - Begin tracking hallucinations and factual deviations under higher creativity settings.
 
 ---
+
+# 📋 Experiment 4: Response Chaining (Self-Loop)
+
+## Setup
+
+- **Starting Prompt:** Tell me about the Great Wall of China.
+- **Max New Tokens:** 100
+- **Temperature:** 0.5
+- **Top-p:** 0.9
+- **Do Sample:** True
+- **Turns:** 5
+
+---
+
+## Results
+
+| Turn | Input | Output | Observations |
+|:-----|:------|:-------|:-------------|
+| 1 | Tell me about the Great Wall of China. | The Great Wall of China is a continuous curved stalactite that rises over the city of Beijing. | Severe factual error immediately. "Stalactite" is incorrect and nonsensical for the Great Wall. |
+| 2 | The Great Wall of China is a continuous curved stalactite that rises over the city of Beijing. | It is a continuous curved stalactite that rises over the city of Beijing. | Model echoes the error without correction. No new information added. |
+| 3 | It is a continuous curved stalactite that rises over the city of Beijing. | The Beijing stalactite is a continuous curved stalactite that rises over the city of Beijing. | Hallucination compounds: "Beijing stalactite" is invented. Increasing factual drift. |
+| 4 | The Beijing stalactite is a continuous curved stalactite that rises over the city of Beijing. | It is a continuous curved stalactite that rises over the city of Beijing. | Model loops — stuck restating earlier errors. No attempt to self-correct. |
+| 5 | It is a continuous curved stalactite that rises over the city of Beijing. | It is a continuous curved stalactite that rises over the city of Beijing. | Hard loop. Model is now fully trapped in a factual error with no variance. |
+
+---
+
+## Observations
+
+- **Error Amplification:**  
+  The model amplified and reinforced the initial hallucination ("stalactite") across all turns without correction.
+
+- **Loss of Topic:**  
+  No attempt was made to reframe or re-anchor to the actual Great Wall of China after the first mistake.
+
+- **Hard Looping:**  
+  By Turn 4-5, the outputs became nearly identical, showing the model getting stuck when fed its own flawed outputs.
+
+---
+
+## Insights
+
+- **Models are very sensitive to initial inaccuracies.**  
+  Once an error is made, chaining worsens the hallucination rather than self-correcting it.
+
+- **Without grounding or external feedback, models can easily drift into meaningless loops.**
+
+- **Even small temperature (0.5) settings cannot fully protect against self-reinforcing errors.**
+
+---
+
+## Next Actions
+
+- Future experiments could explore whether a system prompt that explicitly encourages "recheck facts" or "be skeptical of prior statements" would mitigate this looping effect.
+
+---
