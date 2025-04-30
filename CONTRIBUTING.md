@@ -71,9 +71,9 @@ Pull Requests should:
 
 ## Resources
 
-- Hugging Face Transformers: https://huggingface.co/docs/transformers/index
-- Gradio: https://www.gradio.app/
-- Markdownlint: https://github.com/DavidAnson/markdownlint
+- Hugging Face Transformers: <https://huggingface.co/docs/transformers/index>
+- Gradio: <https://www.gradio.app/>
+- Markdownlint: <https://github.com/DavidAnson/markdownlint>
 
 ---
 
