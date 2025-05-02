@@ -41,17 +41,26 @@ def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
 # Function to get specialized prompt based on the user's message
 def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled):
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
+    tokens = message_lower.split()
 
-    # First: Exact alias match
+    # Track diagnostics
+    scanned_aliases = []
+    match_details = []
+
+    # First: Token-level alias matching
     for alias, concept in KEYWORD_ALIASES.items():
+        scanned_aliases.append(alias)
         if alias in message_lower:
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Match] Matched alias '{alias}' ➔ concept '{concept}'")
-                logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
+                if DEBUG_MODE:
+                    logging.debug(f"[Prompt Match] Matched alias '{alias}' ➔ concept '{concept}'")
+                    logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
                 return prompt, concept, None # No match scope for direct match
+            else:
+                match_details.append((alias, concept, "Concept not found in prompt list"))
             
-    # Second: Fuzzy match if enabled
+    # Second: Fuzzy matching (fallback)
     if fuzzy_matching_enabled:
         all_aliases = list(KEYWORD_ALIASES.keys())
         close_matches = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.7)
@@ -62,12 +71,19 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
             concept = KEYWORD_ALIASES[best_match]
             if concept and concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
-                logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[:80]}...")
+                if DEBUG_MODE:
+                    logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
+                    logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[:80]}...")
                 return prompt, concept, similarity
+            else:
+                logging.debug(f"[Prompt Match - Fuzzy] Match found but concept '{concept}' not in prompt list")
     
-    #Default: No match found
-    logging.debug("[Prompt Match] No match found. Using base prompt.")
+    # Log fallback details
+    logging.debug(f"[Prompt Match - Fallback] No direct or fuzzy match found..")
+    logging.debug(f"[Prompt Match - Fallback] Scanned aliasses: {scanned_aliases} ")
+    if match_details:
+        logging.debug(f"[Prompt Match - Diagnostics] Matched alias but missing prompt entries: {match_details}")
+
     return "", "base_prompt", None
 
 # Initialize the model
@@ -249,4 +265,4 @@ if __name__ == "__main__":
 
     logging.debug("🚀 Launching Gradio demo...")
     demo.launch()
-
+    
