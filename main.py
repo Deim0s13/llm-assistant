@@ -43,6 +43,17 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
     tokens = message_lower.split()
 
+    # Define token-level in-order alias matcher
+        def alias_in_message(alias, message_tokens):
+        alias_tokens = alias.lower().split()
+        pos = 0
+        for token in message_tokens:
+            if token == alias_tokens[pos]:
+                pos += 1
+            if pos == len(alias_tokens):
+                return True
+            return False
+
     # Track diagnostics
     scanned_aliases = []
     match_details = []
@@ -50,7 +61,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     # First: Token-level alias matching
     for alias, concept in KEYWORD_ALIASES.items():
         scanned_aliases.append(alias)
-        if alias in message_lower:
+        if alias_in_message(alias, message_tokens):  
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
                 if DEBUG_MODE:
@@ -265,4 +276,3 @@ if __name__ == "__main__":
 
     logging.debug("🚀 Launching Gradio demo...")
     demo.launch()
-    
