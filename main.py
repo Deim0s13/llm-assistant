@@ -139,13 +139,7 @@ def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fu
     prompt_text, concept, match_score = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
     resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
 
-    # New fallback detection
-    if concept == "base_prompt":
-        concept_display = "Base Prompt Used (no match found)"
-        concept_colour = "yellow"
-    else:
-        concept_display = f" {concept}"
-        concept_colour = "green"
+    concept_display = f"{concept}" if concept != "base_prompt" else "Base Prompt Used (no match found)"
 
     context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
 
