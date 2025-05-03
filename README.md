@@ -4,25 +4,18 @@ This project is a starting point for building an LLM-based chatbot using Hugging
 
 ---
 
-## Current Version
+## Current Version (v0.4.0)
 
-### Features in Version 0.3.0
+This version focuses on enhancing the way the chatbot identifies and responds to different types of user queries. Improvements include:
 
-In this version, the project focus intentionally shifted from purely building application features to a more **hands-on experimental approach**.
+- **Expanded Prompt Matching**: The `prompt_aliases.json` file has been significantly expanded with more keyword variants and paraphrases, allowing better mapping of user input to specialized prompt templates.
+- **In-Order Token Alias Detection**: Introduced a smarter matching function that checks for multi-token aliases occurring in sequence within user input (e.g., "explain like I'm five").
+- **Improved Diagnostics**: Logging now provides better visibility into which aliases were scanned, which were matched, and why a fallback was used—supporting better transparency and future debugging.
+- **Codebase Clean-Up**: Matching logic was modularized to keep `main.py` maintainable and easier to extend in future versions.
 
-The goal was to better understand how large language models (LLMs) behave under different conditions — including prompt phrasing, generation settings, multi-turn context, and safety handling — and to use these insights to guide future development directions.
+These changes lay the foundation for future improvements to safety guardrails and memory handling in v0.4.1 and v0.4.2.
 
-This experiments phase allowed us to:
-
-- Explore LLM strengths and weaknesses systematically.
-- Validate assumptions about prompt design, context management, and parameter tuning.
-- Identify gaps where future improvements (like specialised prompts, safety mechanisms, or memory handling) could be prioritised.
-
-### Key Updates in v0.3.0
-
-- Introduced a structured experiments framework to explore LLM behaviours and limitations.
-- Captured experimental results around prompt engineering, context management, temperature/top-p effects, response chaining, and safety/bias handling.
-- Documented learnings and insights in the [experiments_tracker.md](experiments_tracker.md) file for future reference and ongoing refinement.
+For more detail, see [release_notes.md](release_notes.md).
 
 ---
 
@@ -68,12 +61,17 @@ This ensures we have a clear, evolving roadmap without losing sight of the origi
 
 ---
 
-### Documentation Overview
+## 📚 Documentation Index
 
-- [`experiments_tracker.md`](./experiments_tracker.md): Records structured LLM experiments, findings, and insights.
-- [`scope.md`](./scope.md): Tracks planned features, changes by version, and priorities.
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md): Development workflow, branching strategy, and naming conventions.
-- [`release_notes.md`](./release_notes.md): Detailed historical summaries of all previous versions.
+| File                                  | Description                                                                 |
+|---------------------------------------|-----------------------------------------------------------------------------|
+| [README.md](./README.md)              | Project overview, setup instructions, and current version details.          |
+| [scope.md](./scope.md)                | Defines the scope and goals for each version or feature set.                |
+| [release_notes.md](./release_notes.md)| Chronological version history with highlights and major changes.            |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)  | Guidelines for contributing, including branch strategy and naming standards.|
+| [test_experiments.md](./test_experiments.md) | Master tracker for all tests and experiments.                       |
+| [ROADMAP.md](./ROADMAP.md)            | Long-term learning and development plan across project phases.              |
+| [experiments/](./experiments/)        | Folder containing detailed experiment and test logs by version.             |
 
 ---
 
@@ -113,58 +111,21 @@ Access the Gradio UI locally on `http://127.0.0.1:7860/`
 
 ---
 
-## Testing and Experimentation
+## Experiments & Testing
 
-### • Prompt Match Validation
+We maintain a central index of all structured tests and behavioural experiments conducted on the assistant. This includes results, observations, and guidance for running future tests.
 
-Try input like:
-
-- "Tell me something like I'm five"
-- "Summarise this text"
-- "Can you give me a fun fact"
-
-Then check the logs to verify correct alias mapping and prompt injection.
-
-### • Generation Parameter Tuning
-
-Use the sliders and checkbox in the Gradio interface to adjust:
-
-- **Max New Tokens**: Suggested range: 50–200  
-- **Temperature**: Range: 0.1–1.0  
-- **Top-p**: Range: 0.5–1.0  
-- **Do Sample**: Toggle to switch between sampling (creative) and deterministic (greedy) responses.
-
-Test different values and note how they influence tone, accuracy, and creativity.
-
-### • Prompt Matching Debugging
-
-Turn on `DEBUG_MODE` to confirm when a specialized prompt is used. Matched prompts are logged with `[Prompt Match]`, and unmatched queries will fall back to the base.
-
-### • Few-Shot Examples (in prompt_template.txt)
-
-Simple in-context examples improve model grounding. Review and revise thse to better your use case.
-
-### • Debugging Prompt Matches
-
-Turn on DEBUG_MODE = True to see full matching diagnostics in the console.
-
-### • Testing Playground
-
-Use the Developer Playground panel to verify concept matching and output without impacting user conversation history.
-
-### • Testing Fuzzy Matching
-
-Enable or disable fuzzy matching dynamically from the UI to see the effects of relaxed keywork matching.
+[Test & Experiment Index](experiments/test_experiments_index.md)
 
 ---
 
 ## Future Roadmap
 
-- Enhance specialized prompt coverage.
-- Introduce lightweight safety guardrails for dangerous queries.
-- Improve context memory handling across multi-turn chains.
-- Experiment with external knowledge retrieval (RAG) methods.
-- Expand playground features for even faster prompt iteration.
+This project is part of a multi-phase LLM learning journey. We track our roadmap in [`ROADMAP.md`](./ROADMAP.md), which includes:
+
+- Learning phases (e.g., chatbot basics, fine-tuning, deployment)
+- Feature planning and milestones
+- Links to related experiments and versions
 
 ---
 

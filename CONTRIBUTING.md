@@ -20,6 +20,8 @@ We follow a simplified branching model:
 
 Once your feature is complete and tested, submit a PR to `dev`. We merge to `main` only when cutting a new version.
 
+Developers must branch from `dev`, not `main`. Once features or fixes are complete and reviewed, they should be merged into dev. When preparing a release, the dev branch will be merged into main and tagged with the appropriate version number.
+
 ---
 
 ## Feature Branch Naming Convention
