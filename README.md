@@ -61,12 +61,17 @@ This ensures we have a clear, evolving roadmap without losing sight of the origi
 
 ---
 
-### Documentation Index
+## 📚 Documentation Index
 
-- [`scope.md`](scope.md) – Defines the project’s current and future goals, boundaries, and focus areas.
-- [`release_notes.md`](release_notes.md) – Tracks version history, feature additions, and important changes across releases.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) – Guidelines for contributing, including branch naming, development flow, and coding standards.
-- [`experiments/test_experiments_index.md`](experiments/test_experiments_index.md) – Master index of all experiments and structured tests, with links to detailed results.
+| File                                  | Description                                                                 |
+|---------------------------------------|-----------------------------------------------------------------------------|
+| [README.md](./README.md)              | Project overview, setup instructions, and current version details.          |
+| [scope.md](./scope.md)                | Defines the scope and goals for each version or feature set.                |
+| [release_notes.md](./release_notes.md)| Chronological version history with highlights and major changes.            |
+| [CONTRIBUTING.md](./CONTRIBUTING.md)  | Guidelines for contributing, including branch strategy and naming standards.|
+| [test_experiments.md](./test_experiments.md) | Master tracker for all tests and experiments.                       |
+| [ROADMAP.md](./ROADMAP.md)            | Long-term learning and development plan across project phases.              |
+| [experiments/](./experiments/)        | Folder containing detailed experiment and test logs by version.             |
 
 ---
 
@@ -116,11 +121,11 @@ We maintain a central index of all structured tests and behavioural experiments 
 
 ## Future Roadmap
 
-- Enhance specialized prompt coverage.
-- Introduce lightweight safety guardrails for dangerous queries.
-- Improve context memory handling across multi-turn chains.
-- Experiment with external knowledge retrieval (RAG) methods.
-- Expand playground features for even faster prompt iteration.
+This project is part of a multi-phase LLM learning journey. We track our roadmap in [`ROADMAP.md`](./ROADMAP.md), which includes:
+
+- Learning phases (e.g., chatbot basics, fine-tuning, deployment)
+- Feature planning and milestones
+- Links to related experiments and versions
 
 ---
 
