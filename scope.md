@@ -150,4 +150,41 @@ Shift focus from only chatbot functionality to hands-on learning with prompt eng
 
 ---
 
-## Planned Version: TBC
+## Planned Version: v0.4.0
+
+### Enhanced Prompt Matching
+
+#### Objective
+
+Improve the chatbot’s ability to detect and apply the correct specialized prompt by refining keyword alias logic, expanding coverage, and reducing false negatives.
+
+#### Why This Matters
+
+- Several inputs fallback to the base prompt unnecessarily, even when similar phrases are covered by aliases.
+- Better prompt matching will increase reliability, user satisfaction, and overall prompt response quality.
+
+#### Key Deliverables
+
+- [ ] Expand and refine `prompt_aliases.json` with broader keyword coverage.
+- [ ] Add multi-word and phrase matching capabilities (e.g., regex or token-based heuristics).
+- [ ] Improve logging and diagnostics for better prompt-matching transparency.
+- [ ] Add unit tests to validate alias ➜ concept mapping.
+- [ ] Optional: Build a testing tool to run alias coverage reports.
+
+#### Out of Scope
+
+- Full natural language classification (that's a larger future effort).
+- Safety guardrails and context chaining (planned for v0.4.1 and v0.4.2).
+
+#### Dependencies
+
+- Existing structure in `get_specialized_prompt()`
+- `prompt_aliases.json` and `specialized_prompts.json`
+
+#### Success Criteria
+
+- Fewer fallbacks to base prompt when semantically valid keywords are present.
+- No regression in existing alias matches.
+- Clear logs showing matched aliases and fallback decisions.
+
+---
