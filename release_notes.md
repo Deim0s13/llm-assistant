@@ -15,6 +15,8 @@ This file tracks detailed version histories for the LLM Chatbot Starter Kit proj
 | **v0.2.3** | Introduced alias mapping for flexible keyword detection, normalised specialised prompts, added prompt match diagnostics in debug mode. |
 | **v0.2.4** | Added fuzzy matching toggle in the UI, Developer Prompt Playground panel, expanded debug output, added Advanced Settings collapsible UI section. |
 | **v0.2.5** | Bugfix release: improved internal logging, enhanced error handling for missing specialised prompts, consistency fixes for prompt matching logic. |
+| **v0.3.0** | Introduced documentation restructuring, separated release notes, added `scope.md`, and improved maintainability through branch and contribution conventions. |
+| **v0.4.0** | Enhancements to prompt matching: expanded `prompt_aliases.json`, introduced in-order token alias detection, improved logging diagnostics, and laid groundwork for upcoming safety and memory improvements. |
 
 ---
 
@@ -197,5 +199,25 @@ When responding, the chatbot now identifies whether it used a base prompt or spe
 - Consistent labelling for advanced developer settings.
 - Cleaner error handling for playground generation.
 - Expanded debug logging for fuzzy matches and scores.
+
+---
+
+### Features in Version 0.3.0
+
+In this version, the project focus intentionally shifted from purely building application features to a more **hands-on experimental approach**.
+
+The goal was to better understand how large language models (LLMs) behave under different conditions — including prompt phrasing, generation settings, multi-turn context, and safety handling — and to use these insights to guide future development directions.
+
+This experiments phase allowed us to:
+
+- Explore LLM strengths and weaknesses systematically.
+- Validate assumptions about prompt design, context management, and parameter tuning.
+- Identify gaps where future improvements (like specialised prompts, safety mechanisms, or memory handling) could be prioritised.
+
+### Key Updates in v0.3.0
+
+- Introduced a structured experiments framework to explore LLM behaviours and limitations.
+- Captured experimental results around prompt engineering, context management, temperature/top-p effects, response chaining, and safety/bias handling.
+- Documented learnings and insights in the [experiments_tracker.md](experiments_tracker.md) file for future reference and ongoing refinement.
 
 ---

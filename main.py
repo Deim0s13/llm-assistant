@@ -5,6 +5,7 @@ import gradio as gr
 import torch
 import difflib
 from aliases import KEYWORD_ALIASES
+from utils import alias_in_message
 
 # Configuration constants
 MODEL_NAME = "google/flan-t5-base"
@@ -43,17 +44,6 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     message_lower = message.lower().replace("’", "'") # Normalise smart quotes
     tokens = message_lower.split()
 
-    # Define token-level in-order alias matcher
-        def alias_in_message(alias, message_tokens):
-        alias_tokens = alias.lower().split()
-        pos = 0
-        for token in message_tokens:
-            if token == alias_tokens[pos]:
-                pos += 1
-            if pos == len(alias_tokens):
-                return True
-            return False
-
     # Track diagnostics
     scanned_aliases = []
     match_details = []
@@ -61,7 +51,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     # First: Token-level alias matching
     for alias, concept in KEYWORD_ALIASES.items():
         scanned_aliases.append(alias)
-        if alias_in_message(alias, message_tokens):  
+        if alias_in_message(alias, tokens):  
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
                 if DEBUG_MODE:
@@ -80,7 +70,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
             best_match = close_matches[0]
             similarity = difflib.SequenceMatcher(None, message_lower, best_match).ratio()
             concept = KEYWORD_ALIASES[best_match]
-            if concept and concept in specialized_prompts:
+            if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
                 if DEBUG_MODE:
                     logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
@@ -90,10 +80,11 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 logging.debug(f"[Prompt Match - Fuzzy] Match found but concept '{concept}' not in prompt list")
     
     # Log fallback details
-    logging.debug(f"[Prompt Match - Fallback] No direct or fuzzy match found..")
-    logging.debug(f"[Prompt Match - Fallback] Scanned aliasses: {scanned_aliases} ")
-    if match_details:
-        logging.debug(f"[Prompt Match - Diagnostics] Matched alias but missing prompt entries: {match_details}")
+    if DEBUG_MODE:
+        logging.debug(f"[Prompt Match - Fallback] No direct or fuzzy match found..")
+        logging.debug(f"[Prompt Match - Fallback] Scanned aliases: {scanned_aliases} ")
+        if match_details:
+            logging.debug(f"[Prompt Match - Diagnostics] Matched alias but missing prompt entries: {match_details}")
 
     return "", "base_prompt", None
 
