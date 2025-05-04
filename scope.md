@@ -116,7 +116,7 @@ It complements the `README.md` (current version overview) and the `release_notes
 
 ---
 
-## Current Version: v0.3.0
+## Version: v0.3.0
 
 ### Experimentation Playground Expansion
 
@@ -150,7 +150,7 @@ Shift focus from only chatbot functionality to hands-on learning with prompt eng
 
 ---
 
-## Planned Version: v0.4.0
+## Current Version: v0.4.0
 
 ### Enhanced Prompt Matching
 
@@ -186,5 +186,45 @@ Improve the chatbot’s ability to detect and apply the correct specialized prom
 - Fewer fallbacks to base prompt when semantically valid keywords are present.
 - No regression in existing alias matches.
 - Clear logs showing matched aliases and fallback decisions.
+
+---
+
+## Planned Version: v0.4.1
+
+### Safety Guardrails & Sensitivity Controls
+
+#### Objective
+
+Introduce lightweight safety guardrails for user inputs and system responses, including configurable sensitivity settings (e.g., profanity tolerance), to allow for more responsible and adaptable behaviour.
+
+#### Why This Matters
+
+- Currently, the assistant does not evaluate input for harmful or inappropriate content, nor moderate its responses.
+- As the chatbot becomes more useful in broader settings, it's important to support safe, respectful, and controlled outputs — especially in public or shared environments.
+- Configurable filters will also allow developers to tailor the behaviour for context-specific use (e.g., educational vs. casual).
+
+#### Key Deliverables
+
+- [ ] Add a lightweight content filter to scan user input and model responses for predefined safety triggers.
+- [ ] Introduce a `settings.json` or similar config file to allow sensitivity levels to be toggled (e.g., allow mild profanity).
+- [ ] Log when safety rules are triggered (e.g., “Profanity filtered”, “Blocked sensitive response”).
+- [ ] UI checkbox to enable/disable safety mode (optional if time permits).
+- [ ] Add unit tests to validate safety handling and configuration toggles.
+
+#### Out of Scope
+
+- Advanced AI moderation or third-party safety models (e.g., OpenAI moderation endpoint).
+- Real-time abuse detection or emotional sentiment analysis.
+
+#### Dependencies
+
+- Centralized `settings.json` or config object to manage feature toggles.
+- Chat generation logic (`chat()` function) for post-processing and filter injection.
+
+#### Success Criteria
+
+- Clearly logged safety rule applications when triggered.
+- Ability to toggle profanity filtering via config file or UI.
+- No regressions in prompt response flow or generation performance.
 
 ---

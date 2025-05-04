@@ -19,6 +19,21 @@ For more detail, see [release_notes.md](release_notes.md).
 
 ---
 
+## Planned Version (v0.4.1)
+
+### Features in Version 0.4.1
+
+- Introduced configurable **Safety Guardrails** to moderate content and improve responsible behaviour.
+- Added a lightweight filtering layer to detect and optionally block profanity and sensitive input/output.
+- Implemented support for a 'settings.json' configuration file to control safety features like profanity tolerance.
+- Enhanced logging to clearly show when safety filters are triggered (e.g., “Profanity removed from response”).
+- Maintains modular design to support future expansion (e.g., more granular filter categories or external moderation tools).
+
+**Why this matters:**
+As the chatbot becomes more capable, it’s important to ensure safe and adaptable usage across contexts (e.g., personal, educational, or public-facing environments). This version lays the foundation for tunable behaviour aligned with different use cases.
+
+---
+
 ## Project Structure and Documentation Standards
 
 As part of ongoing improvements, the project now maintains:
