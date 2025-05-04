@@ -1,9 +1,29 @@
-# Python artifacts
+# Python
 __pycache__/
-*.py[cod]
-
-# Virtual enviornment
-env/
-
-#Environment variables file
+*.pyc
+*.pyo
+*.pyd
 .env
+.env.*
+
+# Virtual environment
+env/
+venv/
+
+# OS-specific
+.DS_Store
+
+# VS Code and IDE settings
+.vscode/
+.idea/
+
+# Model / tokenizers cache (if you're experimenting locally)
+~/.cache/
+*.ckpt
+*.pt
+
+# Experiments & test logs (optional)
+experiments/*.log
+
+# Settings file (optional, if user-specific config)
+settings.json

@@ -221,3 +221,91 @@ This experiments phase allowed us to:
 - Documented learnings and insights in the [experiments_tracker.md](experiments_tracker.md) file for future reference and ongoing refinement.
 
 ---
+
+## Features in Version 0.4.0
+
+### Enhanced Prompt Matching and Diagnostics
+
+This version focuses on making the chatbot smarter and more transparent about how it chooses which prompt to use.
+
+#### Key Enhancements
+
+- **Token-Level Alias Detection**  
+  Multi-word aliases (e.g. _“explain like I’m five”_) now match even when tokens are spread across the input text.
+
+- **Alias Coverage Expansion**  
+  Updated `prompt_aliases.json` with broader and more natural language variants to increase match coverage.
+
+- **Refactored Prompt Matching Logic**  
+  Introduced a new `alias_in_message()` helper in `prompt_utils.py` to support better in-order token detection.  
+  Maintains separation of concerns, reducing clutter in `main.py`.
+
+- **Improved Fallback Logging**  
+  New diagnostic logs show:
+  - All aliases scanned
+  - Why a match failed (e.g. concept not found in `specialized_prompts.json`)
+  - Whether fuzzy matching was used and what confidence it returned
+
+- **Consistent Debug Experience**  
+  Fuzzy match scores and reasoning are consistently displayed in both the UI and debug logs.  
+  Maintains clarity during testing and prompt tuning.
+
+### Testing Support
+
+- Ran structured tests using real-world prompt examples to validate matching behaviour.
+- Created [v0.4.0 Test & Experiment Tracker](./experiments/v0.4.0.md) to document test cases and results.
+
+### Internal Cleanups
+
+- Introduced new folder structure to separate `utils`, `data`, `experiments`, and `docs`.
+- Updated documentation, links, and developer references to reflect the new structure.
+
+---
+
+## Planned Features in Version 0.4.1
+
+### Safety & Output Configuration
+
+This version introduces the ability to configure output tone and safety controls — including profanity filtering, response strictness, and moderation modes — giving developers more control over the chatbot's personality and appropriateness in different environments.
+
+#### Key Deliverables (Planned):
+
+- **Safety Config System**
+  - Create a dedicated JSON or Python-based config (e.g. `safety_config.json`) to control behaviour.
+  - Allow setting parameters like:
+    - `allow_mild_profanity`: true/false
+    - `suppress_controversial_topics`: true/false
+    - `tone`: “friendly”, “neutral”, “sarcastic”, etc. (optional)
+
+- **Integrated Enforcement**
+  - Dynamically modify the base prompt or response logic based on the config settings.
+  - Use light prompt-injection to enforce tone or restrict unsafe topics.
+
+- **Settings Preview Panel**
+  - In Gradio UI, add a small developer section showing the current safety settings.
+  - Possibly allow toggling basic flags in real-time (for dev use only).
+
+- **Unit Tests**
+  - Add test cases to validate safety setting toggles.
+  - Ensure output changes appropriately when settings change.
+
+### Out of Scope
+
+- Full moderation pipeline using APIs or classifiers
+- Fine-tuned tone control via embeddings or model-level customization (planned in future)
+
+### Dependencies
+
+- `prompt_utils.py` for tone/prompt modifications
+- Clean config loading structure (`config.py` or JSON)
+- Existing prompt system that supports override injection
+
+### Success Criteria
+
+- Developers can control chatbot tone and safety levels via config
+- Users see appropriately filtered output based on flags
+- No regression in existing functionality (prompt matching, diagnostics, etc.)
+
+---
+
+Once these features are completed and tested, this section will be updated and moved to the stable **v0.4.1** entry in the table above.

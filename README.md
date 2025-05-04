@@ -1,6 +1,6 @@
 # LLM Chatbot Starter Kit
 
-This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.3.0) leverages the instruction-tuned model `google/flan-t5-base` to create a robust multi-turn conversation interface with enhanced prompt control.
+This project is a starting point for building an LLM-based chatbot using Hugging Face's Transformers and Gradio. The current baseline (version 0.4.0) leverages the instruction-tuned model `google/flan-t5-base` to create a robust multi-turn conversation interface with enhanced prompt control.
 
 ---
 
@@ -15,7 +15,7 @@ This version focuses on enhancing the way the chatbot identifies and responds to
 
 These changes lay the foundation for future improvements to safety guardrails and memory handling in v0.4.1 and v0.4.2.
 
-For more detail, see [release_notes.md](release_notes.md).
+For more detail, see [release_notes.md](./release_notes.md).
 
 ---
 
@@ -25,11 +25,11 @@ For more detail, see [release_notes.md](release_notes.md).
 
 - Introduced configurable **Safety Guardrails** to moderate content and improve responsible behaviour.
 - Added a lightweight filtering layer to detect and optionally block profanity and sensitive input/output.
-- Implemented support for a 'settings.json' configuration file to control safety features like profanity tolerance.
+- Implemented support for a `settings.json` configuration file to control safety features like profanity tolerance.
 - Enhanced logging to clearly show when safety filters are triggered (e.g., “Profanity removed from response”).
 - Maintains modular design to support future expansion (e.g., more granular filter categories or external moderation tools).
 
-**Why this matters:**
+**Why this matters:**  
 As the chatbot becomes more capable, it’s important to ensure safe and adaptable usage across contexts (e.g., personal, educational, or public-facing environments). This version lays the foundation for tunable behaviour aligned with different use cases.
 
 ---
@@ -41,7 +41,7 @@ As part of ongoing improvements, the project now maintains:
 - **Structured Documentation:** Each major topic (features, versioning, scope, experiments) has its own dedicated markdown file.
 - **Versioning Model:** Only the current version is detailed in the main README. Historical version details are moved to `release_notes.md`.
 - **Scope Management:** The `scope.md` file captures planned and delivered scope for each version, keeping development focused and visible.
-- **Experiments Tracker:** The `experiments_tracker.md` file logs all structured experiments, findings, and insights as part of hands-on LLM learning.
+- **Experiments Tracker:** The `test_experiments.md` file logs all structured experiments, findings, and insights as part of hands-on LLM learning.
 
 These changes were progressively introduced around version `v0.3.0` but are considered *foundational practices* going forward rather than tied to any single release.
 
@@ -62,31 +62,17 @@ These changes were progressively introduced around version `v0.3.0` but are cons
 
 ---
 
-### Scope and Feature Tracking
-
-In addition to capturing experiment learnings, this project maintains a [scope.md](scope.md) file.
-
-The `scope.md` file serves as the **official tracker** for:
-
-- Defining each planned version and its intended features.
-- Documenting which improvements have been completed, planned, or deferred.
-- Keeping development aligned with the broader learning goals and project focus.
-
-This ensures we have a clear, evolving roadmap without losing sight of the original hands-on learning objectives.
-
----
-
 ## 📚 Documentation Index
 
-| File                                  | Description                                                                 |
-|---------------------------------------|-----------------------------------------------------------------------------|
-| [README.md](./README.md)              | Project overview, setup instructions, and current version details.          |
-| [scope.md](./scope.md)                | Defines the scope and goals for each version or feature set.                |
-| [release_notes.md](./release_notes.md)| Chronological version history with highlights and major changes.            |
-| [CONTRIBUTING.md](./CONTRIBUTING.md)  | Guidelines for contributing, including branch strategy and naming standards.|
-| [test_experiments.md](./test_experiments.md) | Master tracker for all tests and experiments.                       |
-| [ROADMAP.md](./ROADMAP.md)            | Long-term learning and development plan across project phases.              |
-| [experiments/](./experiments/)        | Folder containing detailed experiment and test logs by version.             |
+| File                                         | Description                                                                 |
+|----------------------------------------------|-----------------------------------------------------------------------------|
+| [README.md](./README.md)                     | Project overview, setup instructions, and current version details.          |
+| [scope.md](./docs/scope.md)                  | Defines the scope and goals for each version or feature set.                |
+| [release_notes.md](./docs/release_notes.md)  | Chronological version history with highlights and major changes.            |
+| [CONTRIBUTING.md](./docs/contributing.md)    | Guidelines for contributing, including branch strategy and naming standards.|
+| [test_experiments.md](./docs/test_experiments.md) | Master tracker for all tests and experiments.                       |
+| [ROADMAP.md](./docs/ROADMAP.md)              | Long-term learning and development plan across project phases.              |
+| [experiments/](./experiments/)               | Folder containing detailed experiment and test logs by version.             |
 
 ---
 
@@ -128,26 +114,28 @@ Access the Gradio UI locally on `http://127.0.0.1:7860/`
 
 ## Experiments & Testing
 
-We maintain a central index of all structured tests and behavioural experiments conducted on the assistant. This includes results, observations, and guidance for running future tests.
+We maintain a central index of all structured tests and behavioural experiments conducted on the assistant.  
+This includes results, observations, and guidance for running future tests.
 
-[Test & Experiment Index](experiments/test_experiments_index.md)
+📄 [Test & Experiment Tracker](./experiments/test_experiments_index.md)
+
+Each version's experiments are stored under the `/experiments` directory, allowing us to document findings, regressions, and improvements over time.
 
 ---
 
 ## Future Roadmap
 
-This project is part of a multi-phase LLM learning journey. We track our roadmap in [`ROADMAP.md`](./ROADMAP.md), which includes:
+This project is part of a multi-phase LLM learning journey.  
+We track long-term goals and development phases in the [`ROADMAP.md`](./docs/ROADMAP.md):
 
-- Learning phases (e.g., chatbot basics, fine-tuning, deployment)
-- Feature planning and milestones
-- Links to related experiments and versions
+- Learning stages (e.g., chatbot fundamentals, fine-tuning, deployment)
+- Versioned milestones and development progress
+- Links to experiments, scoped features, and stretch goals
 
 ---
 
 ## Previous Versions
 
-### Version History
+Looking for earlier version details?
 
-Looking for earlier versions? See [Release Notes ➔](release_notes.md) for full details of previous features and improvements.
-
----
+See the [Release Notes](./docs/release_notes.md) for a complete history of version highlights and feature introductions.

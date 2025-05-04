@@ -4,8 +4,9 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
 import difflib
-from aliases import KEYWORD_ALIASES
-from utils import alias_in_message
+
+from utils.aliases import KEYWORD_ALIASES
+from utils.Prompt_utils import alias_in_message
 
 # Configuration constants
 MODEL_NAME = "google/flan-t5-base"
