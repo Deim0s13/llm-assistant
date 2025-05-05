@@ -1,7 +1,12 @@
 import json
 import logging
+import os
 
-PROMPT_ALIASES_PATH = "prompt_aliases.json"
+# Get the directory of the current file (i.e. utlis/)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define the path to prompt_aliases.json inside utils/
+PROMPT_ALIASES_PATH = os.path.join(CURRENT_DIR, "prompt_aliases.json")
 
 def load_prompt_aliases(filepath=PROMPT_ALIASES_PATH):
     """
@@ -22,4 +27,5 @@ def load_prompt_aliases(filepath=PROMPT_ALIASES_PATH):
         logging.error(f"[Prompt Alias Loader] Failed to load aliases: {e}")
         return {}
 
+# Load the aliases at module level
 KEYWORD_ALIASES = load_prompt_aliases()

@@ -139,9 +139,9 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
         output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
 
         # Example: Check for profanity filtering
-        if SETTINGS.get("safety", {}).get("filter_profanity", False):
+        if SETTINGS.get("safety", {}).get("sensitivity_level") == "moderate":
             output_text = apply_profanity_filter(output_text)
-            logging.debug("[Safety] Profanity filter applied")
+            logging.debug("[Safety] Output filtered for profanity (moderate mode)")
 
         if DEBUG_MODE:
             logging.debug("Full generated output:")
@@ -160,7 +160,8 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
         return history, "error"
 
 # Respond function for Gradio
-def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
+def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled, safety_level):
+    SETTINGS["safety"]["sensitivity_level"] = safety_level
     history = history or []
     updated_history, source = chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled)
     diagnostics = f"Prompt Source: {source}"
@@ -238,6 +239,12 @@ with gr.Blocks() as demo:
         resolved_prompt_preview = gr.Textbox(label="Resolved Prompt", lines=6, interactive=False)
         generated_preview = gr.Textbox(label="Generated Output", lines=6, interactive=False)
 
+        safety_mode_dropdown = gr.Dropdown(
+            choices=["strict", "moderate", "relaxed"],
+            value=SETTINGS["safety"].get("sensitivity_level", "moderate"),
+            label="Safety Mode [Dev]"
+        )
+
         # 1. Button click always forces the playground to run
         run_button.click(
             run_playground,
@@ -278,7 +285,7 @@ with gr.Blocks() as demo:
 
     txt.submit(
         respond,
-        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox, fuzzy_match_checkbox],
+        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox, fuzzy_match_checkbox, safety_mode_dropdown],
         [txt, chatbot, diagnostics_box]
     )
 
