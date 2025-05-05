@@ -8,7 +8,7 @@ import difflib
 from utils.aliases import KEYWORD_ALIASES
 from utils.prompt_utils import alias_in_message
 from config.settings_loader import load_settings
-from utils.safety_filters import apply_profanity_filter
+from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
 # Configuration constants
 MODEL_NAME = "google/flan-t5-base"
@@ -114,6 +114,15 @@ def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_ma
 # Generate model response
 def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
     try:
+        # Safety evaluation before prompt generation
+        allowed, blocked_message = evaluate_safety(message, SETTINGS)
+        if not allowed:
+            if DEBUG_MODE:
+                logging.debug("[Safety] Blocked message returned to user.")
+            history.append({"role": "user", "content": message})
+            history.append({"role": "assistant", "content": blocked_message})
+            return history, "blocked_by_safety"
+        
         context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
         if DEBUG_MODE:
             logging.debug("Full context sent to model")
