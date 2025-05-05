@@ -6,7 +6,9 @@ import torch
 import difflib
 
 from utils.aliases import KEYWORD_ALIASES
-from utils.Prompt_utils import alias_in_message
+from utils.prompt_utils import alias_in_message
+from config.settings_loader import load_settings
+from utils.safety_filters import apply_profanity_filter
 
 # Configuration constants
 MODEL_NAME = "google/flan-t5-base"
@@ -14,6 +16,7 @@ BASE_PROMPT_PATH = "prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "specialized_prompts.json"
 MAX_HISTORY_TURNS = 5
 DEBUG_MODE = True
+SETTINGS = load_settings()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -122,8 +125,15 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
             "temperature": float(temperature),
             "top_p": float(top_p),
         }
+
         output_ids = model.generate(input_ids, **generation_params)
         output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
+
+        # Example: Check for profanity filtering
+        if SETTINGS.get("safety", {}).get("filter_profanity", False):
+            output_text = apply_profanity_filter(output_text)
+            logging.debug("[Safety] Profanity filter applied")
+
         if DEBUG_MODE:
             logging.debug("Full generated output:")
             logging.debug(output_text)

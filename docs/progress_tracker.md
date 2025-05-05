@@ -2,7 +2,7 @@
 
 ## Progress Tracker v0.4.1
 
-# ✅ v0.4.1 Safety Guardrails — Progress Tracker
+## v0.4.1 Safety Guardrails — Progress Tracker
 
 This tracker helps monitor development progress for the v0.4.1 release focused on safety guardrails and configurable content moderation.
 

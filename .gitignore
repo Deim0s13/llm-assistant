@@ -26,4 +26,4 @@ venv/
 experiments/*.log
 
 # Settings file (optional, if user-specific config)
-settings.json
+config/settings.json
