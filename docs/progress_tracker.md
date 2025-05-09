@@ -19,8 +19,8 @@ This tracker helps monitor development progress for the v0.4.1 release focused o
 | **3. Dynamic Responses**   | Add refusal response templates                                            | ✅ Done | `blocked_response_temlate` exists (with typo); not yet applied.      |
 |                           | Allow disclaimers or adjustments for relaxed modes                        | ✅ Done | No logic to branch on `sensitivity_level` yet.                       |
 | **4. UI Integration**      | Add safety level toggle in Gradio dev panel (optional)                    | ✅ Done | Optional, not present in current Gradio UI.                          |
-| **5. Testing**             | Create/extend `test_experiments.md` with safety test cases                | ❌ Not Started| No coverage yet for input blocks or output filtering.                |
-|                           | Run tests across each mode (strict, moderate, relaxed)                    | ❌ Not Started| Can be simulated with Gradio.                                        |
+| **5. Testing**             | Create/extend `test_experiments.md` with safety test cases                | ✅ Done | No coverage yet for input blocks or output filtering.                |
+|                           | Run tests across each mode (strict, moderate, relaxed)                    | ✅ Done | Can be simulated with Gradio.                                        |
 | **6. Logging & Debugging** | Add logs for safety decisions and config used                             | ✅ Done | Profanity logs only; `evaluate_safety()` logs pending.               |
 |                           | Ensure visibility in debug mode                                           | ✅ Done | Controlled by `debug_mode` and `log_triggered_filters`.              |
 

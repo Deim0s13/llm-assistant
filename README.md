@@ -4,33 +4,26 @@ This project is a starting point for building an LLM-based chatbot using Hugging
 
 ---
 
-## Current Version (v0.4.0)
+## Current Version: v0.4.1
 
-This version focuses on enhancing the way the chatbot identifies and responds to different types of user queries. Improvements include:
+### Key Focus
 
-- **Expanded Prompt Matching**: The `prompt_aliases.json` file has been significantly expanded with more keyword variants and paraphrases, allowing better mapping of user input to specialized prompt templates.
-- **In-Order Token Alias Detection**: Introduced a smarter matching function that checks for multi-token aliases occurring in sequence within user input (e.g., "explain like I'm five").
-- **Improved Diagnostics**: Logging now provides better visibility into which aliases were scanned, which were matched, and why a fallback was used—supporting better transparency and future debugging.
-- **Codebase Clean-Up**: Matching logic was modularized to keep `main.py` maintainable and easier to extend in future versions.
+- Introduced configurable safety guardrails for input and output handling.
+- Added sensitivity modes: strict, moderate, relaxed.
+- Enabled dynamic safety level selection through the developer UI panel.
 
-These changes lay the foundation for future improvements to safety guardrails and memory handling in v0.4.1 and v0.4.2.
-
-For more detail, see [release_notes.md](./release_notes.md).
+See full details in [release_notes.md](./release_notes.md).
 
 ---
 
-## Planned Version (v0.4.1)
+## Upcoming Version: v0.4.2 (Planning)
 
-### Features in Version 0.4.1
+Planned focus areas:
 
-- Introduced configurable **Safety Guardrails** to moderate content and improve responsible behaviour.
-- Added a lightweight filtering layer to detect and optionally block profanity and sensitive input/output.
-- Implemented support for a `settings.json` configuration file to control safety features like profanity tolerance.
-- Enhanced logging to clearly show when safety filters are triggered (e.g., “Profanity removed from response”).
-- Maintains modular design to support future expansion (e.g., more granular filter categories or external moderation tools).
+- Introduce basic memory and context chaining between user turns.
+- Improve conversation coherence across multiple interactions.
 
-**Why this matters:**  
-As the chatbot becomes more capable, it’s important to ensure safe and adaptable usage across contexts (e.g., personal, educational, or public-facing environments). This version lays the foundation for tunable behaviour aligned with different use cases.
+Details coming soon!
 
 ---
 

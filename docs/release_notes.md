@@ -17,6 +17,7 @@ This file tracks detailed version histories for the LLM Chatbot Starter Kit proj
 | **v0.2.5** | Bugfix release: improved internal logging, enhanced error handling for missing specialised prompts, consistency fixes for prompt matching logic. |
 | **v0.3.0** | Introduced documentation restructuring, separated release notes, added `scope.md`, and improved maintainability through branch and contribution conventions. |
 | **v0.4.0** | Enhancements to prompt matching: expanded `prompt_aliases.json`, introduced in-order token alias detection, improved logging diagnostics, and laid groundwork for upcoming safety and memory improvements. |
+| **v0.4.1** | Introduced configurable safety guardrails, content moderation, and sensitivity-based input/output handling. |
 
 ---
 
@@ -268,7 +269,7 @@ This version focuses on making the chatbot smarter and more transparent about ho
 
 This version introduces the ability to configure output tone and safety controls — including profanity filtering, response strictness, and moderation modes — giving developers more control over the chatbot's personality and appropriateness in different environments.
 
-#### Key Deliverables (Planned):
+#### Key Deliverables (Planned)
 
 - **Safety Config System**
   - Create a dedicated JSON or Python-based config (e.g. `safety_config.json`) to control behaviour.
