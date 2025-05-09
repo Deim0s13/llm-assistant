@@ -6,7 +6,7 @@ import os
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Define the path to prompt_aliases.json inside utils/
-PROMPT_ALIASES_PATH = os.path.join(CURRENT_DIR, "prompt_aliases.json")
+PROMPT_ALIASES_PATH = os.path.join(CURRENT_DIR, "config/prompt_aliases.json")
 
 def load_prompt_aliases(filepath=PROMPT_ALIASES_PATH):
     """

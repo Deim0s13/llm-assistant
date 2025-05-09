@@ -12,8 +12,8 @@ from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
 # Configuration constants
 MODEL_NAME = "google/flan-t5-base"
-BASE_PROMPT_PATH = "prompt_template.txt"
-SPECIALIZED_PROMPTS_PATH = "specialized_prompts.json"
+BASE_PROMPT_PATH = "config/prompt_template.txt"
+SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
 MAX_HISTORY_TURNS = 5
 DEBUG_MODE = True
 SETTINGS = load_settings()
