@@ -185,11 +185,11 @@ Begin improving the chatbot’s ability to remember and respond to earlier parts
 ### Key Deliverables
 
 - Enable turn history recall across multiple exchanges
-- Add configurable memory window (e.g. max turns to retain) via settings.json
+- Add configurable memory window (e.g. max turns to retain) via `settings.json`
 - Log memory handling in debug mode
 - Create GitHub Project board with backlog, labels, and workflow states
 - Migrate markdown-based progress tracking to GitHub Issues/Projects
-- Update README.md and CONTRIBUTING.md to reflect new workflow
+- Update `README.md` and `CONTRIBUTING.md` to reflect new workflow
 
 ### Out of Scope
 
