@@ -263,13 +263,13 @@ This version focuses on making the chatbot smarter and more transparent about ho
 
 ---
 
-## Planned Features in Version 0.4.1
+## Planned Features in Version 0.4.1 (Stable Version)
 
 ### Safety & Output Configuration
 
 This version introduces the ability to configure output tone and safety controls — including profanity filtering, response strictness, and moderation modes — giving developers more control over the chatbot's personality and appropriateness in different environments.
 
-#### Key Deliverables (Planned)
+#### Key Deliverables
 
 - **Safety Config System**
   - Create a dedicated JSON or Python-based config (e.g. `safety_config.json`) to control behaviour.

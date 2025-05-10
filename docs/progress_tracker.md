@@ -25,3 +25,47 @@ This tracker helps monitor development progress for the v0.4.1 release focused o
 |                           | Ensure visibility in debug mode                                           | ✅ Done | Controlled by `debug_mode` and `log_triggered_filters`.              |
 
 ---
+
+# Progress Tracker – v0.4.2
+
+This tracker helps monitor development progress for version **v0.4.2**, focused on improving context memory handling and introducing GitHub Projects as the primary planning and tracking mechanism.
+
+---
+
+## 🧠 Version Goals
+
+> Refer to [`scope.md`](./scope.md) for high-level objectives.
+
+---
+
+## Task Breakdown
+
+| Task Area                 | Sub-Task                                                                 | Status        | Notes                                                            |
+|--------------------------|--------------------------------------------------------------------------|---------------|------------------------------------------------------------------|
+| **1. Context Handling**  | Design context window expansion logic                                     | ☐ Not Started | Plan rules for history retention, token trimming, or summarisation |
+|                          | Update `prepare_context()` to support expanded chaining                   | ☐ Not Started | Consider edge cases with long chat histories                    |
+|                          | Add test cases to verify context correctness                              | ☐ Not Started | Use varying conversation lengths and observe response accuracy  |
+|                          | Add logging to show context size and trimmed tokens                       | ☐ Not Started | Useful for debugging and tuning                                 |
+| **2. Memory Strategy**   | Draft placeholder for future memory implementation (v0.4.3+)              | ☐ Not Started | Plan optional vector-based or database memory layer             |
+| **3. GitHub Integration**| Create GitHub Project board                                               | ☐ Not Started | Kanban-style for backlog, active, done                          |
+|                          | Add remaining v0.4.2 tasks as Issues/cards                                | ☐ Not Started | Link them to this tracker as needed                             |
+|                          | Add README note referencing GitHub Projects                               | ☐ Not Started | Clarify where tasks are now managed                             |
+| **4. Documentation**     | Update `README.md` to reflect v0.4.2 scope and planning shift             | ☐ Not Started | Replace static changelog section                                |
+|                          | Add section to `contributing.md` on project tracking expectations         | ☐ Not Started | Encourage PRs linked to GitHub issues or tasks                  |
+| **5. Testing**           | Create `test_experiments_v0.4.2.md` and define memory/context tests        | ☐ Not Started | Focus on prompt integrity across longer dialogues               |
+|                          | Validate no regressions in prompt selection or diagnostics                | ☐ Not Started | Use history-heavy and prompt-match test cases                   |
+
+---
+
+## ✅ Completion Criteria
+
+- Context management updated and verifiably working in chat flow
+- GitHub Projects board created and adopted for ongoing tracking
+- `README.md` and `scope.md` updated to reflect the new version
+- Tests and logs confirm stability and improvement over prior versions
+
+---
+
+## Version Status: `In Planning`
+
+> This tracker will remain active during early implementation. Items will be migrated to GitHub Projects once the structure is finalised.
