@@ -140,7 +140,7 @@ Improve prompt detection and application by refining alias logic and diagnostics
 
 ---
 
-## v0.4.1 – Safety Guardrails & Sensitivity Controls (Planned)
+## v0.4.1 – Safety Guardrails & Sensitivity Controls (Current Version)
 
 ### Objective
 
@@ -170,3 +170,34 @@ Introduce lightweight filters to moderate chatbot input/output, with adjustable 
 - Stable behaviour with no regressions
 
 ---
+
+## v0.4.2 – Context Memory Handling & Project Hygiene (Planned)
+
+### Objective
+
+Begin improving the chatbot’s ability to remember and respond to earlier parts of a conversation while introducing structured project management using GitHub Projects.
+
+### Why This Matters
+
+- Current memory is limited to a basic context window; more realistic conversations require persistent recall.
+- Task tracking has outgrown markdown-only tracking — introducing GitHub Projects enables better backlog management and collaboration.
+
+### Key Deliverables
+
+- Enable turn history recall across multiple exchanges
+- Add configurable memory window (e.g. max turns to retain) via settings.json
+- Log memory handling in debug mode
+- Create GitHub Project board with backlog, labels, and workflow states
+- Migrate markdown-based progress tracking to GitHub Issues/Projects
+- Update README.md and CONTRIBUTING.md to reflect new workflow
+
+### Out of Scope
+
+- Persistent memory storage (e.g. Redis, database)
+- AI-based summarisation of long conversations (future version)
+
+### Success Criteria
+
+- Responses correctly reflect earlier conversation turns
+- GitHub Project board is created and actively used
+- Documentation updated to reflect new project workflow
