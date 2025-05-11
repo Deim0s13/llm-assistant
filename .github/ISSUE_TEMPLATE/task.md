@@ -22,7 +22,7 @@ Describe what this task aims to accomplish, including expected changes, improvem
 ### Content
 
 - Linked Epic:
-- Milestone:
+- Milestone: [Milestonevx.x.x](https://github.com/Deim0s13/llm-assistant/milestone/x)
 
 _Include any relevant background, references to previous work, or dependencies._
 
@@ -52,4 +52,4 @@ Implementation Notes
 
 ### Status
 
-Set in project board: `Backlog` -> `Next Up` -> `In Progress` -> `Done`
+Set in project board: `Backlog` ➜  `Next Up` ➜  `In Progress` ➜  `Done`
