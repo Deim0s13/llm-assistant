@@ -171,33 +171,58 @@ Introduce lightweight filters to moderate chatbot input/output, with adjustable 
 
 ---
 
-## v0.4.2 – Context Memory Handling & Project Hygiene (Planned)
+## v0.4.2 – Context Memory Handling & Project Hygiene
 
 ### Objective
 
-Begin improving the chatbot’s ability to remember and respond to earlier parts of a conversation while introducing structured project management using GitHub Projects.
+Begin improving the chatbot’s ability to remember and respond to earlier parts of a conversation, while introducing structured project management using GitHub Projects and ensuring consistent cross-platform development across macOS (M1) and Windows (CUDA).
+
+---
 
 ### Why This Matters
 
 - Current memory is limited to a basic context window; more realistic conversations require persistent recall.
 - Task tracking has outgrown markdown-only tracking — introducing GitHub Projects enables better backlog management and collaboration.
+- Development is now occurring across macOS (Apple Silicon) and Windows (x86), requiring consistent environment setup and model handling logic.
+
+---
 
 ### Key Deliverables
 
+#### Context Handling
+
 - Enable turn history recall across multiple exchanges
 - Add configurable memory window (e.g. max turns to retain) via `settings.json`
-- Log memory handling in debug mode
-- Create GitHub Project board with backlog, labels, and workflow states
-- Migrate markdown-based progress tracking to GitHub Issues/Projects
-- Update `README.md` and `CONTRIBUTING.md` to reflect new workflow
+- Log memory handling behaviour in debug mode
+- Add test cases to verify history trimming and context preparation
+
+#### Project Hygiene
+
+- Create GitHub Project board with defined workflow (Backlog → In Progress → Done)
+- Apply standardised labels and status tracking
+- Migrate version tracking and planning to GitHub Issues
+- Update `README.md` and `CONTRIBUTING.md` to reflect project tracking expectations
+
+#### Cross-Platform Support
+
+- Update `initialize_model()` to detect and support `cuda`, `mps`, or `cpu` backends
+- Document developer setup instructions for both macOS and Windows environments
+- Optional: Support `.env` configuration overrides for local development
+- Confirm project runs consistently across architectures
+
+---
 
 ### Out of Scope
 
 - Persistent memory storage (e.g. Redis, database)
-- AI-based summarisation of long conversations (future version)
+- AI-based summarisation of long conversations
+- Full multi-device environment automation or container builds (future)
+
+---
 
 ### Success Criteria
 
-- Responses correctly reflect earlier conversation turns
-- GitHub Project board is created and actively used
-- Documentation updated to reflect new project workflow
+- Responses reflect appropriate turn history within the memory window
+- Project board is used to track all issues and epics
+- All current work is represented in GitHub milestones
+- Contributors can set up and run the project consistently on both macOS and Windows
