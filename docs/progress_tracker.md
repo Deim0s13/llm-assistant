@@ -1,5 +1,12 @@
 # Progress Tracker
 
+**Deprecated Tracker**
+
+> This progress tracker is no longer in use as of `v0.4.2`.  
+> All planning, tasks, and version tracking are now managed via GitHub Issues and the [LLM Project Board](https://github.com/users/<your-username>/projects/<project-id>/views/<view-id>).
+
+---
+
 ## Progress Tracker v0.4.1
 
 ### v0.4.1 Safety Guardrails — Progress Tracker

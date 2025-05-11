@@ -226,3 +226,69 @@ Begin improving the chatbot’s ability to remember and respond to earlier parts
 - Project board is used to track all issues and epics
 - All current work is represented in GitHub milestones
 - Contributors can set up and run the project consistently on both macOS and Windows
+
+---
+
+## v0.4.3 – Memory Backend Preparation & Summarisation Planning
+
+### Objective
+
+Introduce a modular memory interface to enable future persistent storage (e.g. Redis or database), and begin exploring summarisation strategies for handling long-turn or open-ended conversations. This version focuses on building the scaffolding for intelligent, persistent memory while maintaining a lightweight and testable implementation.
+
+---
+
+### Why This Matters
+
+- Current memory is ephemeral and limited to a static context window.
+- Persistent memory is essential for real-world chatbot use cases (multi-session, user-personalised recall).
+- Summarisation is a key technique to maintain model performance across long sessions and large conversation histories.
+- Establishing this structure now enables more advanced reasoning in upcoming versions.
+
+---
+
+### Key Deliverables
+
+#### Memory Interface (Placeholder)
+
+- Create `memory.py` module with a simulated memory backend (e.g. JSON file or in-memory structure)
+- Introduce an interface for saving and retrieving messages across sessions
+- Add toggle in `settings.json` to enable/disable memory use
+- Modify `prepare_context()` to optionally inject memory content into prompt construction
+- Add logging to show memory activation and contents
+
+#### Summarisation Design Prep
+
+- Create abstracted function: `summarise_context()` (implementation optional)
+- Define possible summarisation strategies (e.g. last 10 exchanges ➜ one summary block)
+- Prototype basic summarisation in an experimental script
+- Document ideas and constraints for future implementation
+
+#### Testing & Logging
+
+- Add test coverage for memory integration (on/off behaviour, fallback)
+- Log memory usage decisions in `DEBUG_MODE`
+- Validate that memory toggle has no side effects on legacy context logic
+
+#### Documentation
+
+- Update `scope.md` and `README.md` with new memory and summarisation notes
+- Add comments or diagrams showing where memory will plug into full request flow
+- Link to experiments or reference future goals (e.g. `v0.5.x`, `v0.6.x`)
+
+---
+
+### Out of Scope
+
+- Connecting to actual persistent storage (e.g. Redis, database)
+- Automatic summarisation using LLMs or fine-tuned models
+- Multi-user session ID tracking (for now, assume single user)
+
+---
+
+### Success Criteria
+
+- Memory interface exists and is invoked when enabled
+- Chatbot optionally includes prior memory in context
+- Summarisation planning work is documented and prototyped
+- No regressions occur in standard context handling flow
+- All tasks for this version are tracked via GitHub Project board and Issues
