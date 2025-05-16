@@ -153,7 +153,6 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
             logging.debug(output_text)
             logging.debug("Generation parameters:")
             logging.debug(generation_params)
-            logging.debug(f"[Context] Retaining last {MAX_HISTORY_TURNS} turns for prompt.")
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": output_text})
         return history, source
