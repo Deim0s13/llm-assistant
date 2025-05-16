@@ -103,15 +103,37 @@ def initialize_model(model_name=MODEL_NAME):
 # Prepare the context for the model
 def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
     max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
+    max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
+
     if DEBUG_MODE:
-        logging.debug(f"[Context] Retaining last {max_turns} turns for prompt.")
+        logging.debug(f"[Context] Retaining last {max_turns} turns and {max_tokens} tokens.")
 
     specialized_prompt, source, _ = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     context = specialized_prompt if specialized_prompt else base_prompt
+
     recent_history = history[-max_turns:] if len(history) > max_turns else history
+
     for entry in recent_history:
         context += f"\n{entry['role'].capitalize()}: {entry['content']}"
+
     context += f"\nUser: {message}\nAssistant: "
+
+    # Tokenize and trim if too long
+    tokenized = tokenizer(context, return_tensors="pt", padding=False, truncation=False)
+    num_tokens = tokenizer.input_ids.shape[1]
+
+    while num_tokens > max_tokens and len(recent_history) > 1:
+        recent_history = recent_history[1:] # Trim oldes entry
+        context = specialized_prompt if specialized_prompt else base_prompt
+        for entry in recent_history:
+            context += f"\n{entry['role'].capitalize()}: {entry['content']}"
+        context += f"nUser: {message}\nAssistant:"
+        tokenized = tokenizer(context, return_tensors="pt", padding=False, truncation=False)
+        num_tokens = tokenized.input_ids.shape[1]
+
+    if DEBUG_MODE:
+        logging.debug(f"[Context] Final token count: {num_tokens} with {len(recent_history)} retained turns.")
+        
     return context, source
 
 # Generate model response
