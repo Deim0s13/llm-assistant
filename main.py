@@ -6,7 +6,7 @@ import torch
 import difflib
 
 from utils.aliases import KEYWORD_ALIASES
-from utils.Prompt_utils import alias_in_message
+from utils.prompt_utils import alias_in_message
 from config.settings_loader import load_settings
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
