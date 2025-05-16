@@ -10,15 +10,28 @@ from utils.prompt_utils import alias_in_message
 from config.settings_loader import load_settings
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
-# Configuration constants
+# Configuration
 DEBUG_MODE = True
 SETTINGS = load_settings()
-MODEL_NAME = "google/flan-t5-base"
-BASE_PROMPT_PATH = "config/prompt_template.txt"
-SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
+
+# Initialize the model
+def initialize_model(model_name="google/flan-t5-base"):
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    device = "cuda" if torch.cuda.is_available() else (
+        "mps" if torch.backends.mps.is_available() else "cpu"
+    )
+    tokenizer.pad_token = tokenizer.eos_token # Ensure pad_token is set
+    model.to(device)
+    logging.info(f"Model initializeed on {device}")
+    return tokenizer, model, device
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Load prompt resources
+BASE_PROMPT_PATH = "config/prompt_template.txt"
+SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
 
 # Function to load the base prompt template from an external file.
 def load_base_prompt(filepath=BASE_PROMPT_PATH):
@@ -91,15 +104,6 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
 
     return "", "base_prompt", None
 
-# Initialize the model
-def initialize_model(model_name=MODEL_NAME):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-    model.to(device)
-    logging.info(f"Model initialized on {device}")
-    return tokenizer, model, device
-
 # Prepare the context for the model
 def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
     max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
@@ -109,31 +113,32 @@ def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_ma
         logging.debug(f"[Context] Retaining last {max_turns} turns and {max_tokens} tokens.")
 
     specialized_prompt, source, _ = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
-    context = specialized_prompt if specialized_prompt else base_prompt
-
     recent_history = history[-max_turns:] if len(history) > max_turns else history
 
-    for entry in recent_history:
-        context += f"\n{entry['role'].capitalize()}: {entry['content']}"
-
-    context += f"\nUser: {message}\nAssistant: "
+    # Build context string
+    def build_context(history_slice):
+        ctx = specialized_prompt if specialized_prompt else base_prompt
+        for entry in history_slice:
+            ctx += f"\n{entry['role'].capitalize()}: {entry['content']}"
+        ctx += f"\nUser: {message}\nAssistant:"
+        return ctx
+    
+    context = build_context(recent_history)
 
     # Tokenize and trim if too long
-    tokenized = tokenizer(context, return_tensors="pt", padding=False, truncation=False)
-    num_tokens = tokenizer.input_ids.shape[1]
-
-    while num_tokens > max_tokens and len(recent_history) > 1:
-        recent_history = recent_history[1:] # Trim oldes entry
-        context = specialized_prompt if specialized_prompt else base_prompt
-        for entry in recent_history:
-            context += f"\n{entry['role'].capitalize()}: {entry['content']}"
-        context += f"nUser: {message}\nAssistant:"
+    while True:
         tokenized = tokenizer(context, return_tensors="pt", padding=False, truncation=False)
-        num_tokens = tokenized.input_ids.shape[1]
+        input_ids = tokenized["input_ids"]
+        num_tokens = input_ids.shape[1] if len(input_ids.shape) == 2 else input_ids.shape[0]
 
-    if DEBUG_MODE:
-        logging.debug(f"[Context] Final token count: {num_tokens} with {len(recent_history)} retained turns.")
-        
+        if num_tokens <= max_tokens or len(recent_history) <= 1:
+            break
+        recent_history = recent_history[1:]
+        context = build_context(recent_history)
+
+        if DEBUG_MODE:
+            logging.debug(f"[Context] Final token count: {num_tokens} with {len(recent_history)} retained turns.")
+
     return context, source
 
 # Generate model response
