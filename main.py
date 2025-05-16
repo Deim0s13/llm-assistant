@@ -6,17 +6,16 @@ import torch
 import difflib
 
 from utils.aliases import KEYWORD_ALIASES
-from utils.prompt_utilsOk import alias_in_message
+from utils.Prompt_utils import alias_in_message
 from config.settings_loader import load_settings
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
 # Configuration constants
+DEBUG_MODE = True
+SETTINGS = load_settings()
 MODEL_NAME = "google/flan-t5-base"
 BASE_PROMPT_PATH = "config/prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
-MAX_HISTORY_TURNS = 5
-DEBUG_MODE = True
-SETTINGS = load_settings()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -103,9 +102,13 @@ def initialize_model(model_name=MODEL_NAME):
 
 # Prepare the context for the model
 def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
+    max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
+    if DEBUG_MODE:
+        logging.debug(f"[Context] Retaining last {max_turns} turns for prompt.")
+
     specialized_prompt, source, _ = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     context = specialized_prompt if specialized_prompt else base_prompt
-    recent_history = history[-MAX_HISTORY_TURNS:] if len(history) > MAX_HISTORY_TURNS else history
+    recent_history = history[-max_turns:] if len(history) > max_turns else history
     for entry in recent_history:
         context += f"\n{entry['role'].capitalize()}: {entry['content']}"
     context += f"\nUser: {message}\nAssistant: "
@@ -150,6 +153,7 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
             logging.debug(output_text)
             logging.debug("Generation parameters:")
             logging.debug(generation_params)
+            logging.debug(f"[Context] Retaining last {MAX_HISTORY_TURNS} turns for prompt.")
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": output_text})
         return history, source
