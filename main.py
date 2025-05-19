@@ -131,13 +131,18 @@ def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_ma
         input_ids = tokenized["input_ids"]
         num_tokens = input_ids.shape[1] if len(input_ids.shape) == 2 else input_ids.shape[0]
 
+        if DEBUG_MODE:
+            logging.debug(f"[Context] Final token count: {num_tokens} with {len(recent_history)} retained turns.")
+
         if num_tokens <= max_tokens or len(recent_history) <= 1:
             break
         recent_history = recent_history[1:]
         context = build_context(recent_history)
 
         if DEBUG_MODE:
-            logging.debug(f"[Context] Final token count: {num_tokens} with {len(recent_history)} retained turns.")
+            logging.debug(f"[Context Debug] Final retained turns: {len(recent_history)}")
+            logging.debug(f"[Context Debug] Final token count: {num_tokens}")
+            logging.debug("f[Context Debug] Context preview:\n{context[:400]}...")
 
     return context, source
 
