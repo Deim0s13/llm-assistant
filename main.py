@@ -154,15 +154,18 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
         allowed, blocked_message = evaluate_safety(message, SETTINGS)
         if not allowed:
             if DEBUG_MODE:
-                logging.debug("[Safety] Blocked message returned to user.")
+                logging.debug("[Safety Debug] Message blocked by pre-generation safety filter.")
             history.append({"role": "user", "content": message})
             history.append({"role": "assistant", "content": blocked_message})
             return history, "blocked_by_safety"
         
         context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
+        
         if DEBUG_MODE:
-            logging.debug("Full context sent to model")
-            logging.debug(context)
+            logging.debug("[Generation Debug] Generating response with the following settings:")
+            logging.debug(f"[Generation Debug] Source: {source}")
+            logging.debug(f"[Generation Debug] Context preview:\n{context[:300]}...\n")
+        
         input_ids = tokenizer(context, return_tensors="pt", padding=True, truncation=True).input_ids.to(device)
         generation_params = {
             "max_new_tokens": int(max_new_tokens),
@@ -171,24 +174,30 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
             "top_p": float(top_p),
         }
 
+        if DEBUG_MODE:
+            logging.debug(f"[Generation Debug] Generation parameters: {generation_params}")
+
         output_ids = model.generate(input_ids, **generation_params)
         output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
 
-        # Example: Check for profanity filtering
+        # Profanity filtering if applicable
         if SETTINGS.get("safety", {}).get("sensitivity_level") == "moderate":
-            output_text = apply_profanity_filter(output_text)
-            logging.debug("[Safety] Output filtered for profanity (moderate mode)")
+            filtered_output = apply_profanity_filter(output_text)
+            if DEBUG_MODE:
+                logging.debug("[Safety Debug] Output filtered for profanity (moderate mode)")
+                logging.debug(f"[Safety Debug] Filtered output: {filtered_output[:200]}...")
+            output_text = filtered_output
 
         if DEBUG_MODE:
-            logging.debug("Full generated output:")
-            logging.debug(output_text)
-            logging.debug("Extracted new response:")
-            logging.debug(output_text)
-            logging.debug("Generation parameters:")
-            logging.debug(generation_params)
+            logging.debug("[Generation Debug] Raw model output:")
+            logging.debug(output_text[:500])
+
+        # Add to chat history
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": output_text})
+        
         return history, source
+    
     except Exception as e:
         logging.error(f"Error in chat function: {e}")
         history.append({"role": "user", "content": message})
