@@ -60,6 +60,9 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict:
             settings.setdefault("context", {})
             settings["context"]["max_history_turns"] = int(max_turns_env)
 
+        logging.debug(f"[Env Override] DEBUG_MODE: {settings['logging']['debug_mode']}")
+        logging.debug(f"[Env Override] MAX_HISTORY_TURNS: {settings.get('context', {}).get('max_history_turns')}")
+
         return settings
 
     except Exception as e:

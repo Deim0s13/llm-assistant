@@ -1,5 +1,8 @@
-import json
+# Configure logging
 import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+import json
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import gradio as gr
 import torch
@@ -32,10 +35,6 @@ def initialize_model(model_name="google/flan-t5-base"):
     logging.debug(f"[System] Torch detected device: {device}")
 
     return tokenizer, model, device
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 # Load prompt resources
 BASE_PROMPT_PATH = "config/prompt_template.txt"
