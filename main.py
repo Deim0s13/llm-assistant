@@ -18,16 +18,24 @@ SETTINGS = load_settings()
 def initialize_model(model_name="google/flan-t5-base"):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    device = "cuda" if torch.cuda.is_available() else (
-        "mps" if torch.backends.mps.is_available() else "cpu"
-    )
+
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
+
     tokenizer.pad_token = tokenizer.eos_token # Ensure pad_token is set
     model.to(device)
-    logging.info(f"Model initializeed on {device}")
+
+    logging.debug(f"[System] Torch detected device: {device}")
+
     return tokenizer, model, device
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 # Load prompt resources
 BASE_PROMPT_PATH = "config/prompt_template.txt"
@@ -67,7 +75,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
     # Direct Alias Match
     for alias, concept in KEYWORD_ALIASES.items():
         scanned_aliases.append(alias)
-        if alias_in_message(alias, tokens):  
+        if alias_in_message(alias, tokens):
             if concept in specialized_prompts:
                 prompt = specialized_prompts[concept]
                 if DEBUG_MODE:
@@ -76,7 +84,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 return prompt, concept, None # No match scope for direct match
             else:
                 match_details.append((alias, concept, "Concept not found in prompt list"))
-            
+
     # Fuzzy Matching (Fallback)
     if fuzzy_matching_enabled:
         all_aliases = list(KEYWORD_ALIASES.keys())
@@ -95,7 +103,7 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
                 return prompt, concept, similarity
             else:
                 logging.debug(f"[Prompt Match Debug] Fuzzy match concept '{concept}' not in specialized prompts")
-    
+
     # Fallback - No Match Found
     if DEBUG_MODE:
         logging.debug(f"[Prompt Match Debug] No prompt match found (direct or fuzzy)")
@@ -123,7 +131,7 @@ def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_ma
             ctx += f"\n{entry['role'].capitalize()}: {entry['content']}"
         ctx += f"\nUser: {message}\nAssistant:"
         return ctx
-    
+
     context = build_context(recent_history)
 
     # Tokenize and trim if too long
@@ -158,14 +166,14 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
             history.append({"role": "user", "content": message})
             history.append({"role": "assistant", "content": blocked_message})
             return history, "blocked_by_safety"
-        
+
         context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
-        
+
         if DEBUG_MODE:
             logging.debug("[Generation Debug] Generating response with the following settings:")
             logging.debug(f"[Generation Debug] Source: {source}")
             logging.debug(f"[Generation Debug] Context preview:\n{context[:300]}...\n")
-        
+
         input_ids = tokenizer(context, return_tensors="pt", padding=True, truncation=True).input_ids.to(device)
         generation_params = {
             "max_new_tokens": int(max_new_tokens),
@@ -195,9 +203,9 @@ def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_
         # Add to chat history
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": output_text})
-        
+
         return history, source
-    
+
     except Exception as e:
         logging.error(f"Error in chat function: {e}")
         history.append({"role": "user", "content": message})
@@ -275,7 +283,7 @@ with gr.Blocks() as demo:
         gr.Markdown("Enter a test input to preview prompt handling and output generation.")
 
         test_input = gr.Textbox(
-            label="Test Input Message", 
+            label="Test Input Message",
             placeholder="e.g., Can you explain gravity like I'm five?"
         )
         run_button = gr.Button("Run Playground Test")
