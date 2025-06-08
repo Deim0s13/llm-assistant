@@ -14,7 +14,7 @@ Contributions are welcome — especially those that align with our structured, l
 
 ## How We Plan & Track Work
 
-All work is tracked using GitHub Projects:  
+All work is tracked using GitHub Projects:
 [LLM Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
 
 ### Planning Hierarchy
@@ -24,8 +24,8 @@ All work is tracked using GitHub Projects:
 - **Milestones** – Versioned releases (e.g. `v0.4.2`, `v0.4.3`)
 - **Issues** – Individual trackable tasks
 
-> Create **Issues** for all new work — no markdown-based planning.  
-> Link Issues to Epics and Milestones where appropriate.  
+> Create **Issues** for all new work — no markdown-based planning.
+> Link Issues to Epics and Milestones where appropriate.
 > Use `fixes #issue_number` in PRs to auto-close issues on merge.
 
 ---
@@ -102,24 +102,30 @@ Pull Requests should:
 
 ---
 
+## Local Development Requirements
+
+Before contributing, please review the [Cross-Platform Dev Checklist](./docs/dev_checklist.md) for platform-specific setup, environment variables, and troubleshooting.
+
+---
+
 ## File & Directory Highlights
 
-- `main.py` – App entry point with Gradio UI  
-- `memory.py` – In-memory placeholder backend (from v0.4.3)  
-- `utils/` – Prompt prep, aliasing, filters, etc.  
-- `experiments/` – Testing and exploratory code per version  
-- `docs/` – Planning: roadmap, scope, test logs  
-- `config/` – Prompt templates and settings files  
-- `tests/` – Unit tests for context and logic  
+- `main.py` – App entry point with Gradio UI
+- `memory.py` – In-memory placeholder backend (from v0.4.3)
+- `utils/` – Prompt prep, aliasing, filters, etc.
+- `experiments/` – Testing and exploratory code per version
+- `docs/` – Planning: roadmap, scope, test logs
+- `config/` – Prompt templates and settings files
+- `tests/` – Unit tests for context and logic
 
 ---
 
 ## Resources
 
-- [Project Board](https://github.com/users/Deim0s13/projects/4/views/1)  
-- [Roadmap](./docs/roadmap.md)  
-- [Scope](./docs/scope.md)  
-- [Release Notes](./docs/release_notes.md)  
+- [Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
+- [Roadmap](./docs/roadmap.md)
+- [Scope](./docs/scope.md)
+- [Release Notes](./docs/release_notes.md)
 - [Test Experiments Tracker](./docs/experiments_tracker.md)
 
 ---

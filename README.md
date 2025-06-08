@@ -173,6 +173,13 @@ MAX_NEW_TOKENS=100
 
 ---
 
+### Cross-Platform Dev Checklist
+
+For detailed, platform-specific setup (Python version, Torch install for CUDA / MPS, `.env` tips, troubleshooting, etc.) see the
+[Cross-Platform Development Checklist](./docs/dev_checklist.md).
+
+---
+
 ## Learning Journey Roadmap
 
 This is a staged, evolving project. See [ROADMAP.md](./docs/roadmap.md) for full phase breakdown.
