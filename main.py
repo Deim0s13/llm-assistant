@@ -24,6 +24,7 @@ from utils.aliases import KEYWORD_ALIASES
 from utils.prompt_utils import alias_in_message
 from config.settings_loader import load_settings
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
+from utils.memory import memory, MemoryBackend
 
 # ─────────────────────────────────────────────────────────
 #  Globals & Helpers
@@ -109,10 +110,9 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
     max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
     max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
 
-    # Resolve prompt FIRST
     spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
 
-    # Now helper can reference spec_prompt safely
+    # helper closes over spec_prompt
     def build(hist_slice):
         ctx = (spec_prompt or base_prompt)
         for entry in hist_slice:
@@ -120,23 +120,23 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
         ctx += f"\nUser: {msg}\nAssistant:"
         return ctx
 
-    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
-    recent = history[-max_turns:] if len(history) > max_turns else history
+    # decide where to pull history
+    if memory.backend == MemoryBackend.NONE:
+        recent = history[-max_turns:]
+    else:
+        recent = memory.load()[-max_turns:]
 
     raw_context = build(recent)
     before_tok = count_tokens(raw_context)
 
-    # trim loop
+    # trimming loop …
     while before_tok > max_tokens and len(recent) > 1:
         recent = recent[1:]
         raw_context = build(recent)
         before_tok = count_tokens(raw_context)
 
     if DEBUG_MODE:
-        logging.debug(
-            "[Context Debug] Turns kept: %d  | Tokens: %d",
-            len(recent), before_tok
-        )
+        logging.debug("[Context Debug] Turns kept: %d | Tokens: %d", len(recent), before_tok)
         if SETTINGS["logging"].get("prompt_preview", False):
             logging.debug("[Prompt Preview]\n%s\n···", raw_context[:400])
 
@@ -180,8 +180,16 @@ def chat(msg, history, max_tokens, temp, top_p, sample, fuzzy):
     if DEBUG_MODE:
         logging.debug("[Generation Debug] Output (preview): %s", output[:300])
 
-    history += [{"role": "user", "content": msg},
-                {"role": "assistant", "content": output}]
+    # persist new turn to memory
+    memory.save({"role": "user", "content": msg})
+    memory.save({"role": "assistant", "content": output})
+
+    # maintain local list for Gradio display
+    history += [
+        {"role": "user", "content": msg},
+        {"role": "assistant", "content": output}
+    ]  # ← closing bracket added!
+
     return history, src
 
 # ─────────────────────────────────────────────────────────
