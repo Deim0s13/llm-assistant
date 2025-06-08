@@ -109,6 +109,10 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
     max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
     max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
 
+    # Resolve prompt FIRST
+    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
+
+    # Now helper can reference spec_prompt safely
     def build(hist_slice):
         ctx = (spec_prompt or base_prompt)
         for entry in hist_slice:
@@ -197,6 +201,48 @@ def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
 BASE_PROMPT = load_base_prompt()
 SPECIALIZED_PROMPTS = load_specialized_prompts()
 tokenizer, model, device = initialize_model()
+
+# ─────────────────────────────────────────────────────────
+#  Playground helper – resolves prompt & generates preview
+# ─────────────────────────────────────────────────────────
+def run_playground(test_input,
+                   max_new_tokens, temperature, top_p,
+                   do_sample, fuzzy_matching_enabled,
+                   force_run):
+
+    # Only run if forced (button) or auto-preview checkbox is on
+    if not force_run:
+        return "", "", "", ""
+
+    # 1) Resolve prompt (direct or fuzzy)
+    prompt_text, concept, match_score = get_specialized_prompt(
+        test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled
+    )
+    resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
+
+    # 2) Build a one-turn context
+    context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
+
+    logging.debug("[Playground] Context (preview):\n%s", context[:400])
+
+    # 3) Generate preview
+    ids = tokenizer(context, return_tensors="pt").input_ids.to(device)
+    generation_params = {
+        "max_new_tokens": int(max_new_tokens),
+        "do_sample": do_sample,
+        "temperature": float(temperature),
+        "top_p": float(top_p),
+    }
+    out_ids = model.generate(ids, **generation_params)
+    preview = tokenizer.decode(out_ids[0], skip_special_tokens=True).strip()
+
+    # 4) Nicely format fuzzy score
+    score_txt = f"{match_score:.2f}" if match_score is not None else "N/A"
+    concept_display = concept if concept != "base_prompt" else "Base Prompt"
+
+    return (f"{concept_display} (Confidence: {score_txt})",
+            resolved_prompt.strip(),
+            preview)
 
 # ─────────────────────────────────────────────────────────
 # Build Gradio UI
