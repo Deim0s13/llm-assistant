@@ -171,33 +171,124 @@ Introduce lightweight filters to moderate chatbot input/output, with adjustable 
 
 ---
 
-## v0.4.2 – Context Memory Handling & Project Hygiene (Planned)
+## v0.4.2 – Context Memory Handling & Project Hygiene
 
 ### Objective
 
-Begin improving the chatbot’s ability to remember and respond to earlier parts of a conversation while introducing structured project management using GitHub Projects.
+Begin improving the chatbot’s ability to remember and respond to earlier parts of a conversation, while introducing structured project management using GitHub Projects and ensuring consistent cross-platform development across macOS (M1) and Windows (CUDA).
+
+---
 
 ### Why This Matters
 
 - Current memory is limited to a basic context window; more realistic conversations require persistent recall.
 - Task tracking has outgrown markdown-only tracking — introducing GitHub Projects enables better backlog management and collaboration.
+- Development is now occurring across macOS (Apple Silicon) and Windows (x86), requiring consistent environment setup and model handling logic.
+
+---
 
 ### Key Deliverables
 
+#### Context Handling
+
 - Enable turn history recall across multiple exchanges
 - Add configurable memory window (e.g. max turns to retain) via `settings.json`
-- Log memory handling in debug mode
-- Create GitHub Project board with backlog, labels, and workflow states
-- Migrate markdown-based progress tracking to GitHub Issues/Projects
-- Update `README.md` and `CONTRIBUTING.md` to reflect new workflow
+- Log memory handling behaviour in debug mode
+- Add test cases to verify history trimming and context preparation
+
+#### Project Hygiene
+
+- Create GitHub Project board with defined workflow (Backlog → In Progress → Done)
+- Apply standardised labels and status tracking
+- Migrate version tracking and planning to GitHub Issues
+- Update `README.md` and `CONTRIBUTING.md` to reflect project tracking expectations
+
+#### Cross-Platform Support
+
+- Update `initialize_model()` to detect and support `cuda`, `mps`, or `cpu` backends
+- Document developer setup instructions for both macOS and Windows environments
+- Optional: Support `.env` configuration overrides for local development
+- Confirm project runs consistently across architectures
+
+---
 
 ### Out of Scope
 
 - Persistent memory storage (e.g. Redis, database)
-- AI-based summarisation of long conversations (future version)
+- AI-based summarisation of long conversations
+- Full multi-device environment automation or container builds (future)
+
+---
 
 ### Success Criteria
 
-- Responses correctly reflect earlier conversation turns
-- GitHub Project board is created and actively used
-- Documentation updated to reflect new project workflow
+- Responses reflect appropriate turn history within the memory window
+- Project board is used to track all issues and epics
+- All current work is represented in GitHub milestones
+- Contributors can set up and run the project consistently on both macOS and Windows
+
+---
+
+## v0.4.3 – Memory Backend Preparation & Summarisation Planning
+
+### Objective
+
+Introduce a modular memory interface to enable future persistent storage (e.g. Redis or database), and begin exploring summarisation strategies for handling long-turn or open-ended conversations. This version focuses on building the scaffolding for intelligent, persistent memory while maintaining a lightweight and testable implementation.
+
+---
+
+### Why This Matters
+
+- Current memory is ephemeral and limited to a static context window.
+- Persistent memory is essential for real-world chatbot use cases (multi-session, user-personalised recall).
+- Summarisation is a key technique to maintain model performance across long sessions and large conversation histories.
+- Establishing this structure now enables more advanced reasoning in upcoming versions.
+
+---
+
+### Key Deliverables
+
+#### Memory Interface (Placeholder)
+
+- Create `memory.py` module with a simulated memory backend (e.g. JSON file or in-memory structure)
+- Introduce an interface for saving and retrieving messages across sessions
+- Add toggle in `settings.json` to enable/disable memory use
+- Modify `prepare_context()` to optionally inject memory content into prompt construction
+- Add logging to show memory activation and contents
+
+#### Summarisation Design Prep
+
+- Create abstracted function: `summarise_context()` (implementation optional)
+- Define possible summarisation strategies (e.g. last 10 exchanges ➜ one summary block)
+- Prototype basic summarisation in an experimental script
+- Document ideas and constraints for future implementation
+
+#### Testing & Logging
+
+- Add test coverage for memory integration (on/off behaviour, fallback)
+- Log memory usage decisions in `DEBUG_MODE`
+- Validate that memory toggle has no side effects on legacy context logic
+
+#### Documentation
+
+- Update `scope.md` and `README.md` with new memory and summarisation notes
+- Add comments or diagrams showing where memory will plug into full request flow
+- Link to experiments or reference future goals (e.g. `v0.5.x`, `v0.6.x`)
+
+---
+
+### Out of Scope
+
+- Connecting to actual persistent storage (e.g. Redis, database)
+- Automatic summarisation using LLMs or fine-tuned models
+- Multi-user session ID tracking (for now, assume single user)
+
+---
+
+### Success Criteria
+
+- Memory interface exists and is invoked when enabled
+- Chatbot optionally includes prior memory in context
+- Summarisation planning work is documented and prototyped
+- No regressions occur in standard context handling flow
+- All tasks for this version are tracked via GitHub Project board and Issues
