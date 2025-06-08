@@ -310,3 +310,63 @@ This version introduces the ability to configure output tone and safety controls
 ---
 
 Once these features are completed and tested, this section will be updated and moved to the stable **v0.4.1** entry in the table above.
+
+---
+
+## v0.4.2 – Context Memory Handling & Project Hygiene (In Progress)
+
+> Planned Release:
+> Focus: Improve context window handling, introduce GitHub Projects, and support cross-platform development
+
+### Summary
+
+This version improves the chatbot's ability to retain conversation history and introduces foundational support for structured planning via GitHub Projects. It also formalises development across both macOS (Apple Silicon) and Windows (CUDA) environments.
+
+---
+
+### New Features
+
+- **Context Memory Window Support**
+  - Added support for retaining and trimming multi-turn conversation history
+  - Configurable memory window via `settings.json`
+  - Improved context logging and diagnostics
+
+- **Debugging Enhancements**
+  - Logs memory handling, trimming, and token usage in `DEBUG_MODE`
+  - Clear separation of history, memory, and prompt content in logs
+
+- **Cross-Platform Execution**
+  - Device detection logic now supports `cuda`, `mps`, and `cpu`
+  - Platform-aware deployment from both MacBook (M1) and Windows (NVIDIA)
+
+---
+
+### Project Hygiene & Planning Updates
+
+- **GitHub Project Board Adopted**
+  - Issues now tracked under epics and milestones
+  - Markdown-based trackers deprecated
+  - Project planning now top-down: Initiative → Epic → Milestone → Issue
+
+- **Documentation Updated**
+  - `README.md`, `CONTRIBUTING.md`, and `scope.md` all revised to reflect GitHub-based workflow
+  - Planning diagram and branch/PR guidance added
+
+- **`.env` Support**
+  - Introduced `.env` loading via `python-dotenv`
+  - Enabled safe developer overrides without changing tracked config
+
+---
+
+### Success Criteria
+
+- Context reflects prior turns, with memory trimming when needed
+- GitHub Projects fully replaces legacy markdown tracking
+- Code runs consistently across macOS and Windows
+
+---
+
+### In Progress / Next Steps
+
+- Begin memory backend prototyping and summarisation exploration (`v0.4.3`)
+- Additional unit tests for context edge cases

@@ -1,214 +1,252 @@
-import json
+# ─────────────────────────────────────────────────────────
+#  Configure logging (console + debug.log)
+# ─────────────────────────────────────────────────────────
 import logging
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(),            # terminal
+        logging.FileHandler("debug.log")    # file
+    ]
+)
+
+# ─────────────────────────────────────────────────────────
+#  Imports
+# ─────────────────────────────────────────────────────────
+import json
+import difflib
 import gradio as gr
 import torch
-import difflib
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from utils.aliases import KEYWORD_ALIASES
-from utils.prompt_utilsOk import alias_in_message
+from utils.prompt_utils import alias_in_message
 from config.settings_loader import load_settings
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
-# Configuration constants
-MODEL_NAME = "google/flan-t5-base"
-BASE_PROMPT_PATH = "config/prompt_template.txt"
-SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
-MAX_HISTORY_TURNS = 5
+# ─────────────────────────────────────────────────────────
+#  Globals & Helpers
+# ─────────────────────────────────────────────────────────
 DEBUG_MODE = True
 SETTINGS = load_settings()
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+def count_tokens(txt: str) -> int:
+    return len(tokenizer(txt, return_tensors="pt").input_ids[0])
 
-# Function to load the base prompt template from an external file.
-def load_base_prompt(filepath=BASE_PROMPT_PATH):
-    try:
-        with open(filepath, "r") as file:
-            return file.read().strip()
-    except Exception as e:
-        logging.error(f"Error loading prompt template: {e}")
-
-# Function to load specialized prompts from a JSON file.
-def load_specialized_prompts(filepath=SPECIALIZED_PROMPTS_PATH):
-    try:
-        with open(filepath, "r", encoding="utf-8") as file:
-            prompts = json.load(file)
-            if not isinstance(prompts, dict):
-                raise ValueError("Specialized prompts JSON must be a dictionary")
-            logging.info(f"[Prompt Loader] Loaded {len(prompts)} specialized prompts.")
-            logging.debug(f"[Prompt Loader] Keywords: {list(prompts.keys())}")
-            return prompts
-    except Exception as e:
-        logging.error(f"[Prompt Loader] Error loading specialized prompts: {e}")
-        return {}
-
-# Function to get specialized prompt based on the user's message
-def get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled):
-    message_lower = message.lower().replace("’", "'") # Normalise smart quotes
-    tokens = message_lower.split()
-
-    # Track diagnostics
-    scanned_aliases = []
-    match_details = []
-
-    # First: Token-level alias matching
-    for alias, concept in KEYWORD_ALIASES.items():
-        scanned_aliases.append(alias)
-        if alias_in_message(alias, tokens):  
-            if concept in specialized_prompts:
-                prompt = specialized_prompts[concept]
-                if DEBUG_MODE:
-                    logging.debug(f"[Prompt Match] Matched alias '{alias}' ➔ concept '{concept}'")
-                    logging.debug(f"[Prompt Match] Prompt snippet: {prompt[:80]}...")
-                return prompt, concept, None # No match scope for direct match
-            else:
-                match_details.append((alias, concept, "Concept not found in prompt list"))
-            
-    # Second: Fuzzy matching (fallback)
-    if fuzzy_matching_enabled:
-        all_aliases = list(KEYWORD_ALIASES.keys())
-        close_matches = difflib.get_close_matches(message_lower, all_aliases, n=1, cutoff=0.7)
-
-        if close_matches:
-            best_match = close_matches[0]
-            similarity = difflib.SequenceMatcher(None, message_lower, best_match).ratio()
-            concept = KEYWORD_ALIASES[best_match]
-            if concept in specialized_prompts:
-                prompt = specialized_prompts[concept]
-                if DEBUG_MODE:
-                    logging.debug(f"[Prompt Match - Fuzzy] Best fuzzy match '{best_match}' ➔ concept '{concept}'")
-                    logging.debug(f"[Prompt Match - Fuzzy] Prompt snippet: {prompt[:80]}...")
-                return prompt, concept, similarity
-            else:
-                logging.debug(f"[Prompt Match - Fuzzy] Match found but concept '{concept}' not in prompt list")
-    
-    # Log fallback details
-    if DEBUG_MODE:
-        logging.debug(f"[Prompt Match - Fallback] No direct or fuzzy match found..")
-        logging.debug(f"[Prompt Match - Fallback] Scanned aliases: {scanned_aliases} ")
-        if match_details:
-            logging.debug(f"[Prompt Match - Diagnostics] Matched alias but missing prompt entries: {match_details}")
-
-    return "", "base_prompt", None
-
-# Initialize the model
-def initialize_model(model_name=MODEL_NAME):
+# ─────────────────────────────────────────────────────────
+#  Model initialisation (CUDA ▸ MPS ▸ CPU)
+# ─────────────────────────────────────────────────────────
+def initialize_model(model_name="google/flan-t5-base"):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
+
+    tokenizer.pad_token = tokenizer.eos_token
     model.to(device)
-    logging.info(f"Model initialized on {device}")
+    logging.debug(f"[System] Torch detected device: {device}")
     return tokenizer, model, device
 
-# Prepare the context for the model
-def prepare_context(message, history, base_prompt, specialized_prompts, fuzzy_matching_enabled):
-    specialized_prompt, source, _ = get_specialized_prompt(message, specialized_prompts, fuzzy_matching_enabled)
-    context = specialized_prompt if specialized_prompt else base_prompt
-    recent_history = history[-MAX_HISTORY_TURNS:] if len(history) > MAX_HISTORY_TURNS else history
-    for entry in recent_history:
-        context += f"\n{entry['role'].capitalize()}: {entry['content']}"
-    context += f"\nUser: {message}\nAssistant: "
-    return context, source
+# ─────────────────────────────────────────────────────────
+#  Prompt-template loaders
+# ─────────────────────────────────────────────────────────
+BASE_PROMPT_PATH = "config/prompt_template.txt"
+SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
 
-# Generate model response
-def chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled):
-    try:
-        # Safety evaluation before prompt generation
-        allowed, blocked_message = evaluate_safety(message, SETTINGS)
-        if not allowed:
+def load_base_prompt(path=BASE_PROMPT_PATH):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read().strip()
+
+def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH):
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    logging.info(f"[Prompt Loader] Loaded {len(data)} specialized prompts.")
+    logging.debug(f"[Prompt Loader] Keys: {list(data.keys())}")
+    return data
+
+# ─────────────────────────────────────────────────────────
+#  Prompt-matching
+# ─────────────────────────────────────────────────────────
+def get_specialized_prompt(message, specialized_prompts, fuzzy_enabled):
+    msg = message.lower().replace("’", "'")
+    tokens = msg.split()
+
+    # Direct alias search
+    for alias, concept in KEYWORD_ALIASES.items():
+        if alias_in_message(alias, tokens) and concept in specialized_prompts:
+            prompt = specialized_prompts[concept]
             if DEBUG_MODE:
-                logging.debug("[Safety] Blocked message returned to user.")
-            history.append({"role": "user", "content": message})
-            history.append({"role": "assistant", "content": blocked_message})
-            return history, "blocked_by_safety"
-        
-        context, source = prepare_context(message, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
+                logging.debug(f"[Prompt Debug] Direct match '{alias}' → {concept}")
+            return prompt, concept, None
+
+    # Fuzzy fallback
+    if fuzzy_enabled:
+        best, score = None, 0.0
+        for alias in KEYWORD_ALIASES:
+            sim = difflib.SequenceMatcher(None, msg, alias).ratio()
+            if sim > score and sim >= 0.7:
+                best, score = alias, sim
+        if best:
+            concept = KEYWORD_ALIASES[best]
+            if concept in specialized_prompts:
+                prompt = specialized_prompts[concept]
+                logging.debug(f"[Prompt Debug] Fuzzy '{best}' (score={score:.2f}) → {concept}")
+                return prompt, concept, score
+
+    logging.debug("[Prompt Debug] No prompt match (direct or fuzzy)")
+    return "", "base_prompt", None
+
+# ─────────────────────────────────────────────────────────
+#  Context preparation
+# ─────────────────────────────────────────────────────────
+def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
+    max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
+    max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
+
+    # Resolve prompt FIRST
+    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
+
+    # Now helper can reference spec_prompt safely
+    def build(hist_slice):
+        ctx = (spec_prompt or base_prompt)
+        for entry in hist_slice:
+            ctx += f"\n{entry['role'].capitalize()}: {entry['content']}"
+        ctx += f"\nUser: {msg}\nAssistant:"
+        return ctx
+
+    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
+    recent = history[-max_turns:] if len(history) > max_turns else history
+
+    raw_context = build(recent)
+    before_tok = count_tokens(raw_context)
+
+    # trim loop
+    while before_tok > max_tokens and len(recent) > 1:
+        recent = recent[1:]
+        raw_context = build(recent)
+        before_tok = count_tokens(raw_context)
+
+    if DEBUG_MODE:
+        logging.debug(
+            "[Context Debug] Turns kept: %d  | Tokens: %d",
+            len(recent), before_tok
+        )
+        if SETTINGS["logging"].get("prompt_preview", False):
+            logging.debug("[Prompt Preview]\n%s\n···", raw_context[:400])
+
+    return raw_context, source
+
+# ─────────────────────────────────────────────────────────
+#  Chat-generation
+# ─────────────────────────────────────────────────────────
+def chat(msg, history, max_tokens, temp, top_p, sample, fuzzy):
+    allowed, block_msg = evaluate_safety(msg, SETTINGS)
+    if not allowed:
         if DEBUG_MODE:
-            logging.debug("Full context sent to model")
-            logging.debug(context)
-        input_ids = tokenizer(context, return_tensors="pt", padding=True, truncation=True).input_ids.to(device)
-        generation_params = {
-            "max_new_tokens": int(max_new_tokens),
-            "do_sample": do_sample,
-            "temperature": float(temperature),
-            "top_p": float(top_p),
-        }
+            logging.debug("[Safety Debug] Input blocked by safety filter.")
+        history += [{"role": "user", "content": msg},
+                    {"role": "assistant", "content": block_msg}]
+        return history, "blocked"
 
-        output_ids = model.generate(input_ids, **generation_params)
-        output_text = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
+    context, src = prepare_context(msg, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy)
 
-        # Example: Check for profanity filtering
-        if SETTINGS.get("safety", {}).get("sensitivity_level") == "moderate":
-            output_text = apply_profanity_filter(output_text)
-            logging.debug("[Safety] Output filtered for profanity (moderate mode)")
+    gen_params = {
+        "max_new_tokens": int(max_tokens),
+        "do_sample": sample,
+        "temperature": float(temp),
+        "top_p": float(top_p),
+    }
 
-        if DEBUG_MODE:
-            logging.debug("Full generated output:")
-            logging.debug(output_text)
-            logging.debug("Extracted new response:")
-            logging.debug(output_text)
-            logging.debug("Generation parameters:")
-            logging.debug(generation_params)
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": output_text})
-        return history, source
-    except Exception as e:
-        logging.error(f"Error in chat function: {e}")
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": "I encountered an error processing your request."})
-        return history, "error"
+    if DEBUG_MODE:
+        logging.debug("[Generation Debug] Params: %s", gen_params)
 
-# Respond function for Gradio
-def respond(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled, safety_level):
-    SETTINGS["safety"]["sensitivity_level"] = safety_level
+    ids_in = tokenizer(context, return_tensors="pt").input_ids.to(device)
+    out_ids = model.generate(ids_in, **gen_params)
+    output = tokenizer.decode(out_ids[0], skip_special_tokens=True).strip()
+
+    # profanity filter
+    if SETTINGS["safety"]["sensitivity_level"] == "moderate":
+        filtered = apply_profanity_filter(output)
+        if filtered != output:
+            logging.debug("[Safety Debug] Profanity filter applied.")
+        output = filtered
+
+    if DEBUG_MODE:
+        logging.debug("[Generation Debug] Output (preview): %s", output[:300])
+
+    history += [{"role": "user", "content": msg},
+                {"role": "assistant", "content": output}]
+    return history, src
+
+# ─────────────────────────────────────────────────────────
+#  Gradio wrappers
+# ─────────────────────────────────────────────────────────
+def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
+    SETTINGS["safety"]["sensitivity_level"] = safety
     history = history or []
-    updated_history, source = chat(message, history, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled)
-    diagnostics = f"Prompt Source: {source}"
-    return "", updated_history, diagnostics
+    new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
+    return "", new_hist, f"Prompt source: {src}"
 
-def run_playground(test_input, max_new_tokens, temperature, top_p, do_sample, fuzzy_matching_enabled, force_run):
-    """
-    Simulates the specialized prompt resolution and generation pipeline.
-    """
+# (Playground unchanged)
+
+# ─────────────────────────────────────────────────────────
+#  Boot
+# ─────────────────────────────────────────────────────────
+BASE_PROMPT = load_base_prompt()
+SPECIALIZED_PROMPTS = load_specialized_prompts()
+tokenizer, model, device = initialize_model()
+
+# ─────────────────────────────────────────────────────────
+#  Playground helper – resolves prompt & generates preview
+# ─────────────────────────────────────────────────────────
+def run_playground(test_input,
+                   max_new_tokens, temperature, top_p,
+                   do_sample, fuzzy_matching_enabled,
+                   force_run):
+
+    # Only run if forced (button) or auto-preview checkbox is on
     if not force_run:
-        return "","","",""
+        return "", "", "", ""
 
-    # Updated: Now also handles fuzzy matching and match score
-    prompt_text, concept, match_score = get_specialized_prompt(test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled)
+    # 1) Resolve prompt (direct or fuzzy)
+    prompt_text, concept, match_score = get_specialized_prompt(
+        test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled
+    )
     resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
 
-    concept_display = f"{concept}" if concept != "base_prompt" else "Base Prompt Used (no match found)"
-
+    # 2) Build a one-turn context
     context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
 
-    logging.debug("[Playground] Context used:")
-    logging.debug(context)
+    logging.debug("[Playground] Context (preview):\n%s", context[:400])
 
-    encoded_input = tokenizer(context, return_tensors="pt", padding=True, truncation=True)
-    input_ids = encoded_input.input_ids.to(device)
-
+    # 3) Generate preview
+    ids = tokenizer(context, return_tensors="pt").input_ids.to(device)
     generation_params = {
         "max_new_tokens": int(max_new_tokens),
         "do_sample": do_sample,
         "temperature": float(temperature),
         "top_p": float(top_p),
     }
+    out_ids = model.generate(ids, **generation_params)
+    preview = tokenizer.decode(out_ids[0], skip_special_tokens=True).strip()
 
-    output_ids = model.generate(input_ids, **generation_params)
-    generation_output = tokenizer.decode(output_ids[0], skip_special_tokens=True).strip()
+    # 4) Nicely format fuzzy score
+    score_txt = f"{match_score:.2f}" if match_score is not None else "N/A"
+    concept_display = concept if concept != "base_prompt" else "Base Prompt"
 
-    # Format match score nicely
-    match_score_display = f"{match_score:.2f}" if match_score is not None else "N/A"
+    return (f"{concept_display} (Confidence: {score_txt})",
+            resolved_prompt.strip(),
+            preview)
 
-    return f"{concept_display} (Confidence: {match_score_display})", resolved_prompt.strip(), generation_output
-
-# Load resources at startup
-BASE_PROMPT = load_base_prompt()
-SPECIALIZED_PROMPTS = load_specialized_prompts()
-tokenizer, model, device = initialize_model()
-
+# ─────────────────────────────────────────────────────────
 # Build Gradio UI
+# ─────────────────────────────────────────────────────────
 with gr.Blocks() as demo:
     gr.Markdown("# Chatbot with Tunable Generation Parameters")
     chatbot = gr.Chatbot(type="messages")
@@ -230,7 +268,7 @@ with gr.Blocks() as demo:
         gr.Markdown("Enter a test input to preview prompt handling and output generation.")
 
         test_input = gr.Textbox(
-            label="Test Input Message", 
+            label="Test Input Message",
             placeholder="e.g., Can you explain gravity like I'm five?"
         )
         run_button = gr.Button("Run Playground Test")
@@ -245,7 +283,9 @@ with gr.Blocks() as demo:
             label="Safety Mode [Dev]"
         )
 
+        # ─────────────────────────────────────────────────────────
         # 1. Button click always forces the playground to run
+        # ─────────────────────────────────────────────────────────
         run_button.click(
             run_playground,
             inputs=[
@@ -264,7 +304,9 @@ with gr.Blocks() as demo:
             ]
         )
 
+        # ─────────────────────────────────────────────────────────
         # 2. Typing triggers playground ONLY if autoprivew is enabled
+        # ─────────────────────────────────────────────────────────
         test_input.input(
             run_playground,
             inputs=[

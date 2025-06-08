@@ -1,0 +1,228 @@
+2025-06-08 15:20:47,797 - DEBUG - connect_tcp.started host='api.gradio.app' port=443 local_address=None timeout=3 socket_options=None
+2025-06-08 15:20:47,843 - DEBUG - Importing AvifImagePlugin
+2025-06-08 15:20:47,992 - DEBUG - Importing BlpImagePlugin
+2025-06-08 15:20:47,993 - DEBUG - Importing BmpImagePlugin
+2025-06-08 15:20:47,993 - DEBUG - Importing BufrStubImagePlugin
+2025-06-08 15:20:47,994 - DEBUG - Importing CurImagePlugin
+2025-06-08 15:20:47,994 - DEBUG - Importing DcxImagePlugin
+2025-06-08 15:20:47,995 - DEBUG - Importing DdsImagePlugin
+2025-06-08 15:20:47,996 - DEBUG - Importing EpsImagePlugin
+2025-06-08 15:20:47,997 - DEBUG - Importing FitsImagePlugin
+2025-06-08 15:20:47,997 - DEBUG - Importing FliImagePlugin
+2025-06-08 15:20:47,998 - DEBUG - Importing FpxImagePlugin
+2025-06-08 15:20:47,998 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-06-08 15:20:47,998 - DEBUG - Importing FtexImagePlugin
+2025-06-08 15:20:47,999 - DEBUG - Importing GbrImagePlugin
+2025-06-08 15:20:47,999 - DEBUG - Importing GifImagePlugin
+2025-06-08 15:20:48,005 - DEBUG - Importing GribStubImagePlugin
+2025-06-08 15:20:48,006 - DEBUG - Importing Hdf5StubImagePlugin
+2025-06-08 15:20:48,006 - DEBUG - Importing IcnsImagePlugin
+2025-06-08 15:20:48,007 - DEBUG - Importing IcoImagePlugin
+2025-06-08 15:20:48,008 - DEBUG - Importing ImImagePlugin
+2025-06-08 15:20:48,009 - DEBUG - Importing ImtImagePlugin
+2025-06-08 15:20:48,009 - DEBUG - Importing IptcImagePlugin
+2025-06-08 15:20:48,009 - DEBUG - Importing JpegImagePlugin
+2025-06-08 15:20:48,010 - DEBUG - Importing Jpeg2KImagePlugin
+2025-06-08 15:20:48,010 - DEBUG - Importing McIdasImagePlugin
+2025-06-08 15:20:48,010 - DEBUG - Importing MicImagePlugin
+2025-06-08 15:20:48,010 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-06-08 15:20:48,010 - DEBUG - Importing MpegImagePlugin
+2025-06-08 15:20:48,011 - DEBUG - Importing MpoImagePlugin
+2025-06-08 15:20:48,012 - DEBUG - Importing MspImagePlugin
+2025-06-08 15:20:48,012 - DEBUG - Importing PalmImagePlugin
+2025-06-08 15:20:48,013 - DEBUG - Importing PcdImagePlugin
+2025-06-08 15:20:48,013 - DEBUG - Importing PcxImagePlugin
+2025-06-08 15:20:48,013 - DEBUG - Importing PdfImagePlugin
+2025-06-08 15:20:48,016 - DEBUG - Importing PixarImagePlugin
+2025-06-08 15:20:48,016 - DEBUG - Importing PngImagePlugin
+2025-06-08 15:20:48,016 - DEBUG - Importing PpmImagePlugin
+2025-06-08 15:20:48,016 - DEBUG - Importing PsdImagePlugin
+2025-06-08 15:20:48,016 - DEBUG - Importing QoiImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing SgiImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing SpiderImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing SunImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing TgaImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing TiffImagePlugin
+2025-06-08 15:20:48,017 - DEBUG - Importing WebPImagePlugin
+2025-06-08 15:20:48,065 - DEBUG - Importing WmfImagePlugin
+2025-06-08 15:20:48,066 - DEBUG - Importing XbmImagePlugin
+2025-06-08 15:20:48,067 - DEBUG - Importing XpmImagePlugin
+2025-06-08 15:20:48,067 - DEBUG - Importing XVThumbImagePlugin
+2025-06-08 15:20:48,174 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x107131400>
+2025-06-08 15:20:48,174 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x106ebe330> server_hostname='api.gradio.app' timeout=3
+2025-06-08 15:20:48,556 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x107361d10>
+2025-06-08 15:20:48,556 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-08 15:20:48,557 - DEBUG - send_request_headers.complete
+2025-06-08 15:20:48,557 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-08 15:20:48,557 - DEBUG - send_request_body.complete
+2025-06-08 15:20:48,557 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-08 15:20:48,743 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sun, 08 Jun 2025 03:20:48 GMT'), (b'Content-Type', b'application/json'), (b'Content-Length', b'3'), (b'Connection', b'keep-alive'), (b'Server', b'nginx/1.18.0'), (b'Access-Control-Allow-Origin', b'*')])
+2025-06-08 15:20:48,744 - INFO - HTTP Request: GET https://api.gradio.app/gradio-messaging/en "HTTP/1.1 200 OK"
+2025-06-08 15:20:48,744 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-08 15:20:48,744 - DEBUG - receive_response_body.complete
+2025-06-08 15:20:48,744 - DEBUG - response_closed.started
+2025-06-08 15:20:48,744 - DEBUG - response_closed.complete
+2025-06-08 15:20:48,744 - DEBUG - close.started
+2025-06-08 15:20:48,744 - DEBUG - close.complete
+2025-06-08 15:20:53,040 - INFO - [Prompt Alias Loader] Loaded 55 aliases.
+2025-06-08 15:20:53,044 - INFO - [Settings] Loaded settings from config/settings.json
+2025-06-08 15:20:53,044 - DEBUG - [Env Override] DEBUG_MODE: True
+2025-06-08 15:20:53,044 - DEBUG - [Env Override] MAX_HISTORY_TURNS: 5
+2025-06-08 15:20:53,044 - INFO - [Prompt Loader] Loaded 16 specialized prompts.
+2025-06-08 15:20:53,044 - DEBUG - [Prompt Loader] Keys: ['historical_quote', 'famous_artist', 'fun_fact', 'summarise', 'explain_simple', 'define_term', 'compare_items', 'step_by_step', 'funny_response', 'motivational_quote', 'tech_summary', 'historical_event', 'book_summary', 'movie_explainer', 'science_fact', 'code_explanation']
+2025-06-08 15:20:53,046 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-06-08 15:20:53,506 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+2025-06-08 15:20:53,851 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/config.json HTTP/1.1" 200 0
+2025-06-08 15:20:55,322 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/generation_config.json HTTP/1.1" 200 0
+2025-06-08 15:20:56,112 - DEBUG - [System] Torch detected device: mps
+2025-06-08 15:20:56,115 - DEBUG - Using selector: KqueueSelector
+2025-06-08 15:20:56,116 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-06-08 15:20:56,124 - DEBUG - connect_tcp.started host='api.gradio.app' port=443 local_address=None timeout=3 socket_options=None
+2025-06-08 15:20:56,305 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1220db250>
+2025-06-08 15:20:56,305 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x116f92060> server_hostname='api.gradio.app' timeout=3
+2025-06-08 15:20:56,425 - DEBUG - https://huggingface.co:443 "HEAD /api/telemetry/gradio/initiated HTTP/1.1" 200 0
+2025-06-08 15:20:56,651 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1216e4b00>
+2025-06-08 15:20:56,652 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-08 15:20:56,653 - DEBUG - send_request_headers.complete
+2025-06-08 15:20:56,653 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-08 15:20:56,654 - DEBUG - send_request_body.complete
+2025-06-08 15:20:56,654 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-08 15:20:56,842 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sun, 08 Jun 2025 03:20:56 GMT'), (b'Content-Type', b'application/json'), (b'Content-Length', b'21'), (b'Connection', b'keep-alive'), (b'Server', b'nginx/1.18.0'), (b'Access-Control-Allow-Origin', b'*')])
+2025-06-08 15:20:56,843 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2025-06-08 15:20:56,844 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-08 15:20:56,844 - DEBUG - receive_response_body.complete
+2025-06-08 15:20:56,845 - DEBUG - response_closed.started
+2025-06-08 15:20:56,845 - DEBUG - response_closed.complete
+2025-06-08 15:20:56,845 - DEBUG - close.started
+2025-06-08 15:20:56,845 - DEBUG - close.complete
+2025-06-08 15:30:00,933 - DEBUG - connect_tcp.started host='api.gradio.app' port=443 local_address=None timeout=3 socket_options=None
+2025-06-08 15:30:00,978 - DEBUG - Importing AvifImagePlugin
+2025-06-08 15:30:00,981 - DEBUG - Importing BlpImagePlugin
+2025-06-08 15:30:00,982 - DEBUG - Importing BmpImagePlugin
+2025-06-08 15:30:00,983 - DEBUG - Importing BufrStubImagePlugin
+2025-06-08 15:30:00,983 - DEBUG - Importing CurImagePlugin
+2025-06-08 15:30:00,983 - DEBUG - Importing DcxImagePlugin
+2025-06-08 15:30:00,984 - DEBUG - Importing DdsImagePlugin
+2025-06-08 15:30:00,985 - DEBUG - Importing EpsImagePlugin
+2025-06-08 15:30:00,986 - DEBUG - Importing FitsImagePlugin
+2025-06-08 15:30:00,986 - DEBUG - Importing FliImagePlugin
+2025-06-08 15:30:00,987 - DEBUG - Importing FpxImagePlugin
+2025-06-08 15:30:00,987 - DEBUG - Image: failed to import FpxImagePlugin: No module named 'olefile'
+2025-06-08 15:30:00,987 - DEBUG - Importing FtexImagePlugin
+2025-06-08 15:30:00,988 - DEBUG - Importing GbrImagePlugin
+2025-06-08 15:30:00,988 - DEBUG - Importing GifImagePlugin
+2025-06-08 15:30:00,990 - DEBUG - Importing GribStubImagePlugin
+2025-06-08 15:30:00,990 - DEBUG - Importing Hdf5StubImagePlugin
+2025-06-08 15:30:00,991 - DEBUG - Importing IcnsImagePlugin
+2025-06-08 15:30:00,992 - DEBUG - Importing IcoImagePlugin
+2025-06-08 15:30:00,993 - DEBUG - Importing ImImagePlugin
+2025-06-08 15:30:00,993 - DEBUG - Importing ImtImagePlugin
+2025-06-08 15:30:00,993 - DEBUG - Importing IptcImagePlugin
+2025-06-08 15:30:00,994 - DEBUG - Importing JpegImagePlugin
+2025-06-08 15:30:00,994 - DEBUG - Importing Jpeg2KImagePlugin
+2025-06-08 15:30:00,994 - DEBUG - Importing McIdasImagePlugin
+2025-06-08 15:30:00,994 - DEBUG - Importing MicImagePlugin
+2025-06-08 15:30:00,994 - DEBUG - Image: failed to import MicImagePlugin: No module named 'olefile'
+2025-06-08 15:30:00,994 - DEBUG - Importing MpegImagePlugin
+2025-06-08 15:30:00,995 - DEBUG - Importing MpoImagePlugin
+2025-06-08 15:30:00,996 - DEBUG - Importing MspImagePlugin
+2025-06-08 15:30:00,997 - DEBUG - Importing PalmImagePlugin
+2025-06-08 15:30:00,997 - DEBUG - Importing PcdImagePlugin
+2025-06-08 15:30:00,997 - DEBUG - Importing PcxImagePlugin
+2025-06-08 15:30:00,997 - DEBUG - Importing PdfImagePlugin
+2025-06-08 15:30:01,000 - DEBUG - Importing PixarImagePlugin
+2025-06-08 15:30:01,001 - DEBUG - Importing PngImagePlugin
+2025-06-08 15:30:01,001 - DEBUG - Importing PpmImagePlugin
+2025-06-08 15:30:01,001 - DEBUG - Importing PsdImagePlugin
+2025-06-08 15:30:01,001 - DEBUG - Importing QoiImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing SgiImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing SpiderImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing SunImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing TgaImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing TiffImagePlugin
+2025-06-08 15:30:01,002 - DEBUG - Importing WebPImagePlugin
+2025-06-08 15:30:01,004 - DEBUG - Importing WmfImagePlugin
+2025-06-08 15:30:01,005 - DEBUG - Importing XbmImagePlugin
+2025-06-08 15:30:01,005 - DEBUG - Importing XpmImagePlugin
+2025-06-08 15:30:01,006 - DEBUG - Importing XVThumbImagePlugin
+2025-06-08 15:30:01,149 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1064ed160>
+2025-06-08 15:30:01,151 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x106242210> server_hostname='api.gradio.app' timeout=3
+2025-06-08 15:30:01,491 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x109a52c10>
+2025-06-08 15:30:01,494 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:01,494 - DEBUG - send_request_headers.complete
+2025-06-08 15:30:01,494 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-08 15:30:01,494 - DEBUG - send_request_body.complete
+2025-06-08 15:30:01,494 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:01,829 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sun, 08 Jun 2025 03:30:01 GMT'), (b'Content-Type', b'application/json'), (b'Content-Length', b'3'), (b'Connection', b'keep-alive'), (b'Server', b'nginx/1.18.0'), (b'Access-Control-Allow-Origin', b'*')])
+2025-06-08 15:30:01,830 - INFO - HTTP Request: GET https://api.gradio.app/gradio-messaging/en "HTTP/1.1 200 OK"
+2025-06-08 15:30:01,830 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-08 15:30:01,831 - DEBUG - receive_response_body.complete
+2025-06-08 15:30:01,831 - DEBUG - response_closed.started
+2025-06-08 15:30:01,831 - DEBUG - response_closed.complete
+2025-06-08 15:30:01,831 - DEBUG - close.started
+2025-06-08 15:30:01,831 - DEBUG - close.complete
+2025-06-08 15:30:02,919 - INFO - [Prompt Alias Loader] Loaded 55 aliases.
+2025-06-08 15:30:02,922 - INFO - [Settings] Loaded settings from config/settings.json
+2025-06-08 15:30:02,922 - DEBUG - [Env Override] DEBUG_MODE: True
+2025-06-08 15:30:02,922 - DEBUG - [Env Override] MAX_HISTORY_TURNS: 5
+2025-06-08 15:30:02,922 - INFO - [Prompt Loader] Loaded 16 specialized prompts.
+2025-06-08 15:30:02,922 - DEBUG - [Prompt Loader] Keys: ['historical_quote', 'famous_artist', 'fun_fact', 'summarise', 'explain_simple', 'define_term', 'compare_items', 'step_by_step', 'funny_response', 'motivational_quote', 'tech_summary', 'historical_event', 'book_summary', 'movie_explainer', 'science_fact', 'code_explanation']
+2025-06-08 15:30:02,923 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-06-08 15:30:03,236 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/tokenizer_config.json HTTP/1.1" 200 0
+2025-06-08 15:30:04,039 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/config.json HTTP/1.1" 200 0
+2025-06-08 15:30:05,013 - DEBUG - https://huggingface.co:443 "HEAD /google/flan-t5-base/resolve/main/generation_config.json HTTP/1.1" 200 0
+2025-06-08 15:30:05,338 - DEBUG - [System] Torch detected device: mps
+2025-06-08 15:30:05,341 - DEBUG - Using selector: KqueueSelector
+2025-06-08 15:30:05,342 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-06-08 15:30:05,350 - DEBUG - connect_tcp.started host='api.gradio.app' port=443 local_address=None timeout=3 socket_options=None
+2025-06-08 15:30:05,402 - DEBUG - 🚀 Launching Gradio demo...
+2025-06-08 15:30:05,443 - DEBUG - Using selector: KqueueSelector
+2025-06-08 15:30:05,456 - DEBUG - connect_tcp.started host='127.0.0.1' port=7860 local_address=None timeout=None socket_options=None
+2025-06-08 15:30:05,456 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1170cb750>
+2025-06-08 15:30:05,457 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:05,457 - DEBUG - send_request_headers.complete
+2025-06-08 15:30:05,457 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-08 15:30:05,457 - DEBUG - send_request_body.complete
+2025-06-08 15:30:05,457 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:05,458 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 08 Jun 2025 03:30:05 GMT'), (b'server', b'uvicorn'), (b'content-length', b'4'), (b'content-type', b'application/json')])
+2025-06-08 15:30:05,458 - INFO - HTTP Request: GET http://127.0.0.1:7860/gradio_api/startup-events "HTTP/1.1 200 OK"
+2025-06-08 15:30:05,458 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-08 15:30:05,458 - DEBUG - receive_response_body.complete
+2025-06-08 15:30:05,458 - DEBUG - response_closed.started
+2025-06-08 15:30:05,458 - DEBUG - response_closed.complete
+2025-06-08 15:30:05,458 - DEBUG - close.started
+2025-06-08 15:30:05,458 - DEBUG - close.complete
+2025-06-08 15:30:05,459 - DEBUG - connect_tcp.started host='127.0.0.1' port=7860 local_address=None timeout=3 socket_options=None
+2025-06-08 15:30:05,459 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1170dab10>
+2025-06-08 15:30:05,459 - DEBUG - send_request_headers.started request=<Request [b'HEAD']>
+2025-06-08 15:30:05,459 - DEBUG - send_request_headers.complete
+2025-06-08 15:30:05,459 - DEBUG - send_request_body.started request=<Request [b'HEAD']>
+2025-06-08 15:30:05,459 - DEBUG - send_request_body.complete
+2025-06-08 15:30:05,460 - DEBUG - receive_response_headers.started request=<Request [b'HEAD']>
+2025-06-08 15:30:05,470 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Sun, 08 Jun 2025 03:30:05 GMT'), (b'server', b'uvicorn'), (b'content-length', b'43242'), (b'content-type', b'text/html; charset=utf-8')])
+2025-06-08 15:30:05,470 - INFO - HTTP Request: HEAD http://127.0.0.1:7860/ "HTTP/1.1 200 OK"
+2025-06-08 15:30:05,470 - DEBUG - receive_response_body.started request=<Request [b'HEAD']>
+2025-06-08 15:30:05,470 - DEBUG - receive_response_body.complete
+2025-06-08 15:30:05,470 - DEBUG - response_closed.started
+2025-06-08 15:30:05,470 - DEBUG - response_closed.complete
+2025-06-08 15:30:05,470 - DEBUG - close.started
+2025-06-08 15:30:05,470 - DEBUG - close.complete
+2025-06-08 15:30:05,471 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-06-08 15:30:05,534 - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1170d96e0>
+2025-06-08 15:30:05,534 - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x11080e570> server_hostname='api.gradio.app' timeout=3
+2025-06-08 15:30:05,647 - DEBUG - https://huggingface.co:443 "HEAD /api/telemetry/gradio/initiated HTTP/1.1" 200 0
+2025-06-08 15:30:05,764 - DEBUG - https://huggingface.co:443 "HEAD /api/telemetry/gradio/launched HTTP/1.1" 200 0
+2025-06-08 15:30:05,871 - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1170b2c30>
+2025-06-08 15:30:05,872 - DEBUG - send_request_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:05,872 - DEBUG - send_request_headers.complete
+2025-06-08 15:30:05,872 - DEBUG - send_request_body.started request=<Request [b'GET']>
+2025-06-08 15:30:05,873 - DEBUG - send_request_body.complete
+2025-06-08 15:30:05,873 - DEBUG - receive_response_headers.started request=<Request [b'GET']>
+2025-06-08 15:30:06,042 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Sun, 08 Jun 2025 03:30:06 GMT'), (b'Content-Type', b'application/json'), (b'Content-Length', b'21'), (b'Connection', b'keep-alive'), (b'Server', b'nginx/1.18.0'), (b'Access-Control-Allow-Origin', b'*')])
+2025-06-08 15:30:06,043 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2025-06-08 15:30:06,043 - DEBUG - receive_response_body.started request=<Request [b'GET']>
+2025-06-08 15:30:06,044 - DEBUG - receive_response_body.complete
+2025-06-08 15:30:06,044 - DEBUG - response_closed.started
+2025-06-08 15:30:06,044 - DEBUG - response_closed.complete
+2025-06-08 15:30:06,044 - DEBUG - close.started
+2025-06-08 15:30:06,044 - DEBUG - close.complete

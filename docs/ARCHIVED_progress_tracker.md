@@ -1,4 +1,11 @@
-# Progress Tracker
+# HAS BEEN DEPRECIATED - Progress Tracker
+
+**Deprecated Tracker**
+
+> This progress tracker is no longer in use as of `v0.4.2`.  
+> All planning, tasks, and version tracking are now managed via GitHub Issues and the [LLM Project Board](https://github.com/users/<your-username>/projects/<project-id>/views/<view-id>).
+
+---
 
 ## Progress Tracker v0.4.1
 
@@ -25,7 +32,6 @@ This tracker helps monitor development progress for the v0.4.1 release focused o
 |                           | Ensure visibility in debug mode                                           | ✅ Done | Controlled by `debug_mode` and `log_triggered_filters`.              |
 
 ---
-
 
 ## Progress Tracker – v0.4.2
 

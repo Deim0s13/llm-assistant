@@ -6,52 +6,78 @@ Welcome, and thank you for your interest in contributing to this project! This d
 
 ## Purpose
 
-This project started as a learning journey into LLMs and has grown into a structured exploration tool for prompt behaviour, model response control, and AI experimentation. Contributions are welcome — especially those that align with the project's learning-first mindset and structured development approach.
+This project began as a hands-on exploration into large language models (LLMs) and has grown into a modular, roadmap-driven experimentation platform for prompt engineering, memory handling, summarisation, and more.
+
+Contributions are welcome — especially those that align with our structured, learning-focused development model.
+
+---
+
+## How We Plan & Track Work
+
+All work is tracked using GitHub Projects:
+[LLM Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
+
+### Planning Hierarchy
+
+- **Initiatives** – High-level goals (e.g. AI Assistant, Agent Simulator)
+- **Epics** – Feature themes (e.g. Prompt Matching, Memory Integration)
+- **Milestones** – Versioned releases (e.g. `v0.4.2`, `v0.4.3`)
+- **Issues** – Individual trackable tasks
+
+> Create **Issues** for all new work — no markdown-based planning.
+> Link Issues to Epics and Milestones where appropriate.
+> Use `fixes #issue_number` in PRs to auto-close issues on merge.
 
 ---
 
 ## Branching Strategy
 
-We follow a simplified branching model:
+We follow a stable → dev → feature model:
 
-- **`main`** — Stable, production-ready code. Each release is tagged here.
-- **`dev`** — Integration branch for upcoming changes. All new features, bugfixes, and documentation updates go here first.
-- **`feature/*`**, **`bugfix/*`**, **`docs/*`** — Used for active development. Each isolated change should use a separate branch.
+- **`main`** — Stable, production-ready code. Releases are tagged here.
+- **`dev`** — Development integration branch for new features.
+- **`feature/*`**, **`bugfix/*`**, **`docs/*`** — Work branches off `dev`.
 
-> 🚧 Developers must branch from `dev`, not `main`.  
-> Once your feature or fix is complete and tested, submit a PR to `dev`.  
-> Merges to `main` are only done when cutting a new version.
+### Always
+
+- Branch **from `dev`**, not `main`
+- Submit Pull Requests **to `dev`**
+- Let CI/tests pass before merge
+- Use issues and link them to PRs
 
 ---
 
-## Feature Branch Naming Convention
+## Branch Naming Convention
 
-To maintain clarity, we use **versioned and categorised** branch names.
+Use clear, versioned branch names to track changes.
 
-### Format
+**Format:**
 
+```bash
 [type]/v[major.minor.patch]-[short-description]
+```
 
-### Examples
+**Examples:**
 
-feature/v0.3.1-context-window-expansion
-bugfix/v0.3.1-token-limit-fix
-docs/v0.3.1-readme-cleanup
+- `feature/v0.4.2-context-trimming`
+- `bugfix/v0.4.2-token-truncation`
+- `docs/v0.4.3-memory-setup`
 
-- Use lowercase.
-- Hyphenate the descriptive part for readability.
+Use lowercase and hyphenate descriptive parts.
 
 ---
 
-## Commits
+## Commit Guidelines
 
-Use clear, present-tense commit messages. Optionally follow the [Conventional Commits](https://www.conventionalcommits.org/) style.
+Use clear, short, present-tense commit messages.
 
-### Examples
+Optionally follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-feat: add temperature slider to playground
-fix: correct alias mapping bug
-docs: update scope.md with v0.3.0 summary
+**Examples:**
+
+- `feat: add summarise_context() scaffold`
+- `fix: fallback to base prompt when alias fails`
+- `docs: update scope.md for v0.4.3 planning`
 
 ---
 
@@ -60,30 +86,48 @@ docs: update scope.md with v0.3.0 summary
 Pull Requests should:
 
 - Target the `dev` branch
-- Reference a related issue or experiment (if applicable)
-- Include a brief summary of **what** and **why**
-- Pass any linting or basic tests
+- Reference an issue (e.g. `fixes #42`)
+- Include a short description of what and why
+- Pass all tests and linters
 
 ---
 
-## File Locations of Interest
+## Environment & Code Expectations
 
-- [`README.md`](./README.md) — Project overview and current version
-- [`docs/scope.md`](./docs/scope.md) — Planned and in-progress features by version
-- [`docs/release_notes.md`](./docs/release_notes.md) — Historical release summaries
-- [`docs/experiments_tracker.md`](./docs/experiments_tracker.md) — Index of experiment/test results
-- [`experiments/`](./experiments/) — Per-version testing and experiment logs
-- [`prompt_aliases.json`](./data/prompt_aliases.json) — Maps input phrases to prompt concepts
-- [`specialized_prompts.json`](./data/specialized_prompts.json) — Contains prompt templates used by concept
+- Store machine-specific settings in a `.env` file (not committed)
+- Use `.env.example` to share config structure
+- Run formatting or lint checks before PR (optional for now)
+
+> Additional environment setup and platform-specific steps are documented in `SETUP.md` and `docs/cross-platform-checklist.md`
+
+---
+
+## Local Development Requirements
+
+Before contributing, please review the [Cross-Platform Dev Checklist](./docs/dev_checklist.md) for platform-specific setup, environment variables, and troubleshooting.
+
+---
+
+## File & Directory Highlights
+
+- `main.py` – App entry point with Gradio UI
+- `memory.py` – In-memory placeholder backend (from v0.4.3)
+- `utils/` – Prompt prep, aliasing, filters, etc.
+- `experiments/` – Testing and exploratory code per version
+- `docs/` – Planning: roadmap, scope, test logs
+- `config/` – Prompt templates and settings files
+- `tests/` – Unit tests for context and logic
 
 ---
 
 ## Resources
 
-- [Hugging Face Transformers](https://huggingface.co/docs/transformers/index)
-- [Gradio](https://www.gradio.app/)
-- [Markdownlint](https://github.com/DavidAnson/markdownlint)
+- [Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
+- [Roadmap](./docs/roadmap.md)
+- [Scope](./docs/scope.md)
+- [Release Notes](./docs/release_notes.md)
+- [Test Experiments Tracker](./docs/experiments_tracker.md)
 
 ---
 
-Thanks again for helping improve this project — and deepen our understanding of LLM behaviour in the process!
+Thanks again for helping to shape this project — and for contributing to an open, structured exploration of what’s possible with LLMs
