@@ -72,6 +72,19 @@ def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH):
     return data
 
 # ─────────────────────────────────────────────────────────
+#  Utils/memory import
+# ─────────────────────────────────────────────────────────
+def _memory_turns(max_turns: int, session_id: str = "default"):
+    """
+    Return a list[dict] of the last `max_turns` messages stored in memory
+    (or an empty list if memory is disabled / empty).
+    """
+    if not SETTINGS.get("memory", {}).get("enabled", False):
+        return []
+    mem_hist = memory.load(session_id)
+    return mem_hist[-max_turns:]
+
+# ─────────────────────────────────────────────────────────
 #  Prompt-matching
 # ─────────────────────────────────────────────────────────
 def get_specialized_prompt(message, specialized_prompts, fuzzy_enabled):
@@ -107,40 +120,40 @@ def get_specialized_prompt(message, specialized_prompts, fuzzy_enabled):
 #  Context preparation
 # ─────────────────────────────────────────────────────────
 def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
-    max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
-    max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
+    max_turns  = SETTINGS["context"]["max_history_turns"]
+    max_tokens = SETTINGS["context"]["max_prompt_tokens"]
 
+    # 1) resolve specialised prompt
     spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
 
-    # helper closes over spec_prompt
+    # 2) memory + live history
+    mem_turns  = _memory_turns(max_turns)
+    live_turns = history[-max_turns:]
+    combined   = (mem_turns + live_turns)[-max_turns:]   # cap again
+
+    # 3) build prompt text
     def build(hist_slice):
-        ctx = (spec_prompt or base_prompt)
-        for entry in hist_slice:
-            ctx += f"\n{entry['role'].capitalize()}: {entry['content']}"
+        ctx = spec_prompt or base_prompt
+        for item in hist_slice:
+            ctx += f"\n{item['role'].capitalize()}: {item['content']}"
         ctx += f"\nUser: {msg}\nAssistant:"
         return ctx
 
-    # decide where to pull history
-    if memory.backend == MemoryBackend.NONE:
-        recent = history[-max_turns:]
-    else:
-        recent = memory.load()[-max_turns:]
+    context = build(combined)
+    tok_ct  = count_tokens(context)
 
-    raw_context = build(recent)
-    before_tok = count_tokens(raw_context)
-
-    # trimming loop …
-    while before_tok > max_tokens and len(recent) > 1:
-        recent = recent[1:]
-        raw_context = build(recent)
-        before_tok = count_tokens(raw_context)
+    # 4) trim tokens if necessary
+    while tok_ct > max_tokens and len(combined) > 1:
+        combined = combined[1:]
+        context  = build(combined)
+        tok_ct   = count_tokens(context)
 
     if DEBUG_MODE:
-        logging.debug("[Context Debug] Turns kept: %d | Tokens: %d", len(recent), before_tok)
+        logging.debug("[Context Debug] Turns kept: %d | Tokens: %d", len(combined), tok_ct)
         if SETTINGS["logging"].get("prompt_preview", False):
-            logging.debug("[Prompt Preview]\n%s\n···", raw_context[:400])
+            logging.debug("[Prompt Preview]\n%s\n···", context[:400])
 
-    return raw_context, source
+    return context, source
 
 # ─────────────────────────────────────────────────────────
 #  Chat-generation
