@@ -1,19 +1,18 @@
+# ════════════════════════════════════════════════════════════════════
+#  utils/memory.py – lightweight conversation memory façade
+# ════════════════════════════════════════════════════════════════════
 """
-memory.py – lightweight conversation-memory interface
------------------------------------------------------
+Simple save/load layer for previous chat turns.
 
-Purpose
-~~~~~~~
-Provide a simple, pluggable layer for **saving** and **retrieving** past
-(user, assistant) message pairs.  The default backend is an *in-process*
-dictionary so no external services are required.
+Back-ends
+---------
+• **IN_MEMORY** (default) – Python dict; zero external deps
+• **NONE**           – disable memory
+• Future: Redis, SQLite, vector DB …
 
-Road-map placeholders (⇢) show where future persistent back-ends (Redis,
-SQLite, Vector DB, etc.) can be wired in without changing caller code.
-
-Usage
-~~~~~
->>> from utils.memory import memory, MemoryBackend
+Public API
+----------
+>>> from utils.memory import memory
 >>> memory.save({"role": "user", "content": "Hi"})
 >>> memory.load()[-1]
 {'role': 'user', 'content': 'Hi'}
@@ -22,83 +21,56 @@ Usage
 from __future__ import annotations
 
 import logging
-from enum import Enum
+from enum   import Enum
 from typing import List, Dict, Any, Optional
 
-__all__ = ["Memory", "MemoryBackend", "memory"]
+__all__ = ["MemoryBackend", "Memory", "memory"]
 
-# --------------------------------------------------------------------------- #
-#  ENUM – Available back-end types                                            #
-# --------------------------------------------------------------------------- #
+# ─────────────────────────────────────────────── Back-end enum ──
 class MemoryBackend(str, Enum):
-    NONE = "none"           # disables memory
-    IN_MEMORY = "in_memory" # Python dict-list only
-    # ⇢ add "redis", "sqlite", "vector" in future versions
+    NONE       = "none"
+    IN_MEMORY  = "in_memory"
+    # TODO: REDIS = "redis", SQLITE = "sqlite"
 
-
-# --------------------------------------------------------------------------- #
-#  MEMORY SINGLETON IMPLEMENTATION                                            #
-# --------------------------------------------------------------------------- #
+# ───────────────────────────────────────────── Singleton class ──
 class Memory:
-    """
-    Minimal façade around the chosen back-end.
-
-    • v0.4.3 ships with the in-process store only.
-    • Other back-ends raise NotImplementedError until implemented.
-    """
+    """Façade implementing load / save / clear for the active back-end."""
 
     backend: MemoryBackend
-    _instance: Optional["Memory"] = None  # singleton ref
-
-    # in-memory store: {session_id: [msg, msg, …]}
-    _store: Dict[str, List[Dict[str, Any]]] = {}
+    _instance: Optional["Memory"] = None
+    _store: Dict[str, List[Dict[str, Any]]] = {}  # session → list[turn]
 
     def __new__(cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.backend = MemoryBackend(backend)
-            logging.debug("[Memory] Initialised backend: %s", cls._instance.backend.value)
+            logging.debug("[Memory] backend=%s", cls._instance.backend.value)
         return cls._instance
 
-    # --------------------------------------------------------------------- #
-    #  PUBLIC API                                                           #
-    # --------------------------------------------------------------------- #
+    # ------------------------------------------------ API -------
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
-        """Return a list of messages for a session (empty if none)."""
         if self.backend == MemoryBackend.NONE:
             return []
-
         if self.backend == MemoryBackend.IN_MEMORY:
             return self._store.get(session_id, [])
+        raise NotImplementedError(self.backend.value)
 
-        # ⇢ implement persistent back-ends here
-        raise NotImplementedError(f"Memory backend '{self.backend}' not implemented.")
-
-    def save(self, message: Dict[str, Any], *, session_id: str = "default") -> None:
-        """Append a single message (`{'role': .., 'content': ..}`) to history."""
+    def save(self, msg: Dict[str, Any], *, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.NONE:
-            return  # no-op
-
-        if self.backend == MemoryBackend.IN_MEMORY:
-            self._store.setdefault(session_id, []).append(message)
             return
-
-        # ⇢ implement persistent back-ends here
-        raise NotImplementedError(f"Memory backend '{self.backend}' not implemented.")
+        if self.backend == MemoryBackend.IN_MEMORY:
+            self._store.setdefault(session_id, []).append(msg)
+            return
+        raise NotImplementedError(self.backend.value)
 
     def clear(self, session_id: str = "default") -> None:
-        """Remove all stored messages for a session."""
-        if self.backend == MemoryBackend.IN_MEMORY and session_id in self._store:
-            del self._store[session_id]
+        if self.backend == MemoryBackend.IN_MEMORY:
+            self._store.pop(session_id, None)
 
+# ─────────────────────────────────── Singleton initialisation ──
+from config.settings_loader import load_settings  # late import to avoid cycle
 
-# --------------------------------------------------------------------------- #
-#  Auto-initialise singleton using settings.json /.env                        #
-# --------------------------------------------------------------------------- #
-from config.settings_loader import load_settings  # noqa: E402  (late import)
+_settings           = load_settings()
+DEFAULT_BACKEND     = _settings.get("memory", {}).get("backend", "none")
 
-_SETTINGS = load_settings()
-_DEFAULT_BACKEND = _SETTINGS.get("memory", {}).get("backend", "none")
-
-# public singleton instance
-memory: Memory = Memory(backend=_DEFAULT_BACKEND)
+memory: Memory = Memory(backend=DEFAULT_BACKEND)

@@ -1,39 +1,95 @@
-import re
+# ════════════════════════════════════════════════════════════════════
+#  utils/safety_filters.py – profanity masking & safety gating
+# ════════════════════════════════════════════════════════════════════
+"""
+Basic profanity detection / masking plus a pre-generation safety check.
 
-# A small example list - replace or expand as needed
+The API intentionally stays light-weight so stricter classifiers (e.g.
+OpenAI moderation, Perspective API, custom models) can later replace the
+`evaluate_safety()` stub without changing the main chat flow.
+"""
+
+# ───────────────────────────────────────────────────────── Imports ──
+from __future__ import annotations
+
+import logging
+import re
+from typing import Tuple, Optional
+
+
+# ──────────────────────────────────────── Static data ──
+# A **very** small placeholder list; expand or externalise later.
 PROFANITY_LIST = ["damn", "hell", "shit", "fuck"]
 
+# Compiled regex so we do the heavy work once
+_PROFANITY_REGEX = re.compile(
+    r"\b(" + "|".join(re.escape(w) for w in PROFANITY_LIST) + r")\b",
+    flags=re.IGNORECASE,
+)
+
+
+# ─────────────────────────────────── Profanity masking ──
 def apply_profanity_filter(text: str) -> str:
     """
-    Replaces known profane words in the text with asterisks.
+    Replace each profane word in *text* with the equivalent number of
+    asterisks, preserving capitalisation length only.
+
+    Example
+    -------
+    >>> apply_profanity_filter("That is damn funny")
+    'That is **** funny'
     """
-    def mask_word(word):
-        return "*" * len(word)
-    
-    pattern = re.compile(r'\b(' + '|'.join(re.escape(word) for word in PROFANITY_LIST) + r')\b', flags=re.IGNORECASE)
-    filtered_text = pattern.sub(lambda match: mask_word(match.group()), text)
 
-    return filtered_text
+    def _mask(match: re.Match) -> str:  # local helper
+        return "*" * len(match.group())
 
-def evaluate_safety(message: str, settings: dict) -> tuple[bool, str | None]:
-    safety_config = settings.get("safety", {})
-    sensitivity = safety_config.get("sensitivity_level", "moderate")
-    log_triggers = safety_config.get("log_triggered_filters", False)
-    refusal_template = safety_config.get("blocked_response_template", "Your message was blocked due to safety settings.")
+    return _PROFANITY_REGEX.sub(_mask, text)
 
-    lowered = message.lower()
 
-    for bad_word in PROFANITY_LIST:
-        for bad_word in lowered:
-            if log_triggers:
-                import logging
-                logging.debug(f"[Safety] Profanity detected: '{bad_word}' (level: {sensitivity})")
+# ─────────────────────────────── Safety pre-generation ──
+def evaluate_safety(
+    message: str,
+    settings: dict,
+) -> Tuple[bool, Optional[str]]:
+    """
+    Light safety gate that checks *input* for profanity before we even
+    call the model.
 
-            if sensitivity == "strict":
-                return False, refusal_template
-            elif sensitivity == "moderate":
-                return True, None # Output will be filtered
-            elif sensitivity == "relaxed":
-                return True, None
-            
-    return True, None
+    Returns
+    -------
+    allowed : bool
+        Whether the message is safe to continue processing.
+    blocked_message : Optional[str]
+        If blocked, a pre-formatted refusal text to send back.
+
+    Behaviour by *sensitivity_level* in ``settings['safety']``:
+    ┌────────────┬───────────────────────────────────────────────┐
+    │ strict     │ Always block if profanity match.             │
+    │ moderate   │ Allow but note that output should be filtered │
+    │ relaxed    │ No blocking, no filtering.                    │
+    └────────────┴───────────────────────────────────────────────┘
+    """
+    config = settings.get("safety", {})
+    level = config.get("sensitivity_level", "moderate").lower()
+    log_triggers = config.get("log_triggered_filters", False)
+    refusal_text = config.get(
+        "blocked_response_template",
+        "I'm unable to respond to that request due to safety policies.",
+    )
+
+    # Detect profanity
+    profane = bool(_PROFANITY_REGEX.search(message))
+    if profane and log_triggers:
+        logging.debug("[Safety] Profanity detected (level=%s): %s", level, message)
+
+    if not profane:
+        return True, None  # safe
+
+    # Profanity found – act according to level
+    if level == "strict":
+        return False, refusal_text
+    elif level == "moderate":
+        # Allowed, but caller should run apply_profanity_filter() on output
+        return True, None
+    else:  # "relaxed" or unknown
+        return True, None
