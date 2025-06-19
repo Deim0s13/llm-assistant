@@ -47,27 +47,49 @@ class Memory:
             logging.debug("[Memory] backend=%s", cls._instance.backend.value)
         return cls._instance
 
-    # ------------------------------------------------ API -------
+    # ───────────────────────────────────  API ───────────────────────────────────
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
         if self.backend == MemoryBackend.NONE:
+            logging.debug("[Memory] load skipped – backend NONE")
             return []
-        if self.backend == MemoryBackend.IN_MEMORY:
-            return self._store.get(session_id, [])
-        raise NotImplementedError(self.backend.value)
 
-    def save(self, msg: Dict[str, Any], *, session_id: str = "default") -> None:
-        if self.backend == MemoryBackend.NONE:
-            return
         if self.backend == MemoryBackend.IN_MEMORY:
-            self._store.setdefault(session_id, []).append(msg)
+            hist = self._store.get(session_id, [])
+            logging.debug(
+                "[Memory] load → %d turns (session=%s)",
+                len(hist),
+                session_id,
+            )
+            return hist
+
+        # ⇢ future back-ends
+        raise NotImplementedError(f"backend '{self.backend}' not implemented")
+
+
+    def save(self, message: Dict[str, Any], *, session_id: str = "default") -> None:
+        if self.backend == MemoryBackend.NONE:
+            logging.debug("[Memory] save skipped – backend NONE")
             return
-        raise NotImplementedError(self.backend.value)
+
+        if self.backend == MemoryBackend.IN_MEMORY:
+            self._store.setdefault(session_id, []).append(message)
+            logging.debug(
+                "[Memory] save (%s) role=%s  preview=%s",
+                session_id,
+                message.get("role"),
+                message.get("content", "")[:40],
+            )
+            return
+
+        # ⇢ future back-ends
+        raise NotImplementedError(f"backend '{self.backend}' not implemented")
+
 
     def clear(self, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.IN_MEMORY:
             self._store.pop(session_id, None)
 
-# ─────────────────────────────────── Singleton initialisation ──
+# ─────────────────────────────────── Singleton initialisation ───────────────────────────────────
 from config.settings_loader import load_settings  # late import to avoid cycle
 
 _settings           = load_settings()
