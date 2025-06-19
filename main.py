@@ -27,6 +27,9 @@ from config.settings_loader import load_settings
 DEBUG_MODE  = True
 SETTINGS    = load_settings()
 
+if not DEBUG_MODE:
+    logging.getLogger().setLevel(logging.INFO)
+
 # Memory start-up diagnostic
 _mem_cfg = SETTINGS.get("memory", {})
 logging.debug(
@@ -115,6 +118,7 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
 
     spec_prompt, src, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
 
+    session_id = "default"
     mem_turns  = _memory_turns(max_turns)
     live_turns = history[-max_turns:]
     combined   = (mem_turns + live_turns)[-max_turns:]
@@ -122,9 +126,7 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
     if DEBUG_MODE:
         logging.debug(
             "[Memory] injected=%d | live=%d | combined=%d",
-            len(mem_turns),
-            len(live_turns),
-            len(combined),
+            session_id, len(mem_turns), len(live_turns), len(combined),
         )
 
     def build(hist_slice):

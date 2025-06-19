@@ -26,13 +26,13 @@ from typing import List, Dict, Any, Optional
 
 __all__ = ["MemoryBackend", "Memory", "memory"]
 
-# ─────────────────────────────────────────────── Back-end enum ──
+#  ─────────────────────────────── Back-end enum ───────────────────────────────
 class MemoryBackend(str, Enum):
     NONE       = "none"
     IN_MEMORY  = "in_memory"
     # TODO: REDIS = "redis", SQLITE = "sqlite"
 
-# ───────────────────────────────────────────── Singleton class ──
+#  ─────────────────────────────── Singleton class ───────────────────────────────
 class Memory:
     """Façade implementing load / save / clear for the active back-end."""
 
@@ -50,16 +50,16 @@ class Memory:
     # ───────────────────────────────────  API ───────────────────────────────────
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
         if self.backend == MemoryBackend.NONE:
-            logging.debug("[Memory] load skipped – backend NONE")
+            if logging.getLogger().isEnabledFor(logging.DEBUG):
+                logging.debug("[Memory] load skipped – backend NONE")
             return []
 
         if self.backend == MemoryBackend.IN_MEMORY:
             hist = self._store.get(session_id, [])
-            logging.debug(
-                "[Memory] load → %d turns (session=%s)",
-                len(hist),
-                session_id,
-            )
+            if logging.getLogger().isEnabledFor(logging.DEBUG):
+                logging.debug(
+                    "[Memory] load → %d turns (session=%s)", len(hist), session_id,
+                )
             return hist
 
         # ⇢ future back-ends
@@ -73,12 +73,13 @@ class Memory:
 
         if self.backend == MemoryBackend.IN_MEMORY:
             self._store.setdefault(session_id, []).append(message)
-            logging.debug(
-                "[Memory] save (%s) role=%s  preview=%s",
-                session_id,
-                message.get("role"),
-                message.get("content", "")[:40],
-            )
+            if logging.getLogger().isEnabledFor(logging.DEBUG):
+                logging.debug(
+                    "[Memory] save (%s) role=%s  preview=%s",
+                    session_id,
+                    message.get("role"),
+                    message.get("content", "")[:40],
+                )
             return
 
         # ⇢ future back-ends
