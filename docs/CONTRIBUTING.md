@@ -1,133 +1,140 @@
-# Contributing Guidelines
+# Contributing Guidelines 🤝
 
-Welcome, and thank you for your interest in contributing to this project! This document outlines the standards and workflow we follow to keep things organised, traceable, and easy to collaborate on.
-
----
-
-## Purpose
-
-This project began as a hands-on exploration into large language models (LLMs) and has grown into a modular, roadmap-driven experimentation platform for prompt engineering, memory handling, summarisation, and more.
-
-Contributions are welcome — especially those that align with our structured, learning-focused development model.
+Welcome, and thank you for your interest in helping out!
+This document explains **how we plan, branch, commit, and review code** so collaboration stays smooth and traceable.
 
 ---
 
-## How We Plan & Track Work
+## 1 · Project Purpose & Scope
 
-All work is tracked using GitHub Projects:
-[LLM Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
+This repo started as a hands-on LLM sandbox and has grown into a **modular, roadmap-driven platform** for prompt engineering, memory, summarisation, and more.
+We value:
 
-### Planning Hierarchy
+* 🎯 **Structured learning** – every feature ties to a doc & test
+* 📊 **Traceability** – GitHub Projects for planning, Issues for tasks
+* 🔍 **Experimentation** – dedicated `/experiments/` and markdown logs
 
-- **Initiatives** – High-level goals (e.g. AI Assistant, Agent Simulator)
-- **Epics** – Feature themes (e.g. Prompt Matching, Memory Integration)
-- **Milestones** – Versioned releases (e.g. `v0.4.2`, `v0.4.3`)
-- **Issues** – Individual trackable tasks
-
-> Create **Issues** for all new work — no markdown-based planning.
-> Link Issues to Epics and Milestones where appropriate.
-> Use `fixes #issue_number` in PRs to auto-close issues on merge.
+Contributions that embrace these principles are especially welcome!
 
 ---
 
-## Branching Strategy
+## 2 · Planning & Tracking
 
-We follow a stable → dev → feature model:
+We use the GitHub **LLM Project Board** → https://github.com/users/Deim0s13/projects/4
 
-- **`main`** — Stable, production-ready code. Releases are tagged here.
-- **`dev`** — Development integration branch for new features.
-- **`feature/*`**, **`bugfix/*`**, **`docs/*`** — Work branches off `dev`.
+| Level        | Example                              | Rule                                             |
+|--------------|--------------------------------------|--------------------------------------------------|
+| Initiative   | *AI-Powered Knowledge Assistant*     | Broad, multi-release theme                       |
+| Epic         | *Memory Integration*                 | Group of related milestones/tasks                |
+| Milestone    | `v0.4.3`                             | Target release version                           |
+| Issue / PR   | `Task: Inject Memory`                | Single piece of work – **every change has one**  |
 
-### Always
-
-- Branch **from `dev`**, not `main`
-- Submit Pull Requests **to `dev`**
-- Let CI/tests pass before merge
-- Use issues and link them to PRs
+> In your PR description use **`fixes #123`** (or `closes`) so the Issue auto-closes when merged.
 
 ---
 
-## Branch Naming Convention
+## 3 · Branch Strategy
 
-Use clear, versioned branch names to track changes.
+* **`main`** — always deployable, tagged releases only
+* **`dev`**  — rolling integration of finished features
+* **`feature/*`**, **`bugfix/*`**, **`docs/*`** — work branches off `dev`
 
-**Format:**
+Example:
 
-```bash
-[type]/v[major.minor.patch]-[short-description]
-```
+    # create a new feature branch
+    git checkout dev
+    git pull
+    git switch -c feature/v0.4.4-rag-prototype
 
-**Examples:**
-
-- `feature/v0.4.2-context-trimming`
-- `bugfix/v0.4.2-token-truncation`
-- `docs/v0.4.3-memory-setup`
-
-Use lowercase and hyphenate descriptive parts.
+Always re-base onto `dev` if you fall behind; avoid merging `main` into feature branches.
 
 ---
 
-## Commit Guidelines
+## 4 · Branch Naming
 
-Use clear, short, present-tense commit messages.
+`<type>/v<major.minor.patch>-<slug>`
 
-Optionally follow [Conventional Commits](https://www.conventionalcommits.org/).
+* `feature/v0.4.3-memory-pipeline`
+* `bugfix/v0.4.2-safety-regex`
+* `docs/v0.4.4-testing-guide`
 
-**Examples:**
-
-- `feat: add summarise_context() scaffold`
-- `fix: fallback to base prompt when alias fails`
-- `docs: update scope.md for v0.4.3 planning`
+Lower-case, hyphen-separated, concise.
 
 ---
 
-## Pull Requests
+## 5 · Commit Messaging
 
-Pull Requests should:
+Short + present tense. Conventional-Commit style is optional but welcome.
 
-- Target the `dev` branch
-- Reference an issue (e.g. `fixes #42`)
-- Include a short description of what and why
-- Pass all tests and linters
-
----
-
-## Environment & Code Expectations
-
-- Store machine-specific settings in a `.env` file (not committed)
-- Use `.env.example` to share config structure
-- Run formatting or lint checks before PR (optional for now)
-
-> Additional environment setup and platform-specific steps are documented in `SETUP.md` and `docs/cross-platform-checklist.md`
+* `feat: add summarise_context scaffold`
+* `fix: handle empty memory load`
+* `docs: refresh contributing guide`
 
 ---
 
-## Local Development Requirements
+## 6 · Pull Requests
 
-Before contributing, please review the [Cross-Platform Dev Checklist](./docs/dev_checklist.md) for platform-specific setup, environment variables, and troubleshooting.
-
----
-
-## File & Directory Highlights
-
-- `main.py` – App entry point with Gradio UI
-- `memory.py` – In-memory placeholder backend (from v0.4.3)
-- `utils/` – Prompt prep, aliasing, filters, etc.
-- `experiments/` – Testing and exploratory code per version
-- `docs/` – Planning: roadmap, scope, test logs
-- `config/` – Prompt templates and settings files
-- `tests/` – Unit tests for context and logic
+* **Target** `dev`
+* **Reference** an Issue (`fixes #42`)
+* **Describe** the what & why (1-2 sentences)
+* **Pass** all tests / linters before merge
 
 ---
 
-## Resources
+## 7 · Environment & Setup
 
-- [Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
-- [Roadmap](./docs/roadmap.md)
-- [Scope](./docs/scope.md)
-- [Release Notes](./docs/release_notes.md)
-- [Test Experiments Tracker](./docs/experiments_tracker.md)
+* Copy `.env.example` ➜ `.env` for local overrides (never commit creds)
+* Platform steps live in **`docs/cross-platform-dev-checklist.md`**
+* Extra setup notes live in `SETUP.md`
+
+> macOS M-series uses **`mps`** automatically.
+> Windows + NVIDIA uses CUDA wheels (see checklist).
 
 ---
 
-Thanks again for helping to shape this project — and for contributing to an open, structured exploration of what’s possible with LLMs
+## 8 · Local Dev Requirements
+
+* Python 3.10+
+* `pip install -r requirements.txt`
+* Run `ruff check .` (lint) before PR (optional but appreciated)
+
+---
+
+## 9 · Automated Tests (coming in v0.4.4)
+
+The **“Automated Testing & CI”** epic will introduce:
+
+* PyTest suites for context trimming & memory
+* GitHub Actions workflow (`lint → test → build`)
+* Coverage badge in the README
+
+Want to help? Open an Issue!
+
+---
+
+## 10 · Key Directories
+
+| Path / File                 | Purpose                                           |
+|-----------------------------|---------------------------------------------------|
+| `main.py`                   | Gradio entry point & prompt pipeline              |
+| `utils/memory.py`           | In-process memory backend (plug-in ready)         |
+| `utils/`                    | Prompt utils, safety filters, alias loader        |
+| `config/`                   | Prompts, settings.json, aliases                   |
+| `experiments/`              | One-off prototypes and versioned tests            |
+| `docs/`                     | Roadmap, scope, dev checklist, release notes      |
+| `tests/`                    | (coming) automated unit / integration tests       |
+
+---
+
+### Quick Links
+
+* **Project Board** – https://github.com/users/Deim0s13/projects/4
+* **Roadmap** – `docs/roadmap.md`
+* **Scope** – `docs/scope.md`
+* **Release Notes** – `docs/release_notes.md`
+* **Experiments Tracker** – `docs/experiments_tracker.md`
+* **Cross-Platform Dev Checklist** – `docs/cross-platform-dev-checklist.md`
+
+---
+
+Thanks again for contributing! Your PRs help push this exploration of LLM tooling forward 🚀

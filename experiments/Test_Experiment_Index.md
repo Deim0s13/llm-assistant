@@ -1,95 +1,86 @@
 # Test & Experiment Index
 
-This document serves as the central hub for all tests and experiments conducted in the project.
-It tracks experiment outcomes, methods, observations, and any decisions resulting from those activities.
-Each test or experiment is versioned and linked to its corresponding markdown file.
+This document is the **central hub** for every test set, experiment run, and observation made during development.
+It keeps a living record of what was explored, why it mattered, and any decisions that resulted.
 
 ---
 
 ## Purpose
 
-As the project evolves, it's important to have a structured way to validate assumptions, measure behavioural changes in the LLM's outputs, and explore new features or enhancements.
+A structured tracker gives us:
 
-This file ensures:
-
-* Transparency of what was tested and why
-* A record of behavioural regressions or improvements
-* Shared understanding for collaborators
+* 📜 **Transparency** – know exactly what was tried and when
+* 📈 **Regression safety‑net** – compare behaviour across versions
+* 🤝 **Shared context** – team‑mates see prior findings before repeating work
 
 ---
 
 ## 📂 Experiment & Test Tracker
 
-| Version | Status         | Summary Focus                             | Test File or Notes                                |
-| ------- | -------------- | ----------------------------------------- | ------------------------------------------------- |
-| v0.2.4  | ✅ Done         | Initial specialised prompt scaffolding    | [experiments\_v0.2.4.md](./experiments_v0.2.4.md) |
-| v0.3.0  | ✅ Done         | Prompt matching baseline, output analysis | [experiments\_v0.3.0.md](./experiments_v0.3.0.md) |
-| v0.4.0  | 🔄 In Progress | Enhanced alias matching, diagnostics      | [experiments\_v0.4.0.md](./experiments_v0.4.0.md) |
-| v0.4.1  | 🔼 Planned     | Safety guardrails, refusal patterns       | *(Planned)*                                       |
-| v0.4.2  | 🔼 Planned     | Context memory improvements               | *(Planned)*                                       |
+| Version | Status             | Main Focus                                     | Test File / Notes                                 |
+| ------- | ------------------ | ---------------------------------------------- | ------------------------------------------------- |
+| v0.2.4  | ✅ **Done**         | Initial specialised prompt scaffolding         | [experiments\_v0.2.4.md](./experiments_v0.2.4.md) |
+| v0.3.0  | ✅ **Done**         | Prompt‑matching baseline & output analysis     | [experiments\_v0.3.0.md](./experiments_v0.3.0.md) |
+| v0.4.0  | ✅ **Done**         | Enhanced alias logic & diagnostics             | [experiments\_v0.4.0.md](./experiments_v0.4.0.md) |
+| v0.4.1  | ✅ **Done**         | Safety guard‑rails & refusal patterns          | [experiments\_v0.4.1.md](./experiments_v0.4.1.md) |
+| v0.4.2  | ✅ **Done**         | Context trimming & memory injection            | [experiments\_v0.4.2.md](./experiments_v0.4.2.md) |
+| v0.4.3  | 🔄 **In Progress** | Memory backend toggle & summarisation scaffold | *(running)*                                       |
+| v0.5.x  | 🔼 **Planned**     | Containerisation & deployment tests            | *(TBD)*                                           |
+
+> **Legend**  ✅ Done  ·  🔄 In Progress  ·  🔼 Planned
+> All markdown files live under `/experiments/`.
 
 ---
 
-## Folder Structure
+## Folder Convention
 
-All experiment documents live under the `/experiments/` folder using the naming convention:
-
-```plaintext
-experiments_v[version].md
-```
-
-Example:
-
-```plaintext
+```text
 experiments/
 ├── experiments_v0.2.4.md
 ├── experiments_v0.3.0.md
 ├── experiments_v0.4.0.md
+├── experiments_v0.4.1.md
+├── experiments_v0.4.2.md
+└── …
 ```
 
 ---
 
-## How to Contribute a New Test Set
+## Adding a New Experiment
 
-1. Create a new file in `/experiments/` named `experiments_vX.Y.Z.md`.
-2. Follow the format used in previous versions:
+1. **Create** a file named `experiments_vX.Y.Z.md` in `/experiments/`.
+
+2. Follow the template:
 
    * **Input**
-   * **Matched Concept**
-   * **Resolved Prompt**
+   * **Matched Concept** / **Prompt Source**
+   * **Resolved Prompt Snippet**
    * **Output**
-   * **Observations**
-3. Add a new row to the tracker table above with a short description and link.
+   * **Observations / Next Steps**
+
+3. **Link** the new file in the tracker table above.
 
 ---
 
-## Versioned Experiment Details
+## Version Highlights
 
-### **v0.4.0 – Prompt Matching Enhancements**
+### v0.4.2 – Context Memory Integration
 
-**Focus:**
-Improved alias matching logic, multi-token phrase detection, diagnostics logging, and fallback handling.
+* Combined persistent memory with live history.
+* Verified trimming logic respects token budget.
+* Added rich debug logging for injected vs. live turns.
 
-[experiments\_v0.4.0.md](./experiments_v0.4.0.md)
+### v0.4.1 – Safety Guard‑Rails
 
----
+* Implemented profanity list & sensitivity modes.
+* Block/Filter pathways confirmed with five test cases.
 
-### **v0.3.0 – Structured Prompting & Safety Exploration**
+### v0.4.0 – Improved Prompt Matching
 
-**Focus:**
-Baseline testing of prompt matching, safety-related query responses, and decoding behaviour.
+* Multi‑token alias detection & fuzzy fallback.
+* Diagnostic logs for direct / fuzzy hits.
 
-[experiments\_v0.3.0.md](./experiments_v0.3.0.md)
-
----
-
-### **v0.2.4 – Initial Specialized Prompt Scaffolding**
-
-**Focus:**
-First tests with `specialized_prompts.json` and alias resolution.
-Basic prompt injection and developer playground testing.
-
-[experiments\_v0.2.4.md](./experiments_v0.2.4.md)
+*For earlier details see their respective markdown files.*
 
 ---
 
@@ -98,5 +89,9 @@ Basic prompt injection and developer playground testing.
 * [README.md](../README.md)
 * [release\_notes.md](../docs/release_notes.md)
 * [scope.md](../docs/scope.md)
-* [ROADMAP.md](../docs/ROADMAP.md)
+* [ROADMAP.md](../docs/roadmap.md)
 * [contributing.md](../docs/contributing.md)
+
+---
+
+> *This index is updated every time new experiments land in **main**.*

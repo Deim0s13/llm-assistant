@@ -125,8 +125,11 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
 
     if DEBUG_MODE:
         logging.debug(
-            "[Memory] injected=%d | live=%d | combined=%d",
-            session_id, len(mem_turns), len(live_turns), len(combined),
+            "[Memory] session=%s | injected=%d | live=%d | combined=%d",
+            session_id,
+            len(mem_turns),
+            len(live_turns),
+            len(combined),
         )
 
     def build(hist_slice):
