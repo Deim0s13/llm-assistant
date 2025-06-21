@@ -1,33 +1,53 @@
-import re
-import pytest
-from main import prepare_context, load_base_prompt, load_specialized_prompts
+# experiments/test_memory_toggle.py
+import re, pytest, importlib
+from pathlib import Path
+
 from experiments.memory_test_utils import set_memory_enabled
 from utils.memory import memory
+import main as _main
 
-BASE = load_base_prompt()
-SPEC = load_specialized_prompts()
+# ──────────────────────────────────────────────────────────────
+# Patch prompt paths so the test uses *tiny* files, ensuring
+# our injected memory won’t be truncated.
+# ──────────────────────────────────────────────────────────────
+_MAIN = importlib.reload(_main)
 
-@pytest.mark.parametrize("flag", [True, False])
-def test_memory_toggle(flag):
-    set_memory_enabled(flag)
-    memory.clear()
+tiny_prompt_path = Path(__file__).with_suffix(".base_prompt.txt")
+tiny_prompt_path.write_text("You are a **test** assistant.")
+_MAIN.BASE_PROMPT_PATH = str(tiny_prompt_path)          # type: ignore[attr-defined]
 
-    # seed memory ONLY if flag is True
-    if flag:
-        memory.save({"role": "user", "content": "Hello"})
-        memory.save({"role": "assistant", "content": "Hi!"})
+empty_spec_path = Path(__file__).with_suffix(".spec.json")
+empty_spec_path.write_text("{}")
+_MAIN.SPECIALIZED_PROMPTS_PATH = str(empty_spec_path)   # type: ignore[attr-defined]
 
-    live = [{"role": "user", "content": "Ping"}]
+BASE = _MAIN.load_base_prompt()
+SPEC = _MAIN.load_specialized_prompts()
 
-    ctx, _ = prepare_context("Pong", live, BASE, SPEC, fuzzy=True)
+_MAIN.SETTINGS["context"]["max_prompt_tokens"] = 2048
 
-    # --- assertions ---
-    assert ctx.startswith(BASE[:50]), "Base prompt missing"
-    assert "User: Pong" in ctx,       "Current turn missing"
+# ──────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("mem_on", [True, False])
+def test_memory_toggle(mem_on):
+    set_memory_enabled(mem_on)
+    _MAIN.SETTINGS["memory"]["enabled"] = mem_on  # keep prepare_context in sync
+    _MAIN.memory.clear()
 
-    if flag:
-        # Memory should be present
-        assert re.search(r"Hello", ctx), "Expected memory not injected"
+    if mem_on:
+        _MAIN.memory.save({"role": "user", "content": "Hello"})
+        _MAIN.memory.save({"role": "assistant", "content": "Hi!"})
+
+    live_history = [{"role": "user", "content": "Ping"}]
+
+    ctx, _ = _MAIN.prepare_context("Pong", live_history, BASE, SPEC, fuzzy=False)
+
+    # common assertions
+    assert ctx.startswith(BASE), "Base prompt missing or altered"
+    assert "User: Pong" in ctx,  "Current turn missing"
+
+    # mode-specific assertions
+    if mem_on:
+        assert any(tok in ctx for tok in ("Hello", "Hi!")), \
+            "Memory not injected while enabled"
     else:
-        # No memory text at all
-        assert "Hello" not in ctx,       "Memory surfaced when disabled"
+        assert all(tok not in ctx for tok in ("Hello", "Hi!")), \
+            "Memory surfaced even though disabled"

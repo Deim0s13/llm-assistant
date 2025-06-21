@@ -1,26 +1,36 @@
-from main import prepare_context, load_base_prompt, load_specialized_prompts
+#!/usr/bin/env python
+"""
+Quick manual smoke-test: memory ENABLED
+───────────────────────────────────────
+• Memory flag switched on
+• Pre-seed two memory turns
+• Verify injected memory + live history
+"""
 from experiments.memory_test_utils import set_memory_enabled
 from utils.memory import memory
+from main import (
+    prepare_context,
+    load_base_prompt,
+    load_specialized_prompts,
+)
 
-# 1) Turn memory **on**
-SETTINGS = set_memory_enabled(True)
-
-# 2) Pre-seed memory with two turns
+# 1) Enable memory and clear any previous state
+set_memory_enabled(True)
 memory.clear()
+
+# 2) Pre-seed conversation memory
 memory.save({"role": "user", "content": "Hello"})
 memory.save({"role": "assistant", "content": "Hi, how can I help?"})
 
-# 3) Fake a short live history
-live_history = [
-    {"role": "user", "content": "What's the weather?"},
-]
+# 3) Minimal live history
+history = [{"role": "user", "content": "What's the weather?"}]
 
 ctx, _ = prepare_context(
-    "Tell me a joke.",           # current user message
-    live_history,                # live convo
+    "Tell me a joke.",
+    history,
     load_base_prompt(),
     load_specialized_prompts(),
-    fuzzy=True
+    fuzzy=False,
 )
 
 print("=== MEMORY ENABLED ===")

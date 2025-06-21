@@ -1,33 +1,45 @@
+#!/usr/bin/env python
 """
 experiments/memory_test_utils.py
-Helpers used by the memory-toggle experiment scripts.
+--------------------------------
+
+Tiny helper used by experiment & unit-test scripts to flip memory
+behaviour at runtime without restarting the app.
+
+Usage
+-----
+>>> from experiments.memory_test_utils import set_memory_enabled
+>>> set_memory_enabled(True)   # enable + fresh store
+>>> set_memory_enabled(False)  # disable completely
 """
 
-from utils.memory           import memory, MemoryBackend
 from config.settings_loader import load_settings
+from utils.memory           import memory, MemoryBackend
+from main                    import SETTINGS
 
-# ------------------------------------------------------------------ #
-# toggle helper                                                      #
-# ------------------------------------------------------------------ #
-def set_memory_enabled(enabled: bool) -> None:
+
+def set_memory_enabled(flag: bool, backend: str = "in_memory") -> dict:
     """
-    Enable / disable conversation memory *at runtime* for tests.
+    Toggle conversation-memory ON / OFF for the **current** Python process.
 
-    • Updates the in-process settings dict.
-    • Swaps the singleton's backend (IN_MEMORY ⟷ NONE).
-    • Clears any stored turns so tests start clean.
+    • Updates the shared SETTINGS dict
+    • Switches the live singleton backend
+    • Clears stored turns so tests start clean
+
+    Returns the mutated SETTINGS for convenience.
     """
-    settings = load_settings()
-    settings.setdefault("memory", {})
-    settings["memory"]["enabled"] = enabled
+    SETTINGS.setdefault("memory", {})
+    SETTINGS["memory"]["enabled"] = flag
+    SETTINGS["memory"]["backend"] = backend if flag else "none"
 
-    # swap backend
+    # swap the active backend on the singleton in real time
     memory.backend = (
-        MemoryBackend.IN_MEMORY if enabled else MemoryBackend.NONE
+        MemoryBackend.IN_MEMORY if flag else MemoryBackend.NONE
     )
 
-    # start every test from a clean slate
+    # always begin with an empty store so tests are independent
     memory.clear()
 
-    state = "ON" if enabled else "OFF"
-    print(f"[Test Helper] Memory toggle → {state}")
+    state = "ON" if flag else "OFF"
+    print(f"[Test Helper] Memory toggle → {state} (backend={memory.backend.value})")
+    return SETTINGS

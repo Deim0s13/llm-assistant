@@ -130,10 +130,11 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for specifics.
 
 ## Useful Links
 
-* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
-* 📝 [Scope](./docs/scope.md)
-* 🪵 [Release Notes](./docs/release_notes.md)
-* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
+* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
+* 📝 [Scope](./docs/scope.md)
+* 🪵 [Release Notes](./docs/release_notes.md)
+* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
+* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
 
 ---
 

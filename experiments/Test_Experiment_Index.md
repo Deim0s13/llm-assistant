@@ -91,6 +91,7 @@ experiments/
 * [scope.md](../docs/scope.md)
 * [ROADMAP.md](../docs/roadmap.md)
 * [contributing.md](../docs/contributing.md)
+* [Summarisation Planning](./docs/summarisation_planning.md)
 
 ---
 

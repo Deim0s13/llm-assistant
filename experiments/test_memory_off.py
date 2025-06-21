@@ -1,23 +1,32 @@
-from main import prepare_context, load_base_prompt, load_specialized_prompts
+#!/usr/bin/env python
+"""
+Quick manual smoke-test: memory DISABLED
+────────────────────────────────────────
+• Memory flag switched off
+• Memory store cleared
+• Context should contain *only* the live turn
+"""
 from experiments.memory_test_utils import set_memory_enabled
 from utils.memory import memory
+from main import (
+    prepare_context,
+    load_base_prompt,
+    load_specialized_prompts,
+)
 
-# 1) Turn memory **off**
-SETTINGS = set_memory_enabled(False)
-
-# 2) Clear any previous memory to prove fallback
+# 1) Disable memory and reset singleton state
+set_memory_enabled(False)
 memory.clear()
 
-live_history = [
-    {"role": "user", "content": "Who painted the Mona Lisa?"},
-]
+# 2) Live history for this test
+history = [{"role": "user", "content": "Who painted the Mona Lisa?"}]
 
 ctx, _ = prepare_context(
-    "And what year?",            # current user message
-    live_history,
+    "And what year?",
+    history,
     load_base_prompt(),
     load_specialized_prompts(),
-    fuzzy=True
+    fuzzy=False,
 )
 
 print("=== MEMORY DISABLED ===")
