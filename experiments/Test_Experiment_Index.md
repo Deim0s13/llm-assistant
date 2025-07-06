@@ -19,12 +19,12 @@ A structured tracker gives us:
 
 | Version | Status             | Main Focus                                     | Test File / Notes                                 |
 | ------- | ------------------ | ---------------------------------------------- | ------------------------------------------------- |
-| v0.2.4  | ✅ **Done**         | Initial specialised prompt scaffolding         | [experiments\_v0.2.4.md](./experiments_v0.2.4.md) |
-| v0.3.0  | ✅ **Done**         | Prompt‑matching baseline & output analysis     | [experiments\_v0.3.0.md](./experiments_v0.3.0.md) |
-| v0.4.0  | ✅ **Done**         | Enhanced alias logic & diagnostics             | [experiments\_v0.4.0.md](./experiments_v0.4.0.md) |
-| v0.4.1  | ✅ **Done**         | Safety guard‑rails & refusal patterns          | [experiments\_v0.4.1.md](./experiments_v0.4.1.md) |
-| v0.4.2  | ✅ **Done**         | Context trimming & memory injection            | [experiments\_v0.4.2.md](./experiments_v0.4.2.md) |
-| v0.4.3  | 🔄 **In Progress** | Memory backend toggle & summarisation scaffold | *(running)*                                       |
+| v0.2.4  | ✅ **Done**         | Initial specialised prompt scaffolding         | [experiments\_v0.2.4.md](./v0.2.4.md_experiments) |
+| v0.3.0  | ✅ **Done**         | Prompt‑matching baseline & output analysis     | [experiments\_v0.3.0.md](./v0.3.0.md_experiments) |
+| v0.4.0  | ✅ **Done**         | Enhanced alias logic & diagnostics             | [experiments\_v0.4.0.md](./v0.4.0.md_experiments) |
+| v0.4.1  | ✅ **Done**         | Safety guard‑rails & refusal patterns          | [experiments\_v0.4.1.md](./v0.4.1.md_experiments) |
+| v0.4.2  | ✅ **Done**         | Context trimming & memory injection            | [experiments\_v0.4.2.md](./v0.4.2.md_experiments) |
++| v0.4.3  | ✅ **Done**        | Memory backend toggle · summarisation scaffold · refined safety/profanity tests | [experiments\_v0.4.3.md](./v0.4.3.md_experiments) |
 | v0.5.x  | 🔼 **Planned**     | Containerisation & deployment tests            | *(TBD)*                                           |
 
 > **Legend**  ✅ Done  ·  🔄 In Progress  ·  🔼 Planned

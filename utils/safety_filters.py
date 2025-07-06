@@ -87,23 +87,36 @@ def evaluate_safety(
         "I'm unable to respond to that request due to safety policies.",
     )
 
-    # Detect profanity
-    match   = regex.search(message)
-    profane = bool(match and match.group(0).lower() not in whitelist)
-    if match and log_triggers:
-        logging.debug(
-            "[Safety] profanity=%s term=%s level=%s msg=%s",
-            profane, match.group(0), level, message,
-        )
+    # ───────────────────────────────  Detect profanity  ───────────────────────────────
 
-    if not profane:
-        return True, None  # safe
+    match = regex.search(message)
+    matched_word = match.group(0).lower() if match else ""
+    profane = bool(match and matched_word not in whitelist)
 
-    # Profanity found – act according to level
-    if level == "strict":
+    if profane and log_triggers:
+        logging.debug("[Safety] Profanity detected (level=%s, term=%s): %s",
+                      level, matched_word, message)
+
+    # ─────────────────────────────── NEW: absolute-block list ───────────────────────────────
+    # If the matched word is in *strict_terms*, we always block,
+    # regardless of the chosen sensitivity level.
+    if profane and matched_word in strict_terms:
         return False, refusal_text
-    elif level == "moderate":
-        # Allowed, but caller should run apply_profanity_filter() on output
+
+    # ───────────────────────── decision ladder ─────────────────────────
+    #
+    # 1) Hard override: any word in strict_terms → always block
+    if matched_word in strict_terms:
+        return False, refusal_text
+
+    # 2) Per-message whitelist: allow specific words even in strict mode
+    if matched_word in whitelist:
         return True, None
-    else:  # "relaxed" or unknown
+
+    # 3) Fall back to global sensitivity rules
+    if level == "strict":
+        return False, refusal_text          # blanket block
+    elif level == "moderate":
+        return True, None                   # allow, but caller should mask
+    else:                                   # relaxed / unknown
         return True, None
