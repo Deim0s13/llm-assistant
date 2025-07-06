@@ -3,6 +3,7 @@
 # ════════════════════════════════════════════════════════════════════
 
 # ─────────────────────────────── Logging ───────────────────────────────
+
 import logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -14,6 +15,7 @@ logging.basicConfig(
 )
 
 #  ─────────────────────────────── Imports  ───────────────────────────────
+
 import json, difflib, gradio as gr, torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -24,6 +26,7 @@ from utils.memory           import memory
 from config.settings_loader import load_settings
 
 # ─────────────────────────────── Globals / Helpers ───────────────────────────────
+
 DEBUG_MODE  = True
 SETTINGS    = load_settings()
 
@@ -43,6 +46,7 @@ def count_tokens(text: str) -> int:
     return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
 # ─────────────────────────────── Model initialisation ───────────────────────────────
+
 def initialize_model(model_name: str = "google/flan-t5-base"):
     """Load tokenizer/model and move model onto best device."""
     tok = AutoTokenizer.from_pretrained(model_name)
@@ -61,6 +65,7 @@ def initialize_model(model_name: str = "google/flan-t5-base"):
     return tok, mdl, device
 
 # ─────────────────────────────── Prompt-file loaders ───────────────────────────────
+
 BASE_PROMPT_PATH         = "config/prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
 
@@ -75,6 +80,7 @@ def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH) -> dict:
     return data
 
 # ─────────────────────────────── Memory helper ───────────────────────────────
+
 def _memory_turns(max_turns: int, session: str = "default") -> list[dict]:
     """Return last `max_turns` messages from Memory (or [])."""
     if not SETTINGS["memory"]["enabled"]:
@@ -82,6 +88,7 @@ def _memory_turns(max_turns: int, session: str = "default") -> list[dict]:
     return memory.load(session)[-max_turns:]
 
 # ─────────────────────────────── Prompt-selection ───────────────────────────────
+
 def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
     """
     Return (prompt_text, concept, match_score|None).
@@ -112,7 +119,45 @@ def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
     return "", "base_prompt", None
 
 # ─────────────────────────────── Context preparation ───────────────────────────────
+
 def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
+    """
+    Build the full prompt string that is passed to the model.
+
+    ╭────────────────── Prompt-Assembly Pipeline ──────────────────╮
+    │ 1️⃣  SPECIAL PROMPT  – alias / fuzzy match (optional)        │
+    │ 2️⃣  MEMORY TURNS    – stored conversation (if enabled)      │
+    │ 3️⃣  LIVE HISTORY    – last N on-screen chat messages        │
+    │ 4️⃣  USER MESSAGE    – current turn                          │
+    ╰──────────────────────────────────────────────────────────────╯
+
+    Memory logic
+    ------------
+    • SETTINGS["memory"]["enabled"] == False
+        → `_memory_turns()` returns an empty list → only live history is used.
+
+    • SETTINGS["memory"]["enabled"] == True  and
+      utils.memory.backend != MemoryBackend.NONE
+        → `_memory_turns()` returns up to N stored turns which are **prepended**
+          before the latest on-screen history.
+
+    • If the combined token count exceeds
+      `SETTINGS["context"]["max_prompt_tokens"]`, the oldest turns
+      (memory **and** live) are trimmed first.
+
+    Looking ahead (v0.4.4+)
+    -----------------------
+    • `summarise_context()` will soon compress trimmed lines into a single
+      “⚡ Summary so far” block instead of hard-dropping turns.
+    • Persistent stores (Redis / SQLite) will register in `MemoryBackend`
+      but *this* function will remain unchanged.
+
+    Returns
+    -------
+    context : str   – Final prompt ready for tokenisation.
+    source  : str   – "base_prompt" or specialised concept name (diagnostics).
+    """
+
     max_turns  = SETTINGS["context"]["max_history_turns"]
     max_tokens = SETTINGS["context"]["max_prompt_tokens"]
 
@@ -153,6 +198,7 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
     return context, src
 
 # ─────────────────────────────── Chat generation ───────────────────────────────
+
 def chat(msg, history, mx, temp, top_p, sample, fuzzy):
     allowed, block_msg = evaluate_safety(msg, SETTINGS)
     if not allowed:
@@ -186,6 +232,7 @@ def chat(msg, history, mx, temp, top_p, sample, fuzzy):
     return history, src
 
 # ─────────────────────────────── Gradio wrappers ───────────────────────────────
+
 def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
     SETTINGS["safety"]["sensitivity_level"] = safety
     history = history or []
@@ -193,11 +240,13 @@ def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
     return "", new_hist, f"Prompt source: {src}"
 
 # ─────────────────────────────── Boot phase ───────────────────────────────
+
 BASE_PROMPT              = load_base_prompt()
 SPECIALIZED_PROMPTS       = load_specialized_prompts()
 tokenizer, model, device = initialize_model()
 
 # ─────────────────────────────── Playground helper ───────────────────────────────
+
 def run_playground(test_in, mx, temp, top_p, sample, fuzzy, force):
     if not force:
         return "", "", ""
@@ -214,6 +263,7 @@ def run_playground(test_in, mx, temp, top_p, sample, fuzzy, force):
     return f"{concept} (conf {score_s})", prompt, preview
 
 # ─────────────────────────────── Gradio UI ───────────────────────────────
+
 with gr.Blocks() as demo:
     gr.Markdown("# Chatbot with Tunable Generation Parameters")
 
@@ -274,6 +324,7 @@ with gr.Blocks() as demo:
     )
 
 # ════════════════════════════════════════════════════════════════════
+
 if __name__ == "__main__":
     logging.debug("🚀 Launching Gradio demo …")
     demo.launch()
