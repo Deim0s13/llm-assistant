@@ -1,0 +1,63 @@
+{
+  "last_n": [
+    {
+      "role": "user",
+      "content": "Why is the sky blue?"
+    },
+    {
+      "role": "assistant",
+      "content": "Sure! Rome was traditionally founded in 753 BC \u2026"
+    },
+    {
+      "role": "user",
+      "content": "What's the weather like tomorrow?"
+    },
+    {
+      "role": "assistant",
+      "content": "The sky appears blue due to Rayleigh scattering \u2026"
+    }
+  ],
+  "user_only": [
+    {
+      "role": "user",
+      "content": "Explain quantum entanglement simply"
+    },
+    {
+      "role": "user",
+      "content": "Explain quantum entanglement simply"
+    },
+    {
+      "role": "user",
+      "content": "What's the weather like tomorrow?"
+    },
+    {
+      "role": "user",
+      "content": "Why is the sky blue?"
+    },
+    {
+      "role": "user",
+      "content": "What's the weather like tomorrow?"
+    },
+    {
+      "role": "user",
+      "content": "Recommend a sci-fi novel."
+    },
+    {
+      "role": "user",
+      "content": "Explain quantum entanglement simply"
+    },
+    {
+      "role": "user",
+      "content": "Tell me about the history of Rome."
+    },
+    {
+      "role": "user",
+      "content": "Why is the sky blue?"
+    },
+    {
+      "role": "user",
+      "content": "What's the weather like tomorrow?"
+    }
+  ],
+  "scaffold_summary": "\u2022 Summary of prior discussion (placeholder \u2013 real summarisation TBD)\n"
+}

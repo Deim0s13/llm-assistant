@@ -28,14 +28,14 @@ history = [
     {"role": "assistant", "content": "Ask away!"}
 ]
 
-message = "Tell me how frogs breathe."
+msg = "How do frogs breathe?"
 
 context, source = main.prepare_context(
-    message=message,
-    history=history,
-    base_prompt=base_prompt,
-    specialized_prompts=specialized_prompts,
-    fuzzy_matching_enabled=fuzzy_matching_enabled
+    msg,
+    history,
+    base_prompt,
+    specialized_prompts,
+    fuzzy_matching_enabled
 )
 
 print("\n=== Trimmed History Test ===")
