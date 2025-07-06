@@ -9,44 +9,48 @@ OpenAI moderation, Perspective API, custom models) can later replace the
 `evaluate_safety()` stub without changing the main chat flow.
 """
 
-# ───────────────────────────────────────────────────────── Imports ──
+# ───────────────────────────────  Imports ───────────────────────────────
+
 from __future__ import annotations
 
 import logging
 import re
 from typing import Tuple, Optional
+from functools import lru_cache
 
+# ─────────────────────────────── Static data ───────────────────────────────
 
-# ──────────────────────────────────────── Static data ──
-# A **very** small placeholder list; expand or externalise later.
-PROFANITY_LIST = ["damn", "hell", "shit", "fuck"]
+_DEFAULT_PROFANITY = ["damn", "hell", "shit", "fuck"]
 
-# Compiled regex so we do the heavy work once
-_PROFANITY_REGEX = re.compile(
-    r"\b(" + "|".join(re.escape(w) for w in PROFANITY_LIST) + r")\b",
-    flags=re.IGNORECASE,
-)
-
-
-# ─────────────────────────────────── Profanity masking ──
-def apply_profanity_filter(text: str) -> str:
+@lru_cache(maxsize=8)
+def _build_profanity_regex(strict_terms: tuple[str, ...] = (),
+                           extra_terms : tuple[str, ...] = ()) -> re.Pattern:
     """
-    Replace each profane word in *text* with the equivalent number of
-    asterisks, preserving capitalisation length only.
+    Lazily compile  ❱  ( default ∪ strict_terms ∪ extra_terms )  ❰
+    into a single *whole-word* regex.  Cached for speed.
+    """
+    wordlist = set(_DEFAULT_PROFANITY) | set(strict_terms) | set(extra_terms)
+    pattern  = r"\b(" + "|".join(map(re.escape, sorted(wordlist))) + r")\b"
+    return re.compile(pattern, flags=re.IGNORECASE)
 
-    Example
-    -------
-    >>> apply_profanity_filter("That is damn funny")
-    'That is **** funny'
+# ───────────────────────────────  Profanity masking ───────────────────────────────
+
+def apply_profanity_filter(text: str, regex: re.Pattern | None = None) -> str:
+    """
+    Mask profane words with asterisks (same length, preserves case count).
+    A pre-compiled *regex* can be passed in from evaluate_safety() so
+    we don't compile twice
     """
 
-    def _mask(match: re.Match) -> str:  # local helper
+    regex = regex or _build_profanity_regex()
+
+    def _mask(match: re.Match) -> str:
         return "*" * len(match.group())
 
-    return _PROFANITY_REGEX.sub(_mask, text)
+    return regex.sub(_mask, text)
 
+# ─────────────────────────────── Safety pre-generation ───────────────────────────────
 
-# ─────────────────────────────── Safety pre-generation ──
 def evaluate_safety(
     message: str,
     settings: dict,
@@ -72,13 +76,20 @@ def evaluate_safety(
     config = settings.get("safety", {})
     level = config.get("sensitivity_level", "moderate").lower()
     log_triggers = config.get("log_triggered_filters", False)
+    strict_terms = tuple(config.get("strict_terms", []))
+    whitelist = set(w.lower() for w in config.get("relaxed_whitelist", []))
+    extra_terms = tuple(config.get("extra_phrases", {}).keys())
+
+    regex = _build_profanity_regex(strict_terms, extra_terms)
+
     refusal_text = config.get(
         "blocked_response_template",
         "I'm unable to respond to that request due to safety policies.",
     )
 
     # Detect profanity
-    profane = bool(_PROFANITY_REGEX.search(message))
+    match   = regex.search(message)
+    profane = bool(match and match.group(0).lower() not in whitelist)
     if profane and log_triggers:
         logging.debug("[Safety] Profanity detected (level=%s): %s", level, message)
 

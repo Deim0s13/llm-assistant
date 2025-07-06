@@ -1,5 +1,5 @@
 transformers
 torch
 gradio
-python-dotenv
+python-dotenv>1.0.0
 pytest

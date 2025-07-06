@@ -15,9 +15,8 @@ import json
 import logging
 import os
 
-# ---------------------------------------------------------------------
-#  Paths & defaults
-# ---------------------------------------------------------------------
+#  ───────────────────────────────  Paths & defaults ───────────────────────────────
+
 DEFAULT_SETTINGS_PATH = "config/settings.json"
 
 FALLBACK_SETTINGS = {
@@ -59,14 +58,14 @@ FALLBACK_SETTINGS = {
     }
 }
 
-# ---------------------------------------------------------------------
-#  Loader
-# ---------------------------------------------------------------------
+#  ───────────────────────────────  Loader   ───────────────────────────────
+
 def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict:
     """Load settings from JSON and apply .env overrides."""
     load_dotenv()  # make .env variables available via os.getenv
 
-    # ---------- read file or fall back ----------
+    #  ─────────────────────────────── read file or fall back ───────────────────────────────
+
     try:
         if not os.path.exists(filepath):
             logging.warning("[Settings] %s not found – using defaults", filepath)
@@ -81,7 +80,8 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict:
         logging.error("[Settings] Failed to load %s: %s – using defaults", filepath, e)
         settings = FALLBACK_SETTINGS.copy()
 
-    # ---------- .env overrides ----------
+    #  ─────────────────────────────── .env overrides #  ───────────────────────────────
+
     def env_bool(name: str, default: bool) -> bool:
         val = os.getenv(name)
         return default if val is None else val.lower() == "true"
@@ -99,7 +99,8 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict:
     if mem_enabled is not None:
         settings.setdefault("memory", {})["enabled"] = mem_enabled.lower() == "true"
 
-    # ---------- debug prints ----------
+   #  ─────────────────────────────── debug prints ───────────────────────────────
+
     logging.debug("[Settings] DEBUG_MODE = %s", settings["logging"]["debug_mode"])
     logging.debug("[Settings] MAX_HISTORY_TURNS = %s", settings["context"]["max_history_turns"])
     logging.debug("[Settings] MEMORY backend = %s | enabled = %s",
