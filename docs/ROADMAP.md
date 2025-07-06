@@ -51,20 +51,20 @@ compare against the base model.
 
 ## Delivery Milestones by Version
 
-| Version | Focus Area (Epic)                               | Status |
-|---------|-------------------------------------------------|--------|
-| **v0.1.0** | Minimal static chatbot (single prompt)         | ✅ Done |
-| **v0.2.0 – 0.2.5** | Multi-turn memory, specialised prompts, UI polish | ✅ Done |
-| **v0.3.0** | Structured experiments & diagnostics panel     | ✅ Done |
-| **v0.4.0** | Alias-driven prompt matching                   | ✅ Done |
-| **v0.4.1** | Safety guard-rails & post-filtering            | ✅ Done |
-| **v0.4.2** | Context trimming & debug logging               | ✅ Done |
-| **v0.4.3** | *Current* – In-memory backend + summarise scaffold | 🔄 In Progress |
-| **v0.4.4** | **Persistent memory (Redis/SQLite) + Summarise-MVP** | 🔜 Planned |
-| **v0.4.5** | Evaluation harness & expanded guard-rails      | 🔜 Planned |
-| **v0.5.0** | Containerisation & CI pipeline (Podman / OpenShift) | 🔜 Planned |
-| **v0.6.x** | RAG prototype (file-based Q&A)                 | 🔜 Planned |
-| **v0.7.x** | Fine-tuning foundation setup                   | 🔜 Planned |
+| Version | Focus Area (Epic)                                  | Status |
+|---------|----------------------------------------------------|--------|
+| **v0.1.0** | Minimal static chatbot                           | ✅ Done |
+| **v0.2.0 – 0.2.5** | Multi-turn memory, UI controls              | ✅ Done |
+| **v0.3.0** | Experiments & diagnostics panel                  | ✅ Done |
+| **v0.4.0** | Alias-driven prompt matching                     | ✅ Done |
+| **v0.4.1** | Safety guardrails & post-filtering               | ✅ Done |
+| **v0.4.2** | Context trimming & debug logging                 | ✅ Done |
+| **v0.4.3** | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | 🔄 In Progress |
+| **v0.4.4** | **Persistent memory, Summarise MVP, CI test pipeline** | 🔜 Planned |
+| **v0.4.5** | Evaluation harness & extended guard-rails        | 🔜 Planned |
+| **v0.5.0** | Containerisation & full CI matrix                | 🔜 Planned |
+| **v0.6.x** | RAG prototype (file-based Q&A)                   | 🔜 Planned |
+| **v0.7.x** | Fine-tuning foundation setup                     | 🔜 Planned |
 
 *(milestone titles match what will be created in GitHub → feel free to rename)*
 

@@ -1,139 +1,132 @@
-# Project Scope & Planning Overview 📑
+# LLM Chatbot Project — Scope & Roadmap 📑
 
-A living document outlining **what** each version of the LLM-Chatbot Starter Kit sets out to achieve — and **why**.
+*Last updated: **v0.4.3** (Memory façade + summarisation scaffold)*
 
-It keeps development aligned with the project’s dual purpose:
-
-1. **Hands-on learning** about LLM behaviour, prompt design, safety & memory techniques.
-2. **Modular, production-minded engineering** that can grow into a full assistant stack.
+This document unifies the **learning journey** and the **delivery roadmap** so everyone can see **why** each feature ships, **what** is in-scope for a release, and **how** it maps to GitHub Milestones.
 
 ---
 
-## Why keep a formal scope file?
+## 1 Learning Phases & Goals
 
-* Record the *vision* behind every feature, not just its code.
-* Show the **goal / out-of-scope / success-criteria** for each release.
-* Provide quick context when deciding whether a new idea belongs *now* or in a future milestone.
-* Tie learning-oriented experiments back to concrete deliverables.
-
-It complements:
-
-* **[`README.md`](../README.md)** – *current* status & quick-start.
-* **[`release_notes.md`](./release_notes.md)** – granular changelog.
-* **GitHub Projects board** – day-to-day issue tracking.
+| Phase | Version Range | Theme | Key Take-away |
+|-------|---------------|-------|--------------|
+| **1** | v0.1 → v0.4.x | *Basic LLM-powered chatbot* | Core chat loop, prompt engineering, safety, memory |
+| **2** | v0.6.x → v0.7.x | *Fine-tuning playground* | Collect data, apply LoRA/QLoRA, compare results |
+| **3** | v0.8.x → v1.0.0 | *Packaging & scaling* | Container images, persistent memory, integrations |
 
 ---
 
-## Completed Versions
+## 2 Version Milestones
 
-### v0.2.x – Core Feature Set 🎯
+| Version | Focus / Epic | Status |
+|---------|--------------|--------|
+| **0.1.0** | Minimal static chatbot | ✅ Done |
+| **0.2.0 → 0.2.5** | Multi-turn context, UI sliders, specialised prompts | ✅ Done |
+| **0.3.0** | Experiments framework & diagnostics panel | ✅ Done |
+| **0.4.0** | Alias-driven prompt matching | ✅ Done |
+| **0.4.1** | Safety guardrails (strict / moderate / relaxed) | ✅ Done |
+| **0.4.2** | Context trimming & debug logging | ✅ Done |
+| **0.4.3** | In-memory backend + summarisation scaffold | 🔄 *In Progress* |
+| **0.4.4** | **Persistent memory (Redis/SQLite) + Summarise MVP** | 🔜 Planned |
+| **0.4.5** | Evaluation harness + expanded guardrails | 🔜 Planned |
+| **0.5.0** | Containerisation & CI (Podman / OpenShift) | 🔜 Planned |
+| **0.6.x** | RAG prototype (file-based Q&A) | 🔜 Planned |
+| **0.7.x** | Fine-tuning foundation | 🔜 Planned |
 
-| Sub-ver | Focus                                       | Key Points |
-|---------|---------------------------------------------|------------|
-| 0.2.0   | Multi-turn history, sliders, external base prompt | Context window; generation controls |
-| 0.2.1   | Specialised prompts & file loading polish   | Expanded prompt library |
-| 0.2.2   | **Model upgrade** `flan-t5-base`            | Better comprehension |
-| 0.2.3   | Alias diagnostics                           | Prompt-source display |
-| 0.2.4   | Dev Playground, fuzzy matching              | Auto-preview toggle |
-| 0.2.5   | Naming & UI polish                          | Fuzzy-score logging |
-
-#### Success Snapshot
-* Reliable specialised prompt injection.
-* Clear debug trail of prompt selection & generation parameters.
-
----
-
-### v0.3.0 – Experiments Framework 🔬
-
-* Added `/experiments/` markdown logs.
-* Ran systematic tests on prompt phrasing, decoding, safety toggles.
-* Findings influenced later alias & safety design.
+> **Consistency check**: all milestone names match the GitHub Project board.
 
 ---
 
-### v0.4.0 – Alias Matching Overhaul 🧩
+## 3 Completed Highlights
 
-* Token-level multi-word alias detection.
-* Expanded `prompt_aliases.json`.
-* Richer “[Prompt] …” logs with fallback reasoning.
+### v0.2.x — Core Features
+
+* Multi-turn history, external base prompt, generation controls.
+* Early specialised prompt injection & alias diagnostics.
+
+### v0.3.0 — Experiments Framework
+
+* `/experiments/` notebooks & logs.
+* Findings fed into later alias and safety work.
+
+### v0.4.0 — Alias Overhaul
+
+* Token-level multi-word detection.
+* Expanded `prompt_aliases.json`, richer debug logs.
+
+### v0.4.1 — Safety Guardrails
+
+* Profanity filter with strict | moderate | relaxed modes.
+* Configurable refusal template.
+
+### v0.4.2 — Context Hygiene
+
+* Turn-count + token-budget trimming.
+* `.env` overrides; GitHub Projects migration.
 
 ---
 
-### v0.4.1 – Safety Guardrails 🛡️ **(Done)**
-
-* `settings.json → safety` section (`strict|moderate|relaxed`).
-* Profanity filter & configurable refusal template.
-* Logged rule triggers; tests recorded in experiments.
-
----
-
-### v0.4.2 – Context Window & Dev Hygiene 🧹 **(Done)**
-
-* **Turn-limit + token-limit trimming** with debug counts.
-* Auto device-select (CUDA ▸ MPS ▸ CPU).
-* `.env` overrides; `python-dotenv` bootstrap.
-* Migration to **GitHub Projects** board; `README` & `CONTRIBUTING` rewritten.
-
----
-
-## Active Development
-
-### v0.4.3 – Memory Backend & Summarisation Scaffold 🗄️ **(In Progress)**
+## 4 Current Cycle — **v0.4.3**  🗄️📝
 
 | Track | Deliverable | Status |
 |-------|-------------|--------|
-| Memory | `utils/memory.py` singleton (`IN_MEMORY` / `NONE`) | ✅ Impl |
-| Config | `settings.json → memory.enabled/backend`           | ✅ Impl |
-| Context | `prepare_context()` merges *memory* + live history | ✅ Impl |
-| Logging | `[Memory]` startup status, load/save counts        | ✅ Impl |
-| Tests | Scripts for memory *on/off* behaviour                | 🔄 Draft |
-| Summarisation | `summarise_context()` placeholder + design notes | 🔄 Draft |
-| Docs | Scope/README updated; dev checklist cross-links       | 🔄 Pending |
+| **Memory** | `utils/memory.py` singleton (`IN_MEMORY` / `NONE`) | ✅ |
+| | `settings.json → memory.enabled / backend` | ✅ |
+| | Context builder injects *Memory → Live* | ✅ |
+| **Summaries** | `utils/summariser.py::summarise_context()` scaffold | ✅ |
+| | Playground prototype (`experiments/summarisation_playground.py`) | ✅ |
+| **Tests** | **First unit-test suite** → memory on/off, context trim | ✅ |
+| | Smoke-script `scripts/activate_tests.sh` | ✅ |
+| **Docs** | `summarisation_planning.md`, scope & README refresh | ✅ |
 
-**Success criteria**
-
-* Chat runs identically with memory *enabled* or *disabled*.
-* Debug logs show memory injection counts.
-* Future persistent back-ends can drop in via `MemoryBackend` Enum.
-
----
-
-## Planned / Upcoming
-
-### v0.4.4 – Automated Tests & CI ✅
-
-* **PyTest** suite for context, memory, safety filters.
-* **ruff** lint + **pytest** GitHub Action.
-* Coverage badge & fail-fast on PRs.
-
-### v0.5.x – Containerisation & RAG Prototype 📦
-
-* Podman / Docker image (CPU + GPU variants).
-* Minimal **RAG** pipeline (file embeddings + retrieval).
-* Deployment script for OpenShift Local.
-
-### v0.6.x – Fine-Tuning Playground 🎛️
-
-* LoRA / QLoRA notebook.
-* W&B (or MLflow) experiment tracking.
-* Compare fine-tuned vs base responses inside playground.
+*Success criteria*
+✔ All `pytest` tests pass in DEBUG and non-DEBUG modes.
+✔ Chat behaves identically with memory **on or off**.
+✔ Debug logs show `[Memory] injected / live / combined`.
+✔ Summarisation entry-point ready for real logic in v0.4.4.
 
 ---
 
-## Out-of-Scope (for now)
+## 5 Upcoming Roadmap
 
-* Full multi-user session management.
-* Third-party moderation APIs.
-* Production-grade vector DB integration.
-* Real-time websocket streaming.
+1. **v0.4.4 — Persistent Memory + Summarise MVP + CI**
+   * Redis / SQLite backend, nightly summary roll-ups.
+   * **Expand PyTest coverage** → safety filters, summariser accuracy.
+   * GitHub Action: `ruff`, `pytest`, coverage badge.
+
+2. **v0.4.5 — Evaluation Harness & Guard-rail Edge-cases**
+   * Structured prompt-regression corpus, JSON expectation files.
+   * Scoring dashboard (pass/fail diff).
+
+3. **v0.5.0 — Container & CI**
+   * Podman image, multi-arch builds, end-to-end test matrix.
+
+4. **v0.6.x — RAG Prototype**
+   * File embedding + retrieval “Ask my PDF” flow.
+
+5. **v0.7.x — Fine-tuning Playground**
+   * LoRA/QLoRA scripts, W&B integration.
 
 ---
 
-## Living Process
+## 6 Key Config Flags
 
-1. Proposal → **Issue** (linked to Epic & Milestone).
+| Key | Since | Notes |
+|-----|-------|-------|
+| `memory.enabled` | 0.4.3 | Master toggle (bool) |
+| `memory.backend` | 0.4.3 | `"in_memory"` / `"none"` → future `"redis"`, `"sqlite"` |
+| `context.max_history_turns` | 0.2.0 | Pre-memory live turn cap |
+| `context.max_prompt_tokens` | 0.2.0 | Hard prompt budget |
+
+All can be overridden in `.env` (see README).
+
+---
+
+## 7 Process Recap
+
+1. **Issue** ↔ Epic ↔ Milestone created on GitHub Projects.
 2. Scoped here in `scope.md`.
-3. Implemented in feature branch → PR → `dev`.
-4. On merge, Release Notes updated → milestone closed.
+3. Feature branch → PR → `dev` → squash merge.
+4. Release tag → `release_notes.md` update.
 
-> *Scope evolves with each learning cycle. Check this file at every planning session.*
+> *Keep this file updated each planning session to avoid “doc drift”.* 🚀
