@@ -24,6 +24,7 @@ venv/
 
 # Experiments & test logs (optional)
 experiments/*.log
+debug.log
 
 # Settings file (optional, if user-specific config)
 config/settings.json

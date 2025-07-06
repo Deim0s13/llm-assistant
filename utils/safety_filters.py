@@ -90,8 +90,11 @@ def evaluate_safety(
     # Detect profanity
     match   = regex.search(message)
     profane = bool(match and match.group(0).lower() not in whitelist)
-    if profane and log_triggers:
-        logging.debug("[Safety] Profanity detected (level=%s): %s", level, message)
+    if match and log_triggers:
+        logging.debug(
+            "[Safety] profanity=%s term=%s level=%s msg=%s",
+            profane, match.group(0), level, message,
+        )
 
     if not profane:
         return True, None  # safe
