@@ -22,14 +22,14 @@ history = [
     {"role": "user", "content": "What's the weather like today?"},
 ]
 
-message = "Tell me a joke."
+msg = "Tell me a joke."
 
 context, source = main.prepare_context(
-    message=message,
-    history=history,
-    base_prompt=base_prompt,
-    specialized_prompts=specialized_prompts,
-    fuzzy_matching_enabled=fuzzy_matching_enabled
+    msg,
+    history,
+    base_prompt,
+    specialized_prompts,
+    fuzzy_matching_enabled
 )
 
 print("\n=== Short History Test ===")

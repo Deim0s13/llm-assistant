@@ -1,45 +1,56 @@
-# ─────────────────────────────────────────────────────────
-#  Configure logging (console + debug.log)
-# ─────────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════
+#  main.py – Gradio chat loop, prompt pipeline & memory integration
+# ════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────── Logging ───────────────────────────────
+
 import logging
 logging.basicConfig(
     level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format="%(asctime)s | %(levelname)s | %(message)s",
     handlers=[
-        logging.StreamHandler(),            # terminal
-        logging.FileHandler("debug.log")    # file
-    ]
+        logging.StreamHandler(),            # console
+        logging.FileHandler("debug.log")    # persistent file
+    ],
 )
 
-# ─────────────────────────────────────────────────────────
-#  Imports
-# ─────────────────────────────────────────────────────────
-import json
-import difflib
-import gradio as gr
-import torch
+#  ─────────────────────────────── Imports  ───────────────────────────────
+
+import json, difflib, gradio as gr, torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-from utils.aliases import KEYWORD_ALIASES
-from utils.prompt_utils import alias_in_message
+from utils.aliases          import KEYWORD_ALIASES
+from utils.prompt_utils     import alias_in_message
+from utils.safety_filters   import apply_profanity_filter, evaluate_safety
+from utils.memory           import memory
 from config.settings_loader import load_settings
-from utils.safety_filters import apply_profanity_filter, evaluate_safety
 
-# ─────────────────────────────────────────────────────────
-#  Globals & Helpers
-# ─────────────────────────────────────────────────────────
-DEBUG_MODE = True
-SETTINGS = load_settings()
+# ─────────────────────────────── Globals / Helpers ───────────────────────────────
 
-def count_tokens(txt: str) -> int:
-    return len(tokenizer(txt, return_tensors="pt").input_ids[0])
+DEBUG_MODE  = True
+SETTINGS    = load_settings()
 
-# ─────────────────────────────────────────────────────────
-#  Model initialisation (CUDA ▸ MPS ▸ CPU)
-# ─────────────────────────────────────────────────────────
-def initialize_model(model_name="google/flan-t5-base"):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+if not DEBUG_MODE:
+    logging.getLogger().setLevel(logging.INFO)
+
+# Memory start-up diagnostic
+_mem_cfg = SETTINGS.get("memory", {})
+logging.debug(
+    "[Memory] Enabled=%s | Backend=%s",
+    _mem_cfg.get("enabled", False),
+    _mem_cfg.get("backend", "none"),
+)
+
+def count_tokens(text: str) -> int:
+    """Return #tokens a string yields with current tokenizer."""
+    return len(tokenizer(text, return_tensors="pt").input_ids[0])
+
+# ─────────────────────────────── Model initialisation ───────────────────────────────
+
+def initialize_model(model_name: str = "google/flan-t5-base"):
+    """Load tokenizer/model and move model onto best device."""
+    tok = AutoTokenizer.from_pretrained(model_name)
+    mdl = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
     if torch.cuda.is_available():
         device = "cuda"
@@ -48,291 +59,272 @@ def initialize_model(model_name="google/flan-t5-base"):
     else:
         device = "cpu"
 
-    tokenizer.pad_token = tokenizer.eos_token
-    model.to(device)
-    logging.debug(f"[System] Torch detected device: {device}")
-    return tokenizer, model, device
+    tok.pad_token = tok.eos_token
+    mdl.to(device)
+    logging.debug("[System] Torch device → %s", device)
+    return tok, mdl, device
 
-# ─────────────────────────────────────────────────────────
-#  Prompt-template loaders
-# ─────────────────────────────────────────────────────────
-BASE_PROMPT_PATH = "config/prompt_template.txt"
+# ─────────────────────────────── Prompt-file loaders ───────────────────────────────
+
+BASE_PROMPT_PATH         = "config/prompt_template.txt"
 SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
 
-def load_base_prompt(path=BASE_PROMPT_PATH):
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read().strip()
+def load_base_prompt(path=BASE_PROMPT_PATH) -> str:
+    with open(path, encoding="utf-8") as fh:
+        return fh.read().strip()
 
-def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH):
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    logging.info(f"[Prompt Loader] Loaded {len(data)} specialized prompts.")
-    logging.debug(f"[Prompt Loader] Keys: {list(data.keys())}")
+def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    logging.info("[Prompt] Loaded %d specialised prompts", len(data))
     return data
 
-# ─────────────────────────────────────────────────────────
-#  Prompt-matching
-# ─────────────────────────────────────────────────────────
-def get_specialized_prompt(message, specialized_prompts, fuzzy_enabled):
-    msg = message.lower().replace("’", "'")
-    tokens = msg.split()
+# ─────────────────────────────── Memory helper ───────────────────────────────
 
-    # Direct alias search
+def _memory_turns(max_turns: int, session: str = "default") -> list[dict]:
+    """Return last `max_turns` messages from Memory (or [])."""
+    if not SETTINGS["memory"]["enabled"]:
+        return []
+    return memory.load(session)[-max_turns:]
+
+# ─────────────────────────────── Prompt-selection ───────────────────────────────
+
+def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
+    """
+    Return (prompt_text, concept, match_score|None).
+    If no match → ("", "base_prompt", None)
+    """
+    norm   = msg.lower().replace("’", "'")
+    tokens = norm.split()
+
+    # direct alias
     for alias, concept in KEYWORD_ALIASES.items():
-        if alias_in_message(alias, tokens) and concept in specialized_prompts:
-            prompt = specialized_prompts[concept]
-            if DEBUG_MODE:
-                logging.debug(f"[Prompt Debug] Direct match '{alias}' → {concept}")
-            return prompt, concept, None
+        if alias_in_message(alias, tokens) and concept in prompts:
+            logging.debug("[Prompt] Direct '%s' → %s", alias, concept)
+            return prompts[concept], concept, None
 
-    # Fuzzy fallback
-    if fuzzy_enabled:
+    # fuzzy alias
+    if fuzzy:
         best, score = None, 0.0
         for alias in KEYWORD_ALIASES:
-            sim = difflib.SequenceMatcher(None, msg, alias).ratio()
+            sim = difflib.SequenceMatcher(None, norm, alias).ratio()
             if sim > score and sim >= 0.7:
                 best, score = alias, sim
-        if best:
+        if best and KEYWORD_ALIASES[best] in prompts:
             concept = KEYWORD_ALIASES[best]
-            if concept in specialized_prompts:
-                prompt = specialized_prompts[concept]
-                logging.debug(f"[Prompt Debug] Fuzzy '{best}' (score={score:.2f}) → {concept}")
-                return prompt, concept, score
+            logging.debug("[Prompt] Fuzzy '%s' (%.2f) → %s", best, score, concept)
+            return prompts[concept], concept, score
 
-    logging.debug("[Prompt Debug] No prompt match (direct or fuzzy)")
+    logging.debug("[Prompt] No prompt match")
     return "", "base_prompt", None
 
-# ─────────────────────────────────────────────────────────
-#  Context preparation
-# ─────────────────────────────────────────────────────────
+# ─────────────────────────────── Context preparation ───────────────────────────────
+
 def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
-    max_turns = SETTINGS.get("context", {}).get("max_history_turns", 5)
-    max_tokens = SETTINGS.get("context", {}).get("max_prompt_tokens", 512)
+    """
+    Build the full prompt string that is passed to the model.
 
-    # Resolve prompt FIRST
-    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
+    ╭────────────────── Prompt-Assembly Pipeline ──────────────────╮
+    │ 1️⃣  SPECIAL PROMPT  – alias / fuzzy match (optional)        │
+    │ 2️⃣  MEMORY TURNS    – stored conversation (if enabled)      │
+    │ 3️⃣  LIVE HISTORY    – last N on-screen chat messages        │
+    │ 4️⃣  USER MESSAGE    – current turn                          │
+    ╰──────────────────────────────────────────────────────────────╯
 
-    # Now helper can reference spec_prompt safely
-    def build(hist_slice):
-        ctx = (spec_prompt or base_prompt)
-        for entry in hist_slice:
-            ctx += f"\n{entry['role'].capitalize()}: {entry['content']}"
-        ctx += f"\nUser: {msg}\nAssistant:"
-        return ctx
+    Memory logic
+    ------------
+    • SETTINGS["memory"]["enabled"] == False
+        → `_memory_turns()` returns an empty list → only live history is used.
 
-    spec_prompt, source, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
-    recent = history[-max_turns:] if len(history) > max_turns else history
+    • SETTINGS["memory"]["enabled"] == True  and
+      utils.memory.backend != MemoryBackend.NONE
+        → `_memory_turns()` returns up to N stored turns which are **prepended**
+          before the latest on-screen history.
 
-    raw_context = build(recent)
-    before_tok = count_tokens(raw_context)
+    • If the combined token count exceeds
+      `SETTINGS["context"]["max_prompt_tokens"]`, the oldest turns
+      (memory **and** live) are trimmed first.
 
-    # trim loop
-    while before_tok > max_tokens and len(recent) > 1:
-        recent = recent[1:]
-        raw_context = build(recent)
-        before_tok = count_tokens(raw_context)
+    Looking ahead (v0.4.4+)
+    -----------------------
+    • `summarise_context()` will soon compress trimmed lines into a single
+      “⚡ Summary so far” block instead of hard-dropping turns.
+    • Persistent stores (Redis / SQLite) will register in `MemoryBackend`
+      but *this* function will remain unchanged.
+
+    Returns
+    -------
+    context : str   – Final prompt ready for tokenisation.
+    source  : str   – "base_prompt" or specialised concept name (diagnostics).
+    """
+
+    max_turns  = SETTINGS["context"]["max_history_turns"]
+    max_tokens = SETTINGS["context"]["max_prompt_tokens"]
+
+    spec_prompt, src, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
+
+    session_id = "default"
+    mem_turns  = _memory_turns(max_turns)
+    live_turns = history[-max_turns:]
+    combined   = (mem_turns + live_turns)[-max_turns:]
 
     if DEBUG_MODE:
         logging.debug(
-            "[Context Debug] Turns kept: %d  | Tokens: %d",
-            len(recent), before_tok
+            "[Memory] session=%s | injected=%d | live=%d | combined=%d",
+            session_id,
+            len(mem_turns),
+            len(live_turns),
+            len(combined),
         )
-        if SETTINGS["logging"].get("prompt_preview", False):
-            logging.debug("[Prompt Preview]\n%s\n···", raw_context[:400])
 
-    return raw_context, source
+    def build(hist_slice):
+        ctx = spec_prompt or base_prompt
+        for turn in hist_slice:
+            ctx += f"\n{turn['role'].capitalize()}: {turn['content']}"
+        ctx += f"\nUser: {msg}\nAssistant:"
+        return ctx
 
-# ─────────────────────────────────────────────────────────
-#  Chat-generation
-# ─────────────────────────────────────────────────────────
-def chat(msg, history, max_tokens, temp, top_p, sample, fuzzy):
+    context = build(combined)
+    tok_ct  = count_tokens(context)
+
+    while tok_ct > max_tokens and len(combined) > 1:
+        combined = combined[1:]
+        context  = build(combined)
+        tok_ct   = count_tokens(context)
+
+    if DEBUG_MODE:
+        logging.debug("[Context] kept=%d tokens=%d", len(combined), tok_ct)
+
+    return context, src
+
+# ─────────────────────────────── Chat generation ───────────────────────────────
+
+def chat(msg, history, mx, temp, top_p, sample, fuzzy):
     allowed, block_msg = evaluate_safety(msg, SETTINGS)
     if not allowed:
-        if DEBUG_MODE:
-            logging.debug("[Safety Debug] Input blocked by safety filter.")
+        logging.debug("[Safety] blocked input")
         history += [{"role": "user", "content": msg},
                     {"role": "assistant", "content": block_msg}]
         return history, "blocked"
 
-    context, src = prepare_context(msg, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy)
+    ctx, src = prepare_context(msg, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy)
 
-    gen_params = {
-        "max_new_tokens": int(max_tokens),
-        "do_sample": sample,
-        "temperature": float(temp),
-        "top_p": float(top_p),
+    gen_cfg = {
+        "max_new_tokens": int(mx),
+        "do_sample"     : sample,
+        "temperature"   : float(temp),
+        "top_p"         : float(top_p),
     }
+    logging.debug("[Gen] %s", gen_cfg)
 
-    if DEBUG_MODE:
-        logging.debug("[Generation Debug] Params: %s", gen_params)
+    ids  = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
+    out  = model.generate(ids, **gen_cfg)
+    text = tokenizer.decode(out[0], skip_special_tokens=True).strip()
 
-    ids_in = tokenizer(context, return_tensors="pt").input_ids.to(device)
-    out_ids = model.generate(ids_in, **gen_params)
-    output = tokenizer.decode(out_ids[0], skip_special_tokens=True).strip()
-
-    # profanity filter
     if SETTINGS["safety"]["sensitivity_level"] == "moderate":
-        filtered = apply_profanity_filter(output)
-        if filtered != output:
-            logging.debug("[Safety Debug] Profanity filter applied.")
-        output = filtered
+        text = apply_profanity_filter(text)
 
-    if DEBUG_MODE:
-        logging.debug("[Generation Debug] Output (preview): %s", output[:300])
+    memory.save({"role": "user", "content": msg})
+    memory.save({"role": "assistant", "content": text})
 
     history += [{"role": "user", "content": msg},
-                {"role": "assistant", "content": output}]
+                {"role": "assistant", "content": text}]
     return history, src
 
-# ─────────────────────────────────────────────────────────
-#  Gradio wrappers
-# ─────────────────────────────────────────────────────────
+# ─────────────────────────────── Gradio wrappers ───────────────────────────────
+
 def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
     SETTINGS["safety"]["sensitivity_level"] = safety
     history = history or []
     new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
     return "", new_hist, f"Prompt source: {src}"
 
-# (Playground unchanged)
+# ─────────────────────────────── Boot phase ───────────────────────────────
 
-# ─────────────────────────────────────────────────────────
-#  Boot
-# ─────────────────────────────────────────────────────────
-BASE_PROMPT = load_base_prompt()
-SPECIALIZED_PROMPTS = load_specialized_prompts()
+BASE_PROMPT              = load_base_prompt()
+SPECIALIZED_PROMPTS       = load_specialized_prompts()
 tokenizer, model, device = initialize_model()
 
-# ─────────────────────────────────────────────────────────
-#  Playground helper – resolves prompt & generates preview
-# ─────────────────────────────────────────────────────────
-def run_playground(test_input,
-                   max_new_tokens, temperature, top_p,
-                   do_sample, fuzzy_matching_enabled,
-                   force_run):
+# ─────────────────────────────── Playground helper ───────────────────────────────
 
-    # Only run if forced (button) or auto-preview checkbox is on
-    if not force_run:
-        return "", "", "", ""
+def run_playground(test_in, mx, temp, top_p, sample, fuzzy, force):
+    if not force:
+        return "", "", ""
+    ptxt, concept, score = get_specialized_prompt(test_in, SPECIALIZED_PROMPTS, fuzzy)
+    prompt = ptxt or BASE_PROMPT
+    ctx    = f"{prompt}\nUser: {test_in}\nAssistant:"
+    ids    = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
+    preview = tokenizer.decode(model.generate(ids, max_new_tokens=int(mx),
+                                              do_sample=sample,
+                                              temperature=float(temp),
+                                              top_p=float(top_p))[0],
+                               skip_special_tokens=True).strip()
+    score_s = f"{score:.2f}" if score else "N/A"
+    return f"{concept} (conf {score_s})", prompt, preview
 
-    # 1) Resolve prompt (direct or fuzzy)
-    prompt_text, concept, match_score = get_specialized_prompt(
-        test_input, SPECIALIZED_PROMPTS, fuzzy_matching_enabled
-    )
-    resolved_prompt = prompt_text if prompt_text else BASE_PROMPT
+# ─────────────────────────────── Gradio UI ───────────────────────────────
 
-    # 2) Build a one-turn context
-    context = f"{resolved_prompt.strip()}\nUser: {test_input.strip()}\nAssistant:"
-
-    logging.debug("[Playground] Context (preview):\n%s", context[:400])
-
-    # 3) Generate preview
-    ids = tokenizer(context, return_tensors="pt").input_ids.to(device)
-    generation_params = {
-        "max_new_tokens": int(max_new_tokens),
-        "do_sample": do_sample,
-        "temperature": float(temperature),
-        "top_p": float(top_p),
-    }
-    out_ids = model.generate(ids, **generation_params)
-    preview = tokenizer.decode(out_ids[0], skip_special_tokens=True).strip()
-
-    # 4) Nicely format fuzzy score
-    score_txt = f"{match_score:.2f}" if match_score is not None else "N/A"
-    concept_display = concept if concept != "base_prompt" else "Base Prompt"
-
-    return (f"{concept_display} (Confidence: {score_txt})",
-            resolved_prompt.strip(),
-            preview)
-
-# ─────────────────────────────────────────────────────────
-# Build Gradio UI
-# ─────────────────────────────────────────────────────────
 with gr.Blocks() as demo:
     gr.Markdown("# Chatbot with Tunable Generation Parameters")
-    chatbot = gr.Chatbot(type="messages")
-    state = gr.State([])
-    diagnostics_box = gr.Textbox(label="Diagnostics", interactive=False)
+
+    chatbot   = gr.Chatbot(type="messages")
+    state     = gr.State([])
+    diag_box  = gr.Textbox(label="Diagnostics", interactive=False)
 
     with gr.Row():
-        txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter")
+        txt = gr.Textbox(show_label=False,
+                         placeholder="Enter your message and press Enter")
 
+    # sliders & toggles
     with gr.Row():
-        max_new_tokens_slider = gr.Slider(minimum=50, maximum=200, value=100, label="Max New Tokens")
-        temperature_slider = gr.Slider(minimum=0.1, maximum=1.0, value=0.5, label="Temperature")
-        top_p_slider = gr.Slider(minimum=0.5, maximum=1.0, value=0.9, label="Top-p")
-        do_sample_checkbox = gr.Checkbox(value=True, label="Do Sample")
-        fuzzy_match_checkbox = gr.Checkbox(value=True, label="Enable Fuzzy Matching")
-        autopreview_checkbox = gr.Checkbox(value=False, label="Auto-run Playground")
+        mx_slider   = gr.Slider(50, 200, value=100, label="Max New Tokens")
+        t_slider    = gr.Slider(0.1, 1.0, value=0.5, label="Temperature")
+        top_p_slider= gr.Slider(0.5, 1.0, value=0.9, label="Top-p")
+        sample_chk  = gr.Checkbox(True, label="Do Sample")
+        fuzzy_chk   = gr.Checkbox(True, label="Enable Fuzzy")
+        auto_chk    = gr.Checkbox(False, label="Auto-run Playground")
 
+    # playground
     with gr.Accordion("Developer Prompt Playground", open=False):
-        gr.Markdown("Enter a test input to preview prompt handling and output generation.")
+        test_in   = gr.Textbox(label="Test Input")
+        run_btn   = gr.Button("Run Test")
 
-        test_input = gr.Textbox(
-            label="Test Input Message",
-            placeholder="e.g., Can you explain gravity like I'm five?"
-        )
-        run_button = gr.Button("Run Playground Test")
+        matched   = gr.Textbox(label="Matched Concept", interactive=False)
+        prompt_p  = gr.Textbox(label="Resolved Prompt", lines=6, interactive=False)
+        gen_prev  = gr.Textbox(label="Generated Preview", lines=6, interactive=False)
 
-        matched_concept = gr.Textbox(label="Matched Concept", interactive=False)
-        resolved_prompt_preview = gr.Textbox(label="Resolved Prompt", lines=6, interactive=False)
-        generated_preview = gr.Textbox(label="Generated Output", lines=6, interactive=False)
-
-        safety_mode_dropdown = gr.Dropdown(
-            choices=["strict", "moderate", "relaxed"],
-            value=SETTINGS["safety"].get("sensitivity_level", "moderate"),
-            label="Safety Mode [Dev]"
+        safety_dd = gr.Dropdown(
+            ["strict", "moderate", "relaxed"],
+            value=SETTINGS["safety"]["sensitivity_level"],
+            label="Safety Mode (Dev)"
         )
 
-        # ─────────────────────────────────────────────────────────
-        # 1. Button click always forces the playground to run
-        # ─────────────────────────────────────────────────────────
-        run_button.click(
+        # manual run
+        run_btn.click(
             run_playground,
-            inputs=[
-                test_input,
-                max_new_tokens_slider,
-                temperature_slider,
-                top_p_slider,
-                do_sample_checkbox,
-                fuzzy_match_checkbox,
-                gr.State(True) # Force_run = True when manually clicking
-            ],
-            outputs=[
-                matched_concept,
-                resolved_prompt_preview,
-                generated_preview
-            ]
+            [test_in, mx_slider, t_slider, top_p_slider,
+             sample_chk, fuzzy_chk, gr.State(True)],
+            [matched, prompt_p, gen_prev]
         )
 
-        # ─────────────────────────────────────────────────────────
-        # 2. Typing triggers playground ONLY if autoprivew is enabled
-        # ─────────────────────────────────────────────────────────
-        test_input.input(
+        # auto preview
+        test_in.input(
             run_playground,
-            inputs=[
-                test_input,
-                max_new_tokens_slider,
-                temperature_slider,
-                top_p_slider,
-                do_sample_checkbox,
-                fuzzy_match_checkbox,
-                autopreview_checkbox # Conditional based on this checkbox
-            ],
-            outputs=[
-                matched_concept,
-                resolved_prompt_preview,
-                generated_preview
-            ]
+            [test_in, mx_slider, t_slider, top_p_slider,
+             sample_chk, fuzzy_chk, auto_chk],
+            [matched, prompt_p, gen_prev]
         )
 
+    # main submit
     txt.submit(
         respond,
-        [txt, state, max_new_tokens_slider, temperature_slider, top_p_slider, do_sample_checkbox, fuzzy_match_checkbox, safety_mode_dropdown],
-        [txt, chatbot, diagnostics_box]
+        [txt, state, mx_slider, t_slider, top_p_slider,
+         sample_chk, fuzzy_chk, safety_dd],
+        [txt, chatbot, diag_box]
     )
 
+# ════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-
-    logging.debug("🚀 Launching Gradio demo...")
+    logging.debug("🚀 Launching Gradio demo …")
     demo.launch()
