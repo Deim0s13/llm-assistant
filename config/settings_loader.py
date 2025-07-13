@@ -15,6 +15,8 @@ import json
 import logging
 import os
 
+from typing import Any, Dict, cast
+
 #  ───────────────────────────────  Paths & defaults ───────────────────────────────
 
 DEFAULT_SETTINGS_PATH = "config/settings.json"
@@ -69,13 +71,16 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict:
     try:
         if not os.path.exists(filepath):
             logging.warning("[Settings] %s not found – using defaults", filepath)
-            settings = FALLBACK_SETTINGS.copy()
+            settings: Dict[str, Any] = FALLBACK_SETTINGS.copy()
+
         else:
             with open(filepath, "r", encoding="utf-8") as f:
-                settings = json.load(f)
+                # tell mypy this JSON becomes a dict
+                settings = cast(Dict[str, Any], json.load(f))
             if not isinstance(settings, dict):
                 raise ValueError("settings.json must contain a JSON object")
             logging.info("[Settings] Loaded from %s", filepath)
+
     except Exception as e:
         logging.error("[Settings] Failed to load %s: %s – using defaults", filepath, e)
         settings = FALLBACK_SETTINGS.copy()

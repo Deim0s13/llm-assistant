@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import logging
 from enum   import Enum
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional, cast
 
 __all__ = ["MemoryBackend", "Memory", "memory"]
 
@@ -30,7 +30,8 @@ __all__ = ["MemoryBackend", "Memory", "memory"]
 class MemoryBackend(str, Enum):
     NONE       = "none"
     IN_MEMORY  = "in_memory"
-    # TODO: REDIS = "redis", SQLITE = "sqlite"
+    REDIS      = "redis"
+    # TODO: SQLITE = "sqlite"
 
 #  ─────────────────────────────── Singleton class ───────────────────────────────
 class Memory:
@@ -39,13 +40,22 @@ class Memory:
     backend: MemoryBackend
     _instance: Optional["Memory"] = None
     _store: Dict[str, List[Dict[str, Any]]] = {}  # session → list[turn]
+    _impl: Optional[Any] = None                     # backend implementation
 
     def __new__(cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.backend = MemoryBackend(backend)
             logging.debug("[Memory] backend=%s", cls._instance.backend.value)
-        return cls._instance
+
+            # ───────────── backend implementation object ──────────────
+            if cls._instance.backend == MemoryBackend.REDIS:
+                from memory.backends.redis_memory_backend import RedisMemoryBackend
+                cls._instance._impl = RedisMemoryBackend()            # type: ignore
+            else:
+                cls._instance._impl = None                            # other modes
+
+        return cls._instance                       # fallback for other modes
 
     # ───────────────────────────────────  API ───────────────────────────────────
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
@@ -61,6 +71,9 @@ class Memory:
                     "[Memory] load → %d turns (session=%s)", len(hist), session_id,
                 )
             return hist
+
+        elif self.backend == MemoryBackend.REDIS:
+            return self._impl.get_recent(cid=session_id)            # type: ignore
 
         # ⇢ future back-ends
         raise NotImplementedError(f"backend '{self.backend}' not implemented")
@@ -82,6 +95,10 @@ class Memory:
                 )
             return
 
+        elif self.backend == MemoryBackend.REDIS:
+            self._impl.add_turn(message["role"], message["content"], cid=session_id)  # type: ignore
+            return
+
         # ⇢ future back-ends
         raise NotImplementedError(f"backend '{self.backend}' not implemented")
 
@@ -89,6 +106,9 @@ class Memory:
     def clear(self, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.IN_MEMORY:
             self._store.pop(session_id, None)
+
+        elif self.backend == MemoryBackend.REDIS:
+            self._impl.flush(cid=session_id)                        # type: ignore
 
 # ─────────────────────────────────── Singleton initialisation ───────────────────────────────────
 from config.settings_loader import load_settings  # late import to avoid cycle
