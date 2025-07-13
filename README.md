@@ -1,4 +1,4 @@
-# 🧠 LLM‑Assistant Starter Kit
+# LLM‑Assistant Starter Kit
 
 A hands‑on project for **learning** how to structure, prompt, extend, \_and eventually fine‑tune\_ LLM-powered applications.
 What began as a single‑file chatbot has grown into a modular playground for **prompt engineering**, **memory handling**, **summarisation**, and (soon) **RAG** & **fine‑tuning**.
@@ -15,11 +15,11 @@ What began as a single‑file chatbot has grown into a modular playground for **
 
 ## Project Status
 
-| Track             | Version      | Notes                                                                           |
-| ----------------- | ------------ | ------------------------------------------------------------------------------- |
-| **Latest stable** | **`v0.4.2`** | Context‑window trimming, cross‑platform hygiene                                 |
-| **In progress**   | **`v0.4.3`** | 🗄️ **In‑memory backend**, 📝 **summarise scaffold**, 🔬 **initial unit‑tests** |
-| **Planned next**  | **`v0.4.4`** | 🔧 Persistent memory, Summarise MVP, CI pipeline                                |
+| Track             | Version      | Notes                                                                                                       |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
+| **In progress**   | **`v0.4.5`** | **CI matrix & guard-rails edge-cases**, **typing/IDE hygiene**                                         |
+| **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
 
 *See the full changelog → **[Release Notes](./docs/release_notes.md)**.*
 
@@ -40,8 +40,11 @@ What began as a single‑file chatbot has grown into a modular playground for **
 │   ├── settings.json       # Runtime config (memory, safety, logging …)
 │   ├── prompt_template.txt # Base system prompt
 │   └── specialized_prompts.json
+│   ├── memory.py           # Memory façade (in-memory | redis)
+│   ├── summariser.py       # summarise_context() scaffold
 ├── experiments/            # Exploratory scripts & notebooks
 │   ├── summarisation_playground.py  # simple summary prototype
+│   ├── test_memory_backends.py
 │   └── …                    # memory toggle / context tests
 ├── tests/                  # **PyTest** suites (memory, context …)
 ├── scripts/
@@ -83,7 +86,7 @@ graph TD
 
 ---
 
-## Quick‑start 🏃‍♂️
+## Quick‑start
 
 ```bash
 git clone https://github.com/<you>/llm-assistant.git
@@ -94,6 +97,32 @@ source venv/bin/activate     # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 python main.py
+```
+
+### Optional Installs
+
+```bash
+pip install -r requirements.txt            # core runtime
+pip install -r requirements-dev.txt        # pytest, mypy, fakeredis   ← optional
+pip install -r requirements-redis.txt      # redis-py client (persistence)
+python main.py
+```
+
+### Run with Redis (optional)
+
+```bash
+# 1) Install the client library
+pip install -r requirements-redis.txt        # or: pip install redis
+
+# 2) Start a local test container
+podman run --name redis -p 6379:6379 -d docker.io/redis:7-alpine
+
+# 3) Point the app at it
+export REDIS_URL="redis://localhost:6379/0"
+# or set MEMORY_BACKEND=redis in .env
+
+python main.py
+# Console will show:  [Redis] Connected ✔
 ```
 
 ---
@@ -113,7 +142,7 @@ Supported keys & examples → **docs/dev\_checklist.md**
 
 ---
 
-### Platform Setup 💻
+### Platform Setup
 
 | OS                   | Key steps                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -124,7 +153,7 @@ More detail & troubleshooting → **Cross‑Platform Dev Checklist**.
 
 ---
 
-## Unit‑tests 🧪
+## Unit‑tests
 
 Run smoke tests & memory‑toggle checks:
 
@@ -132,6 +161,7 @@ Run smoke tests & memory‑toggle checks:
 source scripts/activate_tests.sh       # sets PYTHONPATH + runs tests
 # or
 pytest -q                              # full suite
+mypy .                                 # static-type pass (strict on src)
 ```
 
 CI integration arrives in **v0.4.4** (lint + tests on every PR).
