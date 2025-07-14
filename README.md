@@ -125,6 +125,31 @@ python main.py
 # Console will show:  [Redis] Connected ✔
 ```
 
+### Run with SQLite (default)
+
+SQLite requires **no extra install** — it’s part of Python’s std-lib.
+The backend stores chat turns in `data/memory.sqlite` by default and trims the oldest rows automatically.
+
+```bash
+# Use the built-in path
+export MEMORY_BACKEND=sqlite
+python main.py
+
+# ➜ Console shows:  [SQLite] Connected → data/memory.sqlite
+```
+
+To place the DB elsewhere:
+
+```bash
+export MEMORY_BACKEND=sqlite
+export MEMORY_DB_PATH="$HOME/.llm-assistant/chat.sqlite"
+python main.py
+```
+
+The file is created (and schema migrated) on first run.
+
+If the path is unwritable the app logs a warning and transparently falls back to in-memory storage.
+
 ---
 
 ### Environment Overrides (`.env`)

@@ -27,13 +27,15 @@ from typing import Any, Dict, List, Optional, cast
 __all__ = ["MemoryBackend", "Memory", "memory"]
 
 #  ─────────────────────────────── Back-end enum ───────────────────────────────
+
 class MemoryBackend(str, Enum):
     NONE       = "none"
     IN_MEMORY  = "in_memory"
     REDIS      = "redis"
-    # TODO: SQLITE = "sqlite"
+    SQLITE     = "sqlite"
 
 #  ─────────────────────────────── Singleton class ───────────────────────────────
+
 class Memory:
     """Façade implementing load / save / clear for the active back-end."""
 
@@ -49,15 +51,24 @@ class Memory:
             logging.debug("[Memory] backend=%s", cls._instance.backend.value)
 
             # ───────────── backend implementation object ──────────────
+
             if cls._instance.backend == MemoryBackend.REDIS:
                 from memory.backends.redis_memory_backend import RedisMemoryBackend
-                cls._instance._impl = RedisMemoryBackend()            # type: ignore
-            else:
-                cls._instance._impl = None                            # other modes
+                cls._instance._impl = RedisMemoryBackend()        # type: ignore
 
-        return cls._instance                       # fallback for other modes
+            elif cls._instance.backend == MemoryBackend.SQLITE:
+                from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
+                cls._instance._impl = SQLiteMemoryBackend()       # type: ignore
 
-    # ───────────────────────────────────  API ───────────────────────────────────
+            else:  # IN_MEMORY or NONE
+                cls._instance._impl = None                        # fallback for other modes
+
+        return cls._instance
+
+# ───────────────────────────────────  API ───────────────────────────────────
+
+    # ─────────────────────────────── load ───────────────────────────────
+
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
         if self.backend == MemoryBackend.NONE:
             if logging.getLogger().isEnabledFor(logging.DEBUG):
@@ -74,10 +85,14 @@ class Memory:
 
         elif self.backend == MemoryBackend.REDIS:
             return self._impl.get_recent(cid=session_id)            # type: ignore
+        elif self.backend == MemoryBackend.SQLITE:
+            return self._impl.get_recent(cid=session_id)
 
         # ⇢ future back-ends
         raise NotImplementedError(f"backend '{self.backend}' not implemented")
 
+
+    # ─────────────────────────────── save ───────────────────────────────
 
     def save(self, message: Dict[str, Any], *, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.NONE:
@@ -97,11 +112,13 @@ class Memory:
 
         elif self.backend == MemoryBackend.REDIS:
             self._impl.add_turn(message["role"], message["content"], cid=session_id)  # type: ignore
-            return
+        elif self.backend == MemoryBackend.SQLITE:
+            self._impl.add_turn(message["role"], message["content"], cid=session_id)
+        else:
+            raise NotImplementedError(f"backend '{self.backend}' not implemented")
 
-        # ⇢ future back-ends
-        raise NotImplementedError(f"backend '{self.backend}' not implemented")
 
+    # ─────────────────────────────── clear ──────────────────────────────
 
     def clear(self, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.IN_MEMORY:
@@ -109,8 +126,11 @@ class Memory:
 
         elif self.backend == MemoryBackend.REDIS:
             self._impl.flush(cid=session_id)                        # type: ignore
+        elif self.backend == MemoryBackend.SQLITE:
+            self._impl.flush(cid=session_id)
 
 # ─────────────────────────────────── Singleton initialisation ───────────────────────────────────
+
 from config.settings_loader import load_settings  # late import to avoid cycle
 
 _settings           = load_settings()
