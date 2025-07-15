@@ -150,6 +150,22 @@ The file is created (and schema migrated) on first run.
 
 If the path is unwritable the app logs a warning and transparently falls back to in-memory storage.
 
+### Auto-select “persistent” mode
+
+Set `MEMORY_BACKEND=persistent` (or `"backend": "persistent"` in
+`settings.json`) and the app will pick the best available store:
+
+1. **Redis** – if the `redis` Python client is installed *and* a server
+   responds on `REDIS_URL` / `localhost:6379`.
+2. **SQLite** – if Redis isn’t reachable but the local file path is
+   writable.  Data lives in `data/memory.sqlite` (or `MEMORY_DB_PATH`).
+3. **In-memory** – final fallback when both persistent options fail.
+
+Startup log shows the outcome, e.g.: [Memory] persistent → redis or [Memory] persistent → sqlite
+
+No code changes are needed in `main.py`; the `utils.memory` façade
+handles the selection transparently.
+
 ---
 
 ### Environment Overrides (`.env`)
@@ -161,6 +177,9 @@ without touching tracked config:
 DEBUG_MODE=true
 MAX_HISTORY_TURNS=6
 MODEL_DEVICE=mps      # cpu | cuda | mps
+MEMORY_BACKEND=sqlite # in_memory | redis | sqlite
+MEMORY_BACKEND=persistent  # auto-select redis → sqlite → in_memory
+MEMORY_DB_PATH=/absolute/path/chat.sqlite  # optional override for SQLite
 ```
 
 Supported keys & examples → **docs/dev\_checklist.md**

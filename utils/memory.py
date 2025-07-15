@@ -44,11 +44,47 @@ class Memory:
     _store: Dict[str, List[Dict[str, Any]]] = {}  # session → list[turn]
     _impl: Optional[Any] = None                     # backend implementation
 
+    # ───────────────────────── helper for 'persistent' ─────────────────────────
+    @staticmethod
+    def _resolve_persistent() -> tuple["MemoryBackend", Optional[Any]]:
+        """
+        Return (resolved_backend, impl_object|None).
+        Chain: Redis → SQLite → In-memory.
+        """
+        # 1. Try Redis
+        try:
+            from memory.backends.redis_memory_backend import RedisMemoryBackend
+            impl = RedisMemoryBackend()
+            if not impl._using_fallback:                       # connected
+                return MemoryBackend.REDIS, impl
+        except Exception:
+            pass
+
+        # 2. Try SQLite
+        try:
+            from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
+            impl = SQLiteMemoryBackend()
+            if not impl._using_fallback:
+                return MemoryBackend.SQLITE, impl
+        except Exception:
+            pass
+
+        # 3. Fallback
+        return MemoryBackend.IN_MEMORY, None
+
     def __new__(cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.backend = MemoryBackend(backend)
-            logging.debug("[Memory] backend=%s", cls._instance.backend.value)
+
+            if backend == "persistent":
+                    resolved, impl = cls._instance._resolve_persistent()
+                    cls._instance.backend = resolved
+                    cls._instance._impl  = impl
+                    logging.info("[Memory] persistent → %s", resolved.value)
+
+            else:
+                cls._instance.backend = MemoryBackend(backend)
+                # … existing REDIS / SQLITE / else wiring …
 
             # ───────────── backend implementation object ──────────────
 
