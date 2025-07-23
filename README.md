@@ -168,6 +168,19 @@ handles the selection transparently.
 
 ---
 
+### Memory back-ends (v0.4.4 +)
+
+| `memory.backend` value | Store that’s used                               | Extra notes                                              |
+| ---------------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `in_memory`            | Python list in RAM                             | Zero dependencies (default fallback)                     |
+| `sqlite`               | `data/memory.sqlite` via std-lib `sqlite3`     | Auto-creates file & trims oldest rows                    |
+| `redis`                | Remote Redis (needs **redis-py** + server)     | Falls back to RAM if server not reachable                |
+| `persistent`           | **Chooser:** redis → sqlite → in_memory        | Picks best available at runtime – no code changes needed |
+
+*The runtime chooser lives in `utils/memory.py` – adding a new backend is now as easy as plugging a factory into `_BACKEND_FACTORIES`; the chat loop still just calls `memory.load / save / clear`.*
+
+---
+
 ### Environment Overrides (`.env`)
 
 Drop a `.env` in the project root to override `settings.json`
