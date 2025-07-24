@@ -78,7 +78,7 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
                 # 1  insert row
                 self._conn.execute(
                     "INSERT INTO turns (session, ts, role, content) VALUES (?, ?, ?, ?)",
-                    (cid, ts_now, role, json.dumps(content)),
+                    (cid, ts_now, role, content),
                 )
 
                 # 2  trim oldest beyond max_rows_per_session
@@ -123,8 +123,7 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
                 (cid, limit),
             )
             rows = cur.fetchall()
-            # convert JSON string back to plain str
-            return [{"role": r, "content": json.loads(c)} for r, c in rows]
+            return [{"role": r, "content": c} for r, c in rows]
         except Exception as exc:
             LOGGER.error("SQLite get_recent failed (%s) – switching to fallback", exc)
             self._using_fallback = True
