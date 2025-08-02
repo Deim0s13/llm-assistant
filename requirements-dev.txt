@@ -1,4 +1,4 @@
 -r requirements.txt
-pytest
+pytest>=8
 fakeredis>=2.20
 mypy

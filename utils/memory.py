@@ -1,42 +1,58 @@
 # ════════════════════════════════════════════════════════════════════
-#  utils/memory.py – lightweight conversation memory façade
+#  utils/memory.py – lightweight conversation-memory façade
 # ════════════════════════════════════════════════════════════════════
 """
-Simple save/load layer for previous chat turns.
+Simple save / load layer for previous chat turns.
 
 Back-ends
 ---------
-• in-process **IN_MEMORY**  (default, zero deps)
-• **REDIS**                 (network, redis-py)
-• **SQLITE**                (file-based, std-lib)
+• **IN_MEMORY**  (default, zero deps, oldest→newest order)
+• **REDIS**      (network)        – newest-first → flipped once on load
+• **SQLITE**     (file-based)     – newest-first → flipped once on load
 • “persistent” alias = redis → sqlite → in-memory
 """
 
 from __future__ import annotations
 
-import logging
 import importlib
+import logging
+import json
+import os
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 __all__ = ["MemoryBackend", "Memory", "memory"]
 
-# ─────────────────────────── Backend registry ────────────────────────────
+# --------------------------------------------------------------------
+# One-shot env key used only as a bridge for the migration subprocess.
+# We WRITE this snapshot when saving/clearing IN_MEMORY.
+# The migration script READS it if needed. We do NOT auto-load it here.
+# --------------------------------------------------------------------
+_ENV_KEY = "LLM_MEM_STORE_JSON"
+
+# ───────────────────────────── Backend factories ────────────────────────────
 def _redis_factory() -> Any | None:
     try:
-        RedisMB = importlib.import_module(
+        return importlib.import_module(
             "memory.backends.redis_memory_backend"
-        ).RedisMemoryBackend
-        return RedisMB()
+        ).RedisMemoryBackend()
     except Exception:
-        return None            # import error or constructor failure
+        return None
 
 def _sqlite_factory() -> Any | None:
+    """
+    Build the SQLite backend.
+
+    • honours $MEMORY_DB_PATH so tests can point at a tmpfile
+    • falls back to data/memory.sqlite for normal runs
+    • default persist=False (façade parity tests don’t write to disk)
+    """
+    db_path = os.getenv("MEMORY_DB_PATH", "data/memory.sqlite")
     try:
         SQLiteMB = importlib.import_module(
             "memory.backends.sqlite_memory_backend"
         ).SQLiteMemoryBackend
-        return SQLiteMB()
+        return SQLiteMB(db_path=db_path, persist=False)
     except Exception:
         return None
 
@@ -47,31 +63,35 @@ _BACKEND_FACTORIES: dict[str, Callable[[], Any | None]] = {
     "none"      : lambda: None,
 }
 
-# ─────────────────────────── Helper: resolve backend ─────────────────────
+# ───────────────────────────── Helper / enum ───────────────────────────────
 class MemoryBackend(str, Enum):
-    NONE       = "none"
-    IN_MEMORY  = "in_memory"
-    REDIS      = "redis"
-    SQLITE     = "sqlite"
+    NONE      = "none"
+    IN_MEMORY = "in_memory"
+    REDIS     = "redis"
+    SQLITE    = "sqlite"
+
+def _normalise(raw: str) -> str:
+    """Collapse things like 'MemoryBackend.SQLITE' → 'sqlite' (lower-case)."""
+    raw = raw.lower()
+    if raw.startswith("memorybackend."):
+        raw = raw.split(".", 1)[1]
+    return raw
 
 def create_memory(req: str | MemoryBackend) -> Tuple[MemoryBackend, Any | None]:
-    """
-    Return (resolved_enum, impl|None) for requested backend string/enum.
-    Accepts 'persistent' alias → redis ⟶ sqlite ⟶ in_memory.
-    """
-    name = req.value if isinstance(req, MemoryBackend) else str(req).lower()
+    """Return (<resolved enum>, <backend instance | None>)."""
+    raw = req.value if isinstance(req, MemoryBackend) else str(req)
+    name = _normalise(raw)
 
-    # persistent chain
+    # persistent chain – redis → sqlite → in_memory
     if name == "persistent":
-        for cand in ("redis", "sqlite"):
-            resolved, impl = create_memory(cand)
+        for candidate in ("redis", "sqlite"):
+            resolved, impl = create_memory(candidate)
             if resolved != MemoryBackend.IN_MEMORY and not (
                 impl and getattr(impl, "_using_fallback", False)
             ):
                 return resolved, impl
         return MemoryBackend.IN_MEMORY, None
 
-    # normal lookup
     factory = _BACKEND_FACTORIES.get(name)
     if factory is None:
         logging.error("[Memory] unknown backend '%s' – using in_memory", name)
@@ -79,60 +99,86 @@ def create_memory(req: str | MemoryBackend) -> Tuple[MemoryBackend, Any | None]:
 
     try:
         impl = factory()
-        try:
-            resolved = MemoryBackend(name)
-        except ValueError:               # safety for weird strings
-            resolved = MemoryBackend.IN_MEMORY
+        if impl is None:
+            # factory failed → fall back quietly
+            resolved = MemoryBackend.NONE if name == "none" else MemoryBackend.IN_MEMORY
+            return resolved, None
+
+        resolved = MemoryBackend(name)
         logging.info("[Memory] backend resolved → %s", resolved.value)
         return resolved, impl
+
     except Exception as exc:
         logging.warning("[Memory] %s backend failed (%s) – using in_memory", name, exc)
         return MemoryBackend.IN_MEMORY, None
 
-# ─────────────────────────────── Singleton ───────────────────────────────
+# ─────────────────────────────── Singleton façade ───────────────────────────
 class Memory:
-    """Facade wrapping the active backend."""
+    """Unified `.save / .load / .clear` wrapper around the active backend."""
     backend: MemoryBackend
     _instance: Optional["Memory"] = None
-    _store: Dict[str, List[Dict[str, Any]]] = {}
-    _impl: Optional[Any] = None
+    _store: Dict[str, List[Dict[str, Any]]] = {}   # in-process store
+    _impl: Optional[Any] = None                    # real backend instance
 
+    # ───────────────────────── ctor / (re)configure ─────────────────────────
     def __new__(cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            resolved, impl = create_memory(backend)
+            cls._instance.backend = MemoryBackend.NONE
+            cls._instance._impl = None
+
+        raw = backend.value if isinstance(backend, MemoryBackend) else str(backend)
+        req = _normalise(raw)
+
+        if cls._instance.backend.value != req:
+            resolved, impl = create_memory(req)
             cls._instance.backend = resolved
-            cls._instance._impl   = impl
+            cls._instance._impl = impl
+
         return cls._instance
 
-    # ─────────────────────────────── load ───────────────────────────────
+    # ─────────────────────────────── load ────────────────────────────────
     def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
+        # NONE → empty
         if self.backend == MemoryBackend.NONE:
             return []
-        if self.backend == MemoryBackend.IN_MEMORY:
-            return self._store.get(session_id, [])
-        return self._impl.get_recent(cid=session_id)          # type: ignore
 
-    # ─────────────────────────────── save ───────────────────────────────
+        # IN_MEMORY → read from in-process dict (oldest → newest)
+        if self.backend == MemoryBackend.IN_MEMORY:
+            return list(self._store.get(session_id, []))
+
+        # Persistent backends → newest-first; we flip to chronological once
+        if not self._impl:
+            return []
+        turns = self._impl.get_recent(cid=session_id)  # type: ignore[attr-defined]
+        return list(reversed(turns))
+
+    # ─────────────────────────────── save ────────────────────────────────
     def save(self, msg: Dict[str, Any], *, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.NONE:
             return
+
         if self.backend == MemoryBackend.IN_MEMORY:
             self._store.setdefault(session_id, []).append(msg)
+            # snapshot to env for the migration subprocess
+            os.environ[_ENV_KEY] = json.dumps(self._store)
             return
-        self._impl.add_turn(msg["role"], msg["content"], cid=session_id)  # type: ignore
 
-    # ─────────────────────────────── clear ──────────────────────────────
+        # Persistent backend write
+        self._impl.add_turn(  # type: ignore[attr-defined]
+            msg["role"], msg["content"], cid=session_id
+        )
+
+    # ─────────────────────────────── clear ───────────────────────────────
     def clear(self, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.IN_MEMORY:
             self._store.pop(session_id, None)
+            os.environ[_ENV_KEY] = json.dumps(self._store)  # keep snapshot in sync
         elif self.backend != MemoryBackend.NONE:
-            self._impl.flush(cid=session_id)                  # type: ignore
+            self._impl.flush(cid=session_id)  # type: ignore[attr-defined]
 
-# ──────────────────────────── bootstrap singleton ────────────────────────────
-from config.settings_loader import load_settings
+# ───────────────────────── bootstrap default singleton ─────────────────────
+from config.settings_loader import load_settings  # late import to avoid cycles
 
-_settings       = load_settings()
-DEFAULT_BACKEND = _settings.get("memory", {}).get("backend", "none")
-
+DEFAULT_BACKEND = load_settings().get("memory", {}).get("backend", "none")
 memory: Memory = Memory(backend=DEFAULT_BACKEND)
