@@ -14,20 +14,11 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 
 ## Project Status
 
-<<<<<<< HEAD
-| Track             | Version      | Notes                                                                                           |
-| ----------------- | ------------ | ----------------------------------------------------------------------------------------------- |
-| **Latest stable** | **`v0.4.3`** | In‑memory backend, summarise scaffold, first wave of unit‑tests                                 |
-| **In progress**   | **`v0.4.4`** | 🔧 **RedisMemoryBackend** (persistent memory), 📝 Summarise MVP, 🤖 CI pipeline (pytest + Ruff) |
-| **Planned next**  | **`v0.4.5`** | 🧩 Vector‑DB memory, 🪄 RAG prototype, Docker/Podman containers                                 |
-=======
 | Track             | Version      | Notes                                                                                                       |
 | ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
 | **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
 | **In progress**   | **`v0.4.5`** | **CI matrix & guard-rails edge-cases**, **typing/IDE hygiene**                                         |
 | **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
->>>>>>> dev
-
 *See the full history → **[Release Notes](./docs/release_notes.md)**.*
 
 ---
@@ -62,7 +53,7 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 ├── experiments/            # Exploratory scripts & notebooks
 │   ├── summarisation_playground.py  # simple summary prototype
 │   ├── test_memory_backends.py
-│   └── …                    # memory toggle / context tests
+│   └── …                    # memory toggle/context tests
 ├── tests/                  # **PyTest** suites (memory, context …)
 >>>>>>> dev
 ├── scripts/
