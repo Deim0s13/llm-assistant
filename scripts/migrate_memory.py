@@ -1,18 +1,16 @@
 #!/usr/bin/env python
+# ════════════════════════════════════════════════════════════════════
+#  migrate_memory.py – one-shot export of an *in-memory* session → SQLite
+# ════════════════════════════════════════════════════════════════════
 """
-migrate_memory.py – one-shot export of an *in-memory* session → SQLite file.
-
 How it works
 ============
-1.  The parent process (your REPL, a test, etc.) serialises the current
-    `Memory._store` dict into the environment variable **LLM_MEM_STORE_JSON**.
-    The helper code in *utils/memory.py* does this automatically whenever you
-    call `Memory.save()` while using the **IN_MEMORY** backend.
-2.  When you invoke this script (which runs in a new Python process), the
-    import of `utils.memory` re-hydrates that JSON back into RAM, so a
-    normal `.load()` call sees the same turns.
-3.  We read those turns, write them into an SQLite file (creating the table
-    on first-run) and report how many rows were migrated.
+1) While using the IN_MEMORY backend, `utils.memory.Memory.save()` keeps a JSON
+   snapshot of the in-process store in the env var **LLM_MEM_STORE_JSON**.
+2) When this script runs in a new process, we read the same turns through the
+   normal Memory façade (preferred) or fall back to the env snapshot if needed.
+3) We write those turns into an SQLite file (creating the table on first-run)
+   and report how many rows were migrated.
 
 Typical usage
 -------------
@@ -23,44 +21,83 @@ $ python scripts/migrate_memory.py --db-path /tmp/chat.sqlite
 
 from __future__ import annotations
 
+# ───────────────────────────────────────────────────────── Imports ──
 import argparse
 import json
 import os
 import pathlib
 import sys
+from typing import Any, Dict, List, Sequence, TypedDict
 
-# ── project imports ─────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────── Data shapes ────────────
+class Turn(TypedDict):
+    role: str
+    content: str
+
+
+# ── project imports ─────────────────────────────────────────────────
 sys.path.append(".")  # ensure repo root on PYTHONPATH
 
 from utils.memory import Memory, MemoryBackend  # noqa: E402
-from importlib import import_module
+from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend  # noqa: E402
 
-SQLiteMemoryBackend = import_module(
-    "memory.backends.sqlite_memory_backend"
-).SQLiteMemoryBackend
-
+# ───────────────────────────────────────────────────────── Constants ──
 _ENV_KEY = "LLM_MEM_STORE_JSON"
 
 
-def _fallback_turns_from_env(session_id: str) -> list[dict]:
-    """If Memory.load() returns empty, try to read the JSON snapshot directly."""
+# ─────────────────────────────────────────── Helpers ─────────────────
+def _normalize_turns(objs: List[Dict[str, Any]]) -> List[Turn]:
+    """
+    Convert a raw list of dicts into a typed list[Turn], discarding any
+    items that don't have `role` and `content` as strings.
+    """
+    out: List[Turn] = []
+    for o in objs:
+        role = o.get("role")
+        content = o.get("content")
+        if isinstance(role, str) and isinstance(content, str):
+            out.append(Turn(role=role, content=content))
+    return out
+
+
+def _fallback_turns_from_env(session_id: str) -> List[Turn]:
+    """
+    Read the in-memory snapshot from the LLM_MEM_STORE_JSON env var and
+    extract a typed list[Turn] for `session_id`. Returns [] on any error.
+    """
     raw = os.getenv(_ENV_KEY)
     if not raw:
         return []
+
     try:
-        store = json.loads(raw)
-        # store is expected to be: {session_id: [ {role, content}, ... ], ...}
-        turns = store.get(session_id, [])
-        # Ensure structure is as expected
-        if isinstance(turns, list) and all(isinstance(t, dict) for t in turns):
-            return turns
+        obj: Any = json.loads(raw)
     except Exception:
-        pass
-    return []
+        return []
+
+    store: Dict[str, List[Turn]] = {}
+
+    if isinstance(obj, dict):
+        for k_any, v_any in obj.items():
+            if not (isinstance(k_any, str) and isinstance(v_any, list)):
+                continue
+
+            turns: List[Turn] = []
+            for it in v_any:
+                if not isinstance(it, dict):
+                    continue
+                role = it.get("role")
+                content = it.get("content")
+                if isinstance(role, str) and isinstance(content, str):
+                    turns.append({"role": role, "content": content})
+            store[k_any] = turns
+
+    session_list: List[Turn] = store.get(session_id, [])
+    return session_list
 
 
-# ─────────────────────────────── main() ────────────────────────────────
-def main(argv: list[str] | None = None) -> None:
+# ─────────────────────────────────────────────────────────── main() ──
+def main(argv: Sequence[str] | None = None) -> None:
     ap = argparse.ArgumentParser(
         prog="migrate_memory.py",
         description="Export an in-memory chat session to an SQLite file",
@@ -78,7 +115,10 @@ def main(argv: list[str] | None = None) -> None:
     args = ap.parse_args(argv)
 
     # 1) pull turns from the (rehydrated) in-memory backend
-    turns = Memory(backend=MemoryBackend.IN_MEMORY).load(args.session)
+    raw_turns: List[Dict[str, Any]] = Memory(backend=MemoryBackend.IN_MEMORY).load(
+        args.session
+    )
+    turns: List[Turn] = _normalize_turns(raw_turns)
 
     # Fallback: read directly from the env snapshot if needed
     if not turns:
@@ -103,5 +143,6 @@ def main(argv: list[str] | None = None) -> None:
     print(f"Migrated {len(turns)} turns  →  {db_path}  (session “{args.session}”).")
 
 
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
     main()

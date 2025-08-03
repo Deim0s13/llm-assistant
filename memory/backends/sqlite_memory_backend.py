@@ -4,18 +4,21 @@
 
 from __future__ import annotations
 
+# ───────────────────────────────────────────────────────── Imports ──
 import logging
 import os
 import sqlite3
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, final, override
 
 from memory.backends.redis_memory_backend import BaseMemoryBackend, InMemoryBackend
 
+# ───────────────────────────────────────────────────────── Logging ──
 LOGGER = logging.getLogger(__name__)
 
 
+@final
 class SQLiteMemoryBackend(BaseMemoryBackend):
     """
     File-based chat-turn store.
@@ -50,12 +53,17 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
         fallback: Optional[BaseMemoryBackend] = None,
         persist: bool = True,
     ) -> None:
-        self._db_path = Path(os.getenv("MEMORY_DB_PATH", str(db_path or "data/memory.sqlite")))
-        self._max = max_rows if max_rows is not None else max_rows_per_session
-        self._fallback = fallback or InMemoryBackend()
+        # ─────────────────────────────────────────── Fields ──
+        self._db_path: Path = Path(
+            os.getenv("MEMORY_DB_PATH", str(db_path or "data/memory.sqlite"))
+        )
+        self._max: int = max_rows if max_rows is not None else max_rows_per_session
+        self._fallback: BaseMemoryBackend = fallback or InMemoryBackend()
+        self._conn: sqlite3.Connection | None = None
+        self._using_fallback: bool = True  # default until setup succeeds
 
+        # ───────────────────────────────────────── Connect ──
         try:
-            # Make sure the directory exists, open DB, and create table.
             self._db_path.parent.mkdir(parents=True, exist_ok=True)
             self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
             self._conn.execute("PRAGMA journal_mode=WAL;")
@@ -68,7 +76,8 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
             self._conn = None
             self._using_fallback = True
 
-    # ─────────────────────────── add_turn ───────────────────────────────
+    # ───────────────────────────────────────── add_turn ──
+    @override
     def add_turn(self, role: str, content: str, *, cid: str = "default") -> None:
         """
         Persist a single chat turn (or delegate to RAM if in fallback).
@@ -83,7 +92,8 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
         ts_now = time.time_ns()  # monotonic-ish, good for DESC sorting
 
         try:
-            with self._conn:  # type: ignore[attr-defined]
+            assert self._conn is not None  # narrow for type-checkers
+            with self._conn:
                 # 1) insert
                 self._conn.execute(
                     "INSERT INTO turns (session, ts, role, content) VALUES (?, ?, ?, ?)",
@@ -108,8 +118,11 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
             self._using_fallback = True
             self._fallback.add_turn(role, content, cid=cid)
 
-    # ─────────────────────────── get_recent ────────────────────────────
-    def get_recent(self, *, limit: int = 50, cid: str = "default") -> List[Dict[str, str]]:
+    # ───────────────────────────────────────── get_recent ──
+    @override
+    def get_recent(
+        self, *, limit: int = 50, cid: str = "default"
+    ) -> List[Dict[str, str]]:
         """
         Return the most-recent `limit` turns (newest-first).
         """
@@ -117,7 +130,8 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
             return self._fallback.get_recent(limit=limit, cid=cid)
 
         try:
-            rows = self._conn.execute(  # type: ignore[attr-defined]
+            assert self._conn is not None  # narrow for type-checkers
+            rows = self._conn.execute(
                 """
                 SELECT role, content
                 FROM   turns
@@ -133,17 +147,19 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
             self._using_fallback = True
             return self._fallback.get_recent(limit=limit, cid=cid)
 
-    # ───────────────────────────── flush ───────────────────────────────
+    # ───────────────────────────────────────────── flush ──
+    @override
     def flush(self, *, cid: str = "default") -> None:
         """Delete all stored turns for a conversation id."""
         if self._using_fallback:
             self._fallback.flush(cid=cid)
             return
 
-        # Ensure table exists even if flush is the first call made.
         try:
-            self._conn.execute(self._DDL)  # type: ignore[attr-defined]
-            with self._conn:               # type: ignore[attr-defined]
+            assert self._conn is not None  # narrow for type-checkers
+            # Ensure table exists even if flush is the first call made.
+            self._conn.execute(self._DDL)
+            with self._conn:
                 self._conn.execute("DELETE FROM turns WHERE session = ?", (cid,))
         except Exception as exc:
             LOGGER.error("SQLite flush failed (%s) – switching to fallback", exc)
