@@ -9,55 +9,72 @@ OpenAI moderation, Perspective API, custom models) can later replace the
 `evaluate_safety()` stub without changing the main chat flow.
 """
 
-# ───────────────────────────────  Imports ───────────────────────────────
-
 from __future__ import annotations
 
+# ───────────────────────────────────────────────────────── Logging ──
 import logging
+
+LOGGER = logging.getLogger(__name__)  # inherit root config from main
+
+# ───────────────────────────────────────────────────────── Imports ──
 import re
-from typing import Tuple, Optional
 from functools import lru_cache
+from typing import Any, Dict, Optional, Tuple
 
-# ─────────────────────────────── Static data ───────────────────────────────
+# ─────────────────────────────────────────────────────── Static data ──
+_DEFAULT_PROFANITY: Tuple[str, ...] = ("damn", "hell", "shit", "fuck")
 
-_DEFAULT_PROFANITY = ["damn", "hell", "shit", "fuck"]
+from functools import lru_cache
+import re
 
+
+@lru_cache(maxsize=1)
+def _default_regex() -> re.Pattern[str]:
+    """Cached whole-word regex built from _DEFAULT_PROFANITY."""
+    pat = r"\b(" + "|".join(map(re.escape, sorted(_DEFAULT_PROFANITY))) + r")\b"
+    return re.compile(pat, re.IGNORECASE)
+
+
+# ─────────────────────────────── Regex builder (cached) ──────────────
 @lru_cache(maxsize=8)
-def _build_profanity_regex(strict_terms: tuple[str, ...] = (),
-                           extra_terms : tuple[str, ...] = ()) -> re.Pattern:
+def _build_profanity_regex(
+    strict_terms: Tuple[str, ...] = (),
+    extra_terms: Tuple[str, ...] = (),
+) -> re.Pattern[str]:
     """
-    Lazily compile  ❱  ( default ∪ strict_terms ∪ extra_terms )  ❰
-    into a single *whole-word* regex.  Cached for speed.
+    Compile  ❱  ( default ∪ strict_terms ∪ extra_terms )  ❰
+    into a single *whole-word* regex. Cached for speed.
     """
     wordlist = set(_DEFAULT_PROFANITY) | set(strict_terms) | set(extra_terms)
-    pattern  = r"\b(" + "|".join(map(re.escape, sorted(wordlist))) + r")\b"
-    return re.compile(pattern, flags=re.IGNORECASE)
+    if not wordlist:
+        # Compile a regex that never matches to keep types simple downstream.
+        return re.compile(r"(?!x)x")
+    pattern = r"\b(" + "|".join(map(re.escape, sorted(wordlist))) + r")\b"
+    return re.compile(pattern, re.IGNORECASE)
 
-# ───────────────────────────────  Profanity masking ───────────────────────────────
 
-def apply_profanity_filter(text: str, regex: re.Pattern | None = None) -> str:
+# ───────────────────────────────────── Profanity masking ─────────────
+def apply_profanity_filter(text: str, regex: re.Pattern[str] | None = None) -> str:
     """
-    Mask profane words with asterisks (same length, preserves case count).
-    A pre-compiled *regex* can be passed in from evaluate_safety() so
-    we don't compile twice
+    Mask profane words with asterisks. If no regex is provided, use a cached
+    whole-word default compiled from _DEFAULT_PROFANITY.
     """
+    if regex is None:
+        regex = _default_regex()
 
-    regex = regex or _build_profanity_regex()
-
-    def _mask(match: re.Match) -> str:
-        return "*" * len(match.group())
+    def _mask(match: re.Match[str]) -> str:
+        return "*" * len(match.group(0))
 
     return regex.sub(_mask, text)
 
-# ─────────────────────────────── Safety pre-generation ───────────────────────────────
 
+# ─────────────────────────────── Safety pre-generation ───────────────
 def evaluate_safety(
     message: str,
-    settings: dict,
+    settings: Dict[str, Any],
 ) -> Tuple[bool, Optional[str]]:
     """
-    Light safety gate that checks *input* for profanity before we even
-    call the model.
+    Light safety gate that checks *input* for profanity before we call the model.
 
     Returns
     -------
@@ -68,55 +85,57 @@ def evaluate_safety(
 
     Behaviour by *sensitivity_level* in ``settings['safety']``:
     ┌────────────┬───────────────────────────────────────────────┐
-    │ strict     │ Always block if profanity match.             │
-    │ moderate   │ Allow but note that output should be filtered │
-    │ relaxed    │ No blocking, no filtering.                    │
+    │ strict     │ Always block on profanity (or strict term).   │
+    │ moderate   │ Allow but caller should mask output.           │
+    │ relaxed    │ No blocking.                                   │
     └────────────┴───────────────────────────────────────────────┘
     """
-    config = settings.get("safety", {})
-    level = config.get("sensitivity_level", "moderate").lower()
-    log_triggers = config.get("log_triggered_filters", False)
-    strict_terms = tuple(config.get("strict_terms", []))
-    whitelist = set(w.lower() for w in config.get("relaxed_whitelist", []))
-    extra_terms = tuple(config.get("extra_phrases", {}).keys())
+    cfg = settings.get("safety", {})
+    level = str(cfg.get("sensitivity_level", "moderate")).lower()
+    log_triggers = bool(cfg.get("log_triggered_filters", False))
+
+    # Optional lists/dicts in settings; coerce to expected shapes
+    strict_terms: Tuple[str, ...] = tuple(cfg.get("strict_terms", ()))
+    whitelist = {str(w).lower() for w in cfg.get("relaxed_whitelist", ())}
+
+    # `extra_phrases` may be a dict of {phrase: …}; keys become terms
+    extra_terms: Tuple[str, ...] = tuple(
+        getattr(cfg.get("extra_phrases", {}), "keys", lambda: ())()
+    )
 
     regex = _build_profanity_regex(strict_terms, extra_terms)
 
-    refusal_text = config.get(
-        "blocked_response_template",
-        "I'm unable to respond to that request due to safety policies.",
+    refusal_text: str = str(
+        cfg.get(
+            "blocked_response_template",
+            "I'm unable to respond to that request due to safety policies.",
+        )
     )
 
-    # ───────────────────────────────  Detect profanity  ───────────────────────────────
-
+    # ── Detect profanity ────────────────────────────────────────────
     match = regex.search(message)
     matched_word = match.group(0).lower() if match else ""
     profane = bool(match and matched_word not in whitelist)
 
     if profane and log_triggers:
-        logging.debug("[Safety] Profanity detected (level=%s, term=%s): %s",
-                      level, matched_word, message)
+        LOGGER.debug(
+            "[Safety] Profanity detected (level=%s, term=%s): %s",
+            level,
+            matched_word,
+            message,
+        )
 
-    # ─────────────────────────────── NEW: absolute-block list ───────────────────────────────
-    # If the matched word is in *strict_terms*, we always block,
-    # regardless of the chosen sensitivity level.
+    # ── Absolute block: any strict term triggers a block ────────────
     if profane and matched_word in strict_terms:
         return False, refusal_text
 
-    # ───────────────────────── decision ladder ─────────────────────────
-    #
-    # 1) Hard override: any word in strict_terms → always block
-    if matched_word in strict_terms:
-        return False, refusal_text
-
-    # 2) Per-message whitelist: allow specific words even in strict mode
-    if matched_word in whitelist:
+    # ── Sensitivity ladder ──────────────────────────────────────────
+    if not profane:
         return True, None
 
-    # 3) Fall back to global sensitivity rules
     if level == "strict":
-        return False, refusal_text          # blanket block
-    elif level == "moderate":
-        return True, None                   # allow, but caller should mask
-    else:                                   # relaxed / unknown
-        return True, None
+        return False, refusal_text
+    if level == "moderate":
+        return True, None  # caller may apply output masking
+    # relaxed / unknown
+    return True, None

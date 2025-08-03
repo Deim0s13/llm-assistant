@@ -1,0 +1,44 @@
+{
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.13",
+
+  "include": ["utils", "memory", "config", "scripts"],
+  "exclude": [
+    "venv",
+    "experiments",
+    "data",
+    ".git",
+    "**/__pycache__",
+    "**/.mypy_cache",
+    "**/.pytest_cache"
+  ],
+
+  "venvPath": ".",
+  "venv": "venv",
+
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "warning",
+  "reportUnknownVariableType": "error",
+  "reportUnknownMemberType": "error",
+  "reportUnknownArgumentType": "error",
+  "reportUnknownParameterType": "error",
+  "reportUnusedImport": "warning",
+  "reportPrivateUsage": "warning",
+  "reportImportCycles": "warning",
+  "reportUnnecessaryTypeIgnoreComment": "error",
+  "reportIncompatibleMethodOverride": "error",
+  "reportIncompatibleVariableOverride": "error",
+  "reportInvalidTypeVarUse": "error",
+  "reportInvalidTypeForm": "error",
+  "reportUntypedFunctionDecorator": "error",
+  "reportUntypedClassDecorator": "error",
+  "reportCallInDefaultInitializer": "error",
+  "reportImplicitOverride": "error",
+
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "pythonVersion": "3.13"
+    }
+  ]
+}

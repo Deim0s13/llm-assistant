@@ -1,4 +1,4 @@
-# 🧠 LLM‑Assistant Starter Kit
+# LLM‑Assistant Starter Kit
 
 A hands‑on project for **learning** how to structure, prompt, extend, *and eventually fine‑tune* LLM‑powered applications. What began as a single‑file chatbot has grown into a modular playground for **prompt engineering**, **memory handling**, **summarisation**, and (next) **RAG** & **fine‑tuning**.
 
@@ -14,11 +14,19 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 
 ## Project Status
 
+<<<<<<< HEAD
 | Track             | Version      | Notes                                                                                           |
 | ----------------- | ------------ | ----------------------------------------------------------------------------------------------- |
 | **Latest stable** | **`v0.4.3`** | In‑memory backend, summarise scaffold, first wave of unit‑tests                                 |
 | **In progress**   | **`v0.4.4`** | 🔧 **RedisMemoryBackend** (persistent memory), 📝 Summarise MVP, 🤖 CI pipeline (pytest + Ruff) |
 | **Planned next**  | **`v0.4.5`** | 🧩 Vector‑DB memory, 🪄 RAG prototype, Docker/Podman containers                                 |
+=======
+| Track             | Version      | Notes                                                                                                       |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
+| **In progress**   | **`v0.4.5`** | **CI matrix & guard-rails edge-cases**, **typing/IDE hygiene**                                         |
+| **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
+>>>>>>> dev
 
 *See the full history → **[Release Notes](./docs/release_notes.md)**.*
 
@@ -40,10 +48,23 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 │   ├── prompt_utils.py             # Order‑preserving alias helper
 │   └── safety_filters.py           # Profanity & safety checks
 ├── config/
+<<<<<<< HEAD
 │   ├── settings.json               # Runtime config (memory, model, logging …)
 │   ├── prompt_template.txt         # Base system prompt
 │   └── specialised_prompts.json
 ├── tests/                          # PyTest suites (memory, summariser …)
+=======
+│   ├── settings.json       # Runtime config (memory, safety, logging …)
+│   ├── prompt_template.txt # Base system prompt
+│   └── specialized_prompts.json
+│   ├── memory.py           # Memory façade (in-memory | redis)
+│   ├── summariser.py       # summarise_context() scaffold
+├── experiments/            # Exploratory scripts & notebooks
+│   ├── summarisation_playground.py  # simple summary prototype
+│   ├── test_memory_backends.py
+│   └── …                    # memory toggle / context tests
+├── tests/                  # **PyTest** suites (memory, context …)
+>>>>>>> dev
 ├── scripts/
 │   └── activate_tests.sh           # helper → sets PYTHONPATH + runs smoke tests
 └── docs/                           # Roadmap · Scope · Dev checklist · …
@@ -66,7 +87,7 @@ See full contributor guidelines in **[`CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
 
 ---
 
-## Quick‑start 🏃‍♂️
+## Quick‑start
 
 ```bash
 git clone https://github.com/<you>/llm-assistant.git
@@ -79,6 +100,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
+<<<<<<< HEAD
 ### Run with Redis (optional)
 
 ```bash
@@ -90,6 +112,87 @@ python main.py --memory redis       # or edit config/settings.json
 ```
 
 If Redis is unavailable the app automatically falls back to volatile memory.
+=======
+### Optional Installs
+
+```bash
+pip install -r requirements.txt            # core runtime
+pip install -r requirements-dev.txt        # pytest, mypy, fakeredis   ← optional
+pip install -r requirements-redis.txt      # redis-py client (persistence)
+python main.py
+```
+
+### Run with Redis (optional)
+
+```bash
+# 1) Install the client library
+pip install -r requirements-redis.txt        # or: pip install redis
+
+# 2) Start a local test container
+podman run --name redis -p 6379:6379 -d docker.io/redis:7-alpine
+
+# 3) Point the app at it
+export REDIS_URL="redis://localhost:6379/0"
+# or set MEMORY_BACKEND=redis in .env
+
+python main.py
+# Console will show:  [Redis] Connected ✔
+```
+
+### Run with SQLite (default)
+
+SQLite requires **no extra install** — it’s part of Python’s std-lib.
+The backend stores chat turns in `data/memory.sqlite` by default and trims the oldest rows automatically.
+
+```bash
+# Use the built-in path
+export MEMORY_BACKEND=sqlite
+python main.py
+
+# ➜ Console shows:  [SQLite] Connected → data/memory.sqlite
+```
+
+To place the DB elsewhere:
+
+```bash
+export MEMORY_BACKEND=sqlite
+export MEMORY_DB_PATH="$HOME/.llm-assistant/chat.sqlite"
+python main.py
+```
+
+The file is created (and schema migrated) on first run.
+
+If the path is unwritable the app logs a warning and transparently falls back to in-memory storage.
+
+### Auto-select “persistent” mode
+
+Set `MEMORY_BACKEND=persistent` (or `"backend": "persistent"` in
+`settings.json`) and the app will pick the best available store:
+
+1. **Redis** – if the `redis` Python client is installed *and* a server
+   responds on `REDIS_URL` / `localhost:6379`.
+2. **SQLite** – if Redis isn’t reachable but the local file path is
+   writable.  Data lives in `data/memory.sqlite` (or `MEMORY_DB_PATH`).
+3. **In-memory** – final fallback when both persistent options fail.
+
+Startup log shows the outcome, e.g.: [Memory] persistent → redis or [Memory] persistent → sqlite
+
+No code changes are needed in `main.py`; the `utils.memory` façade
+handles the selection transparently.
+
+---
+
+### Memory back-ends (v0.4.4 +)
+
+| `memory.backend` value | Store that’s used                               | Extra notes                                              |
+| ---------------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `in_memory`            | Python list in RAM                             | Zero dependencies (default fallback)                     |
+| `sqlite`               | `data/memory.sqlite` via std-lib `sqlite3`     | Auto-creates file & trims oldest rows                    |
+| `redis`                | Remote Redis (needs **redis-py** + server)     | Falls back to RAM if server not reachable                |
+| `persistent`           | **Chooser:** redis → sqlite → in_memory        | Picks best available at runtime – no code changes needed |
+
+*The runtime chooser lives in `utils/memory.py` – adding a new backend is now as easy as plugging a factory into `_BACKEND_FACTORIES`; the chat loop still just calls `memory.load / save / clear`.*
+>>>>>>> dev
 
 ---
 
@@ -101,13 +204,16 @@ Drop a `.env` in the project root to override `settings.json` without touching t
 DEBUG_MODE=true
 MAX_HISTORY_TURNS=6
 MODEL_DEVICE=mps      # cpu | cuda | mps
+MEMORY_BACKEND=sqlite # in_memory | redis | sqlite
+MEMORY_BACKEND=persistent  # auto-select redis → sqlite → in_memory
+MEMORY_DB_PATH=/absolute/path/chat.sqlite  # optional override for SQLite
 ```
 
 Supported keys & examples → **docs/dev\_checklist.md**
 
 ---
 
-### Platform Setup 💻
+### Platform Setup
 
 | OS                   | Key steps                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -118,7 +224,7 @@ More detail & troubleshooting → **Cross‑Platform Dev Checklist**.
 
 ---
 
-## Unit‑tests 🧪
+## Unit‑tests
 
 Run smoke tests & memory‑toggle checks:
 
@@ -126,6 +232,7 @@ Run smoke tests & memory‑toggle checks:
 source scripts/activate_tests.sh       # sets PYTHONPATH + runs tests
 # or
 pytest -q                              # full suite
+mypy .                                 # static-type pass (strict on src)
 ```
 
 CI (GitHub Actions) kicks off in **v0.4.4** (Ruff + PyTest on every PR).
