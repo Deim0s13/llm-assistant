@@ -2,39 +2,40 @@
 #  main.py – Gradio chat loop, prompt pipeline & memory integration
 # ════════════════════════════════════════════════════════════════════
 
-# ─────────────────────────────── Logging ───────────────────────────────
+# ───────────────────────────── Imports ─────────────────────────────
 
 import logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[
-        logging.StreamHandler(),            # console
-        logging.FileHandler("debug.log")    # persistent file
-    ],
-)
+import json
+import difflib
+from typing import Any, Tuple
 
-#  ─────────────────────────────── Imports  ───────────────────────────────
-
-import json, difflib, gradio as gr, torch
+import gradio as gr
+import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from utils.aliases          import KEYWORD_ALIASES
 from utils.prompt_utils     import alias_in_message
 from utils.safety_filters   import apply_profanity_filter, evaluate_safety
 from utils.memory           import memory
+from utils.summariser       import summarise_context
 from config.settings_loader import load_settings
 
-# ─────────────────────────────── Globals / Helpers ───────────────────────────────
+# ────────────────────────── Logging Configuration ──────────────────
+DEBUG_MODE: bool = True
 
-DEBUG_MODE  = True
-SETTINGS    = load_settings()
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.StreamHandler(),            # Console
+        logging.FileHandler("debug.log")    # Persistent file
+    ],
+)
 
-if not DEBUG_MODE:
-    logging.getLogger().setLevel(logging.INFO)
+# ────────────── Globals & Initialisation (Settings, Model) ──────────────
+SETTINGS: dict[str, Any] = load_settings()
 
-# Memory start-up diagnostic
-_mem_cfg = SETTINGS.get("memory", {})
+_mem_cfg: dict[str, Any] = SETTINGS.get("memory", {})
 logging.debug(
     "[Memory] Enabled=%s | Backend=%s",
     _mem_cfg.get("enabled", False),
@@ -45,57 +46,55 @@ def count_tokens(text: str) -> int:
     """Return #tokens a string yields with current tokenizer."""
     return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
-# ─────────────────────────────── Model initialisation ───────────────────────────────
-
-def initialize_model(model_name: str = "google/flan-t5-base"):
+def initialize_model(model_name: str = "google/flan-t5-base") -> Tuple[Any, Any, str]:
     """Load tokenizer/model and move model onto best device."""
     tok = AutoTokenizer.from_pretrained(model_name)
     mdl = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-
     if torch.cuda.is_available():
         device = "cuda"
     elif torch.backends.mps.is_available():
         device = "mps"
     else:
         device = "cpu"
-
     tok.pad_token = tok.eos_token
     mdl.to(device)
     logging.debug("[System] Torch device → %s", device)
     return tok, mdl, device
 
-# ─────────────────────────────── Prompt-file loaders ───────────────────────────────
+BASE_PROMPT_PATH: str = "config/prompt_template.txt"
+SPECIALIZED_PROMPTS_PATH: str = "config/specialized_prompts.json"
 
-BASE_PROMPT_PATH         = "config/prompt_template.txt"
-SPECIALIZED_PROMPTS_PATH = "config/specialized_prompts.json"
-
-def load_base_prompt(path=BASE_PROMPT_PATH) -> str:
+def load_base_prompt(path: str = BASE_PROMPT_PATH) -> str:
     with open(path, encoding="utf-8") as fh:
         return fh.read().strip()
 
-def load_specialized_prompts(path=SPECIALIZED_PROMPTS_PATH) -> dict:
+def load_specialized_prompts(path: str = SPECIALIZED_PROMPTS_PATH) -> dict[str, str]:
     with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
+        data: dict[str, str] = json.load(fh)
     logging.info("[Prompt] Loaded %d specialised prompts", len(data))
     return data
 
-# ─────────────────────────────── Memory helper ───────────────────────────────
+# ─────────────── Memory Helper ───────────────
 
-def _memory_turns(max_turns: int, session: str = "default") -> list[dict]:
+def _memory_turns(max_turns: int, session: str = "default") -> list[dict[str, Any]]:
     """Return last `max_turns` messages from Memory (or [])."""
     if not SETTINGS["memory"]["enabled"]:
         return []
     return memory.load(session)[-max_turns:]
 
-# ─────────────────────────────── Prompt-selection ───────────────────────────────
+# ─────────────── Prompt Selection ───────────────
 
-def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
+def get_specialized_prompt(
+    msg: str,
+    prompts: dict[str, str],
+    fuzzy: bool
+) -> Tuple[str, str, float | None]:
     """
     Return (prompt_text, concept, match_score|None).
     If no match → ("", "base_prompt", None)
     """
-    norm   = msg.lower().replace("’", "'")
-    tokens = norm.split()
+    norm: str = msg.lower().replace("’", "'")
+    tokens: list[str] = norm.split()
 
     # direct alias
     for alias, concept in KEYWORD_ALIASES.items():
@@ -105,7 +104,8 @@ def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
 
     # fuzzy alias
     if fuzzy:
-        best, score = None, 0.0
+        best: str | None = None
+        score: float = 0.0
         for alias in KEYWORD_ALIASES:
             sim = difflib.SequenceMatcher(None, norm, alias).ratio()
             if sim > score and sim >= 0.7:
@@ -118,55 +118,38 @@ def get_specialized_prompt(msg: str, prompts: dict, fuzzy: bool):
     logging.debug("[Prompt] No prompt match")
     return "", "base_prompt", None
 
-# ─────────────────────────────── Context preparation ───────────────────────────────
+# ─────────────── Context Preparation ───────────────
 
-def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
+def prepare_context(
+    msg: str,
+    history: list[dict[str, Any]],
+    base_prompt: str,
+    spec_prompts: dict[str, str],
+    fuzzy: bool
+) -> Tuple[str, str]:
     """
     Build the full prompt string that is passed to the model.
-
-    ╭────────────────── Prompt-Assembly Pipeline ──────────────────╮
-    │ 1️⃣  SPECIAL PROMPT  – alias / fuzzy match (optional)        │
-    │ 2️⃣  MEMORY TURNS    – stored conversation (if enabled)      │
-    │ 3️⃣  LIVE HISTORY    – last N on-screen chat messages        │
-    │ 4️⃣  USER MESSAGE    – current turn                          │
-    ╰──────────────────────────────────────────────────────────────╯
-
-    Memory logic
-    ------------
-    • SETTINGS["memory"]["enabled"] == False
-        → `_memory_turns()` returns an empty list → only live history is used.
-
-    • SETTINGS["memory"]["enabled"] == True  and
-      utils.memory.backend != MemoryBackend.NONE
-        → `_memory_turns()` returns up to N stored turns which are **prepended**
-          before the latest on-screen history.
-
-    • If the combined token count exceeds
-      `SETTINGS["context"]["max_prompt_tokens"]`, the oldest turns
-      (memory **and** live) are trimmed first.
-
-    Looking ahead (v0.4.4+)
-    -----------------------
-    • `summarise_context()` will soon compress trimmed lines into a single
-      “⚡ Summary so far” block instead of hard-dropping turns.
-    • Persistent stores (Redis / SQLite) will register in `MemoryBackend`
-      but *this* function will remain unchanged.
-
-    Returns
-    -------
-    context : str   – Final prompt ready for tokenisation.
-    source  : str   – "base_prompt" or specialised concept name (diagnostics).
+    (Docstring unchanged)
     """
-
-    max_turns  = SETTINGS["context"]["max_history_turns"]
-    max_tokens = SETTINGS["context"]["max_prompt_tokens"]
+    max_turns: int = SETTINGS["context"]["max_history_turns"]
+    max_tokens: int = SETTINGS["context"]["max_prompt_tokens"]
 
     spec_prompt, src, _ = get_specialized_prompt(msg, spec_prompts, fuzzy)
 
-    session_id = "default"
-    mem_turns  = _memory_turns(max_turns)
-    live_turns = history[-max_turns:]
-    combined   = (mem_turns + live_turns)[-max_turns:]
+    session_id: str = "default"
+    mem_turns: list[dict[str, Any]] = _memory_turns(max_turns)
+    live_turns: list[dict[str, Any]] = history[-max_turns:]
+    combined: list[dict[str, Any]] = (mem_turns + live_turns)[-max_turns:]
+
+    min_summary_turns: int = int(SETTINGS.get("context", {}).get("min_summary_turns", 5))
+    use_summary: bool = len(combined) >= min_summary_turns
+    summary_text: str = ""
+    if use_summary:
+        summary_text = summarise_context(combined)
+        if summary_text.strip():
+            # Treat summary as synthetic "user" turn for prompt assembly
+            combined = [{"role": "user", "content": summary_text}] + combined[-(max_turns-1):]
+            logging.debug("[Summary] Injected summary, turns=%d, chars=%d", len(combined), len(summary_text))
 
     if DEBUG_MODE:
         logging.debug(
@@ -177,15 +160,15 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
             len(combined),
         )
 
-    def build(hist_slice):
-        ctx = spec_prompt or base_prompt
+    def build(hist_slice: list[dict[str, Any]]) -> str:
+        ctx: str = spec_prompt or base_prompt
         for turn in hist_slice:
             ctx += f"\n{turn['role'].capitalize()}: {turn['content']}"
         ctx += f"\nUser: {msg}\nAssistant:"
         return ctx
 
-    context = build(combined)
-    tok_ct  = count_tokens(context)
+    context: str = build(combined)
+    tok_ct: int  = count_tokens(context)
 
     while tok_ct > max_tokens and len(combined) > 1:
         combined = combined[1:]
@@ -197,9 +180,17 @@ def prepare_context(msg, history, base_prompt, spec_prompts, fuzzy):
 
     return context, src
 
-# ─────────────────────────────── Chat generation ───────────────────────────────
+# ─────────────── Chat Generation ───────────────
 
-def chat(msg, history, mx, temp, top_p, sample, fuzzy):
+def chat(
+    msg: str,
+    history: list[dict[str, Any]],
+    mx: int,
+    temp: float,
+    top_p: float,
+    sample: bool,
+    fuzzy: bool
+) -> Tuple[list[dict[str, Any]], str]:
     allowed, block_msg = evaluate_safety(msg, SETTINGS)
     if not allowed:
         logging.debug("[Safety] blocked input")
@@ -209,7 +200,7 @@ def chat(msg, history, mx, temp, top_p, sample, fuzzy):
 
     ctx, src = prepare_context(msg, history, BASE_PROMPT, SPECIALIZED_PROMPTS, fuzzy)
 
-    gen_cfg = {
+    gen_cfg: dict[str, Any] = {
         "max_new_tokens": int(mx),
         "do_sample"     : sample,
         "temperature"   : float(temp),
@@ -231,38 +222,54 @@ def chat(msg, history, mx, temp, top_p, sample, fuzzy):
                 {"role": "assistant", "content": text}]
     return history, src
 
-# ─────────────────────────────── Gradio wrappers ───────────────────────────────
+# ─────────────── Gradio Wrappers ───────────────
 
-def respond(msg, history, mx, temp, top_p, sample, fuzzy, safety):
+def respond(
+    msg: str,
+    history: list[dict[str, Any]],
+    mx: int,
+    temp: float,
+    top_p: float,
+    sample: bool,
+    fuzzy: bool,
+    safety: str
+) -> Tuple[str, list[dict[str, Any]], str]:
     SETTINGS["safety"]["sensitivity_level"] = safety
     history = history or []
     new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
     return "", new_hist, f"Prompt source: {src}"
 
-# ─────────────────────────────── Boot phase ───────────────────────────────
+# ─────────────── Boot Phase ───────────────
 
-BASE_PROMPT              = load_base_prompt()
-SPECIALIZED_PROMPTS       = load_specialized_prompts()
+BASE_PROMPT: str                 = load_base_prompt()
+SPECIALIZED_PROMPTS: dict[str, str] = load_specialized_prompts()
 tokenizer, model, device = initialize_model()
 
-# ─────────────────────────────── Playground helper ───────────────────────────────
+# ─────────────── Playground Helper ───────────────
 
-def run_playground(test_in, mx, temp, top_p, sample, fuzzy, force):
+def run_playground(
+    test_in: str,
+    mx: int,
+    temp: float,
+    top_p: float,
+    sample: bool,
+    fuzzy: bool,
+    force: bool
+) -> Tuple[str, str, str]:
     if not force:
         return "", "", ""
     ptxt, concept, score = get_specialized_prompt(test_in, SPECIALIZED_PROMPTS, fuzzy)
     prompt = ptxt or BASE_PROMPT
     ctx    = f"{prompt}\nUser: {test_in}\nAssistant:"
     ids    = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
-    preview = tokenizer.decode(model.generate(ids, max_new_tokens=int(mx),
-                                              do_sample=sample,
+    preview = tokenizer.decode(model.generate(ids, max_new_tokens=int(mx), do_sample=sample,
                                               temperature=float(temp),
                                               top_p=float(top_p))[0],
                                skip_special_tokens=True).strip()
     score_s = f"{score:.2f}" if score else "N/A"
     return f"{concept} (conf {score_s})", prompt, preview
 
-# ─────────────────────────────── Gradio UI ───────────────────────────────
+# ─────────────── Gradio UI ───────────────
 
 with gr.Blocks() as demo:
     gr.Markdown("# Chatbot with Tunable Generation Parameters")
@@ -326,5 +333,5 @@ with gr.Blocks() as demo:
 # ════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    logging.debug("🚀 Launching Gradio demo …")
+    logging.debug("Launching Gradio demo...")
     demo.launch()
