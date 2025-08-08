@@ -149,9 +149,9 @@ def prepare_context(
     max_summary_chars: int = summ_cfg.get("max_chars", 512)
     
     # Check if we should trigger summarization (by turns OR tokens)
-    total_context_str = " ".join(turn["content"] for turn in combined if "content" in turn)
+    total_context_str: str = " ".join(turn["content"] for turn in combined if "content" in turn)
     trigger_by_turns: bool = len(combined) >= min_summary_turns
-    trigger_by_tokens = summ_cfg.get("trigger_by_tokens", False) and count_tokens(total_context_str) > summ_cfg.get("max_context_tokens", 2000)
+    trigger_by_tokens: bool = summ_cfg.get("trigger_by_tokens", False) and count_tokens(total_context_str) > summ_cfg.get("max_context_tokens", 2000)
     
     if summ_enabled and (trigger_by_turns or trigger_by_tokens):
         # Validate strategy with fallback
