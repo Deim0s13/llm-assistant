@@ -141,15 +141,37 @@ def prepare_context(
     live_turns: list[dict[str, Any]] = history[-max_turns:]
     combined: list[dict[str, Any]] = (mem_turns + live_turns)[-max_turns:]
 
-    min_summary_turns: int = int(SETTINGS.get("context", {}).get("min_summary_turns", 5))
-    use_summary: bool = len(combined) >= min_summary_turns
-    summary_text: str = ""
-    if use_summary:
-        summary_text = summarise_context(combined)
+    # Apply summarization if conditions are met
+    summ_cfg = SETTINGS.get("summarisation", {})
+    summ_enabled: bool = summ_cfg.get("enabled", True)
+    min_summary_turns: int = summ_cfg.get("min_turns", 8)
+    summ_strategy: str = summ_cfg.get("strategy", "brief")
+    max_summary_chars: int = summ_cfg.get("max_chars", 512)
+    
+    # Check if we should trigger summarization (by turns OR tokens)
+    total_context_str = " ".join(turn["content"] for turn in combined if "content" in turn)
+    trigger_by_turns: bool = len(combined) >= min_summary_turns
+    trigger_by_tokens = summ_cfg.get("trigger_by_tokens", False) and count_tokens(total_context_str) > summ_cfg.get("max_context_tokens", 2000)
+    
+    if summ_enabled and (trigger_by_turns or trigger_by_tokens):
+        # Validate strategy with fallback
+        valid_strategies = ["brief", "bullet"]  # Add more as supported
+        if summ_strategy not in valid_strategies:
+            logging.warning("[Summary] Unknown strategy '%s', falling back to 'brief'", summ_strategy)
+            summ_strategy = "brief"
+            
+        summary_text: str = summarise_context(
+            combined, 
+            style=summ_strategy,
+            max_chars=max_summary_chars
+        )
+        
         if summary_text.strip():
-            # Treat summary as synthetic "user" turn for prompt assembly
+            # Inject summary as synthetic "user" turn
             combined = [{"role": "user", "content": summary_text}] + combined[-(max_turns-1):]
-            logging.debug("[Summary] Injected summary, turns=%d, chars=%d", len(combined), len(summary_text))
+            trigger_reason = "turns" if trigger_by_turns else "tokens"
+            logging.debug("[Summary] Injected summary (trigger: %s), turns=%d, chars=%d", 
+                         trigger_reason, len(combined), len(summary_text))
 
     if DEBUG_MODE:
         logging.debug(
