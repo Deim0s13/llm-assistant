@@ -1,88 +1,71 @@
-# LLM‑Assistant Starter Kit
+# LLM‑Assistant Starter Kit
 
-A hands‑on project for **learning** how to structure, prompt, extend, \_and eventually fine‑tune\_ LLM-powered applications.
-What began as a single‑file chatbot has grown into a modular playground for **prompt engineering**, **memory handling**, **summarisation**, and (soon) **RAG** & **fine‑tuning**.
+A hands‑on project for **learning** how to structure, prompt, extend, *and eventually fine‑tune* LLM‑powered applications. What began as a single‑file chatbot has grown into a modular playground for **prompt engineering**, **memory handling**, **summarisation**, and (next) **RAG** & **fine‑tuning**.
 
 ---
 
 ## Key Objectives
 
-* **Learn by doing** – prompts, context windows, safety & memory techniques.
-* **Repeatable workflows** – versioned releases, unit‑tests, GitHub Projects.
-* **Modular code** – swap back‑ends (Redis memory, vector DB, containers) with minimal friction.
+* **Learn by doing** – iterate on prompts, context windows, safety & memory techniques.
+* **Repeatable workflows** – versioned releases, Pytest + Ruff checks, GitHub Projects for kan‑ban.
+* **Modular code** – swap back‑ends (Redis memory, vector DB, containers) with minimal friction.
 
 ---
 
-## Project Status
+## Project Status
 
 | Track             | Version      | Notes                                                                                                       |
 | ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
 | **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
 | **In progress**   | **`v0.4.5`** | **Summarisation**                                         |
 | **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
-
-*See the full changelog → **[Release Notes](./docs/release_notes.md)**.*
+*See the full history → **[Release Notes](./docs/release_notes.md)**.*
 
 ---
 
-## Directory Map
+## Directory Map <small>(key paths only)</small>
 
 ```text
 .
-├── main.py                 # Gradio chat loop & prompt pipeline
+├── main.py                         # Gradio chat loop & prompt pipeline
+├── memory/                         # Unified façade + concrete back‑ends
+│   ├── __init__.py                 # Memory.create(<backend>) factory
+│   ├── backends/
+│   │   ├── in_memory_backend.py    # default volatile store
+│   │   └── redis_memory_backend.py # v0.4.4 persistent store
+│   └── summariser.py               # summarise_context() scaffold
 ├── utils/
-│   ├── memory.py           # In‑memory backend façade (v0.4.3)
-│   ├── summariser.py       # summarise_context() scaffold
-│   ├── aliases.py          # Alias → concept mappings
-│   ├── prompt_utils.py     # In‑order token alias helper
-│   └── safety_filters.py   # Profanity & safety checks
+│   ├── aliases.py                  # Keyword → concept mappings
+│   ├── prompt_utils.py             # Order‑preserving alias helper
+│   └── safety_filters.py           # Profanity & safety checks
 ├── config/
-│   ├── settings.json       # Runtime config (memory, safety, logging …)
-│   ├── prompt_template.txt # Base system prompt
+│   ├── settings.json               # Runtime config (memory, model, logging …)
+│   ├── prompt_template.txt         # Base system prompt
 │   └── specialized_prompts.json
-│   ├── memory.py           # Memory façade (in-memory | redis)
-│   ├── summariser.py       # summarise_context() scaffold
-├── experiments/            # Exploratory scripts & prototypes  
-│   ├── summarisation_playground.py  # simple summary prototype
-│   ├── memory_test_utils.py # testing utilities for development
-│   └── …                    # one-off experiments & research
-├── tests/                  # **PyTest** unit & integration tests
+├── experiments/                    # Exploratory scripts & prototypes  
+│   ├── summarisation_playground.py # simple summary prototype
+│   ├── memory_test_utils.py        # testing utilities for development
+│   └── …                           # one-off experiments & research
+├── tests/                          # **PyTest** unit & integration tests
 ├── scripts/
-│   └── activate_tests.sh   # helper → sets PYTHONPATH + runs smoke tests
-└── docs/                   # Roadmap · Scope · Dev checklist · …
+│   └── activate_tests.sh           # helper → sets PYTHONPATH + runs smoke tests
+└── docs/                           # Roadmap · Scope · Dev checklist · …
 ```
 
 ---
 
-## Workflow & Planning
+## Workflow & Planning
 
-Work is managed in **GitHub Projects** → ▶ [LLM Project Board](https://github.com/users/Deim0s13/projects/4/views/1).
+Work is managed in **GitHub Projects** → ▶ [LLM Project Board](https://github.com/users/Deim0s13/projects/4/views/1)
 
 ```
 Initiative → Epic → Milestone (version) → Issue (task)
 ```
 
-* Every change begins as an **Issue** linked to its Epic & Milestone.
-* PRs flow **feature → dev → main** and include `fixes #id`.
+* Every change starts as an **Issue** linked to its Epic & Milestone.
+* PR flow: **feature → dev → main** with `Fixes #<id>` semantics.
 
-See full contributor notes in **[`CONTRIBUTING.md`](./docs/CONTRIBUTING.md)**.
-
-### Visual overview
-
-```mermaid
-graph TD
-  A[Initiative 🧭] --> B[Epic 📂 Prompt & Safety]
-  A                --> C[Epic 📂 Memory & Summaries]
-  B --> D[Milestone v0.4.0]
-  B --> E[Milestone v0.4.1]
-  C --> F[Milestone v0.4.2]
-  C --> G[Milestone v0.4.3]
-  D --> H[Issue ✅ Alias logic]
-  E --> I[Issue ✅ Safety filters]
-  F --> J[Issue ✅ Context trim]
-  G --> K[Issue ✅ In-memory backend]
-  G --> L[Issue ✅ Summarise scaffold]
-```
+See full contributor guidelines in **[`CONTRIBUTING.md`](./docs/CONTRIBUTING.md)**.
 
 ---
 
@@ -127,7 +110,7 @@ python main.py
 
 ### Run with SQLite (default)
 
-SQLite requires **no extra install** — it’s part of Python’s std-lib.
+SQLite requires **no extra install** — it's part of Python's std-lib.
 The backend stores chat turns in `data/memory.sqlite` by default and trims the oldest rows automatically.
 
 ```bash
@@ -150,14 +133,14 @@ The file is created (and schema migrated) on first run.
 
 If the path is unwritable the app logs a warning and transparently falls back to in-memory storage.
 
-### Auto-select “persistent” mode
+### Auto-select "persistent" mode
 
 Set `MEMORY_BACKEND=persistent` (or `"backend": "persistent"` in
 `settings.json`) and the app will pick the best available store:
 
 1. **Redis** – if the `redis` Python client is installed *and* a server
    responds on `REDIS_URL` / `localhost:6379`.
-2. **SQLite** – if Redis isn’t reachable but the local file path is
+2. **SQLite** – if Redis isn't reachable but the local file path is
    writable.  Data lives in `data/memory.sqlite` (or `MEMORY_DB_PATH`).
 3. **In-memory** – final fallback when both persistent options fail.
 
@@ -170,7 +153,7 @@ handles the selection transparently.
 
 ### Memory back-ends (v0.4.4 +)
 
-| `memory.backend` value | Store that’s used                               | Extra notes                                              |
+| `memory.backend` value | Store that's used                               | Extra notes                                              |
 | ---------------------- | ---------------------------------------------- | -------------------------------------------------------- |
 | `in_memory`            | Python list in RAM                             | Zero dependencies (default fallback)                     |
 | `sqlite`               | `data/memory.sqlite` via std-lib `sqlite3`     | Auto-creates file & trims oldest rows                    |
@@ -181,10 +164,9 @@ handles the selection transparently.
 
 ---
 
-### Environment Overrides (`.env`)
+### Environment Overrides (`.env`)
 
-Drop a `.env` in the project root to override `settings.json`
-without touching tracked config:
+Drop a `.env` in the project root to override `settings.json` without touching tracked config:
 
 ```env
 DEBUG_MODE=true
@@ -199,12 +181,12 @@ Supported keys & examples → **docs/dev\_checklist.md**
 
 ---
 
-### Platform Setup
+### Platform Setup
 
 | OS                   | Key steps                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **macOS (M‑series)** | Python 3.10+, `pip install torch torchvision torchaudio` (MPS wheels)                                                   |
-| **Windows + CUDA**   | Install CUDA Toolkit then `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121` |
+| **macOS (M‑series)** | Install Python 3.10+, then `pip install torch torchvision torchaudio` (MPS wheels)                                      |
+| **Windows + CUDA**   | Install CUDA Toolkit then `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121` |
 
 More detail & troubleshooting → **Cross‑Platform Dev Checklist**.
 
@@ -228,38 +210,38 @@ mypy .                                 # static-type pass (strict on src)
 source scripts/activate_tests.sh      # sets PYTHONPATH + runs tests
 ```
 
-Automated CI integration planned for **v0.5.0** (CI pipeline + matrix testing).
+CI (GitHub Actions) kicks off in **v0.4.4** (Ruff + PyTest on every PR).
 
 ---
 
-## Learning Roadmap
+## Learning Roadmap
 
-1. **Phase 1** – Prompt engineering & baseline chatbot *(v0.1 → v0.4.x)*
-2. **Phase 2** – Fine‑tuning playground *(v0.6.x → v0.7.x)*
-3. **Phase 3** – Packaging, scaling & RAG *(v0.8.x → v1.0)*
+1. **Phase 1** – Prompt engineering & baseline chatbot *(v0.1 → v0.4.x)*
+2. **Phase 2** – Fine‑tuning playground *(v0.5 → v0.7)*
+3. **Phase 3** – Packaging, scaling & RAG *(v0.8 → v1.0)*
 
-See **[`ROADMAP.md`](./docs/roadmap.md)** for the detailed timeline.
+See **[`ROADMAP.md`](./docs/roadmap.md)** for milestone‑level detail.
 
 ---
 
 ## Useful Links
 
-* [Board](https://github.com/users/Deim0s13/projects/4/views/1)
-* [Scope](./docs/scope.md)
-* [Release Notes](./docs/release_notes.md)
-* [Experiments Tracker](./docs/experiments_tracker.md)
-* [Summarisation Planning](./docs/summarisation_planning.md)
-* [Memory Flow](./docs/memory_flow.md)`
-* [Summarisation Trigger Logic Spec](./docs/summarisation_trigger_logic.md)
+* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
+* 📑 [Scope](./docs/scope.md)
+* 🪵 [Release Notes](./docs/release_notes.md)
+* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
+* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
+* 🗄️ [Memory Flow](./docs/memory_flow.md)
+* [Summarisation Trigger Logic Spec](./docs/Technical_Specification_Summarisation_Trigger_Logic.md)
 
 ---
 
-## Future Vision ✨
+## Future Vision ✨
 
-* Redis / vector‑DB memory back‑ends
+* Vector‑DB (FAISS / Milvus) for semantic memory
 * Automated regression tests & CI matrix
 * RAG pipelines for knowledge‑base answers
-* Containerised deployment on OpenShift
+* Containerised deployment (Podman / OpenShift)
 * Dev‑agent capabilities & self‑evaluation loops
 
-> **Stay curious. Iterate often. Share learnings.**
+> **Stay curious. Iterate often. Share your learnings.**

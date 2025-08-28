@@ -1,12 +1,12 @@
-# LLM Chatbot Project — Scope & Roadmap 📑
+# LLM‑Assistant Project — Scope & Roadmap 📑
 
 *Last updated: **v0.4.5** (Persistent Memory + Summarisation MVP)*
 
-This document unifies the **learning journey** and the **delivery roadmap** so everyone can see **why** each feature ships, **what** is in-scope for a release, and **how** it maps to GitHub Milestones.
+This document couples the **learning journey** with the **delivery roadmap** so anyone can see **why** we ship a feature, **what** is in‑scope, and **how** each piece maps to GitHub Milestones.
 
 ---
 
-## 1 Learning Phases & Goals
+## 1 Learning Phases & Goals
 
 | Phase | Version Range      | Theme                    | Key Take-away                           |
 |-------|--------------------|--------------------------|-----------------------------------------|
@@ -16,7 +16,7 @@ This document unifies the **learning journey** and the **delivery roadmap** so e
 
 ---
 
-## 2 Version Milestones
+## 2 Version Milestones
 
 | Version           | Focus / Epic                                             | Status         |
 |-------------------|---------------------------------------------------------|----------------|
@@ -34,44 +34,41 @@ This document unifies the **learning journey** and the **delivery roadmap** so e
 | **0.6.x**         | RAG prototype (file-based Q&A)                          | 🔜 Planned     |
 | **0.7.x**         | Fine-tuning foundation                                  | 🔜 Planned     |
 
-> **Consistency check**: all milestone names match the GitHub Project board.
+> **Sync note:** Milestone names mirror the GitHub Project board.
 
 ---
 
-## 3 Completed Highlights
+## 3 Completed Highlights (≤ v0.4.3)
 
 ### v0.2.x — Core Features
-* Multi-turn history, external base prompt, generation controls.
+
+* Multi‑turn history, external base prompt, generation controls.
 * Early specialised prompt injection & alias diagnostics.
 
 ### v0.3.0 — Experiments Framework
 * `/experiments/` notebooks & logs.
-* Findings fed into later alias and safety work.
+* Findings informed alias & safety designs.
 
 ### v0.4.0 — Alias Overhaul
-* Token-level multi-word detection.
-* Expanded `prompt_aliases.json`, richer debug logs.
+* Token‑level multi‑word alias detection.
+* Expanded `prompt_aliases.json`; richer debug logs.
 
 ### v0.4.1 — Safety Guardrails
-* Profanity filter with strict | moderate | relaxed modes.
+* Profanity filter (strict | moderate | relaxed).
 * Configurable refusal template.
 
 ### v0.4.2 — Context Hygiene
-* Turn-count + token-budget trimming.
+* Turn‑count + token‑budget trimming.
 * `.env` overrides; GitHub Projects migration.
 
 ### v0.4.3 — Volatile Memory & Summarisation Scaffold
-* In-memory backend and context builder injection.
-* Summarisation function stub and playground.
-
-### v0.4.4 — Persistent Memory
-* Redis and SQLite memory backends, auto-fallback chain.
-* `settings.json` → backend selection, full persistence tests.
-* Updated `SETUP.md`, `README.md`, and developer docs.
+* **`memory/backends/in_memory_backend.py`** default store.
+* Memory toggle in `settings.json`.
+* Summarisation function stub + initial unit tests.
 
 ---
 
-## 4 Current Cycle — **v0.4.5**  📝🧪
+## 4 Current Cycle — **v0.4.5**  📝🧪
 
 | Track         | Deliverable                                                  | Status         |
 |---------------|-------------------------------------------------------------|----------------|
@@ -87,7 +84,7 @@ This document unifies the **learning journey** and the **delivery roadmap** so e
 
 ---
 
-## 5 Upcoming Roadmap
+## 5 Upcoming Roadmap
 
 1. **v0.5.0 — Automated Test Suite & CI Enablement**
    * Full PyTest coverage for critical modules, typing checks.
@@ -98,14 +95,14 @@ This document unifies the **learning journey** and the **delivery roadmap** so e
    * Podman image, multi-arch builds, end-to-end test pipeline.
 
 3. **v0.6.x — RAG Prototype**
-   * File embedding + retrieval “Ask my PDF” flow.
+   * File embedding + retrieval "Ask my PDF" flow.
 
 4. **v0.7.x — Fine-tuning Playground**
    * LoRA/QLoRA scripts, W&B integration.
 
 ---
 
-## 6 Key Config Flags
+## 6 Key Config Flags
 
 | Key                         | Since | Notes                                          |
 |-----------------------------|-------|------------------------------------------------|
@@ -122,11 +119,11 @@ All can be overridden in `.env` (see README).
 
 ---
 
-## 7 Process Recap
+## 7 Process Recap
 
 1. **Issue** ↔ Epic ↔ Milestone created on GitHub Projects.
 2. Scoped here in `scope.md`.
 3. Feature branch → PR → `dev` → squash merge.
 4. Release tag → `release_notes.md` update.
 
-> *Keep this file updated each planning session to avoid “doc drift”.* 🚀
+> *Keep this file in sync with planning sessions to avoid "doc drift."* 🚀

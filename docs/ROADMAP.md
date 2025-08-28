@@ -59,8 +59,8 @@ compare against the base model.
 | **v0.4.0** | Alias-driven prompt matching                     | ✅ Done |
 | **v0.4.1** | Safety guardrails & post-filtering               | ✅ Done |
 | **v0.4.2** | Context trimming & debug logging                 | ✅ Done |
-| **v0.4.3** | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | 🔄 In Progress |
-| **v0.4.4** | **Persistent memory, Summarise MVP, CI test pipeline** | 🔜 Planned |
+| **v0.4.3** | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done |
+| **v0.4.4** | **Persistent memory, Summarise MVP, CI test pipeline** | 🔄 In Progress |
 | **v0.4.5** | Evaluation harness & extended guard-rails        | 🔜 Planned |
 | **v0.5.0** | Containerisation & full CI matrix                | 🔜 Planned |
 | **v0.6.x** | RAG prototype (file-based Q&A)                   | 🔜 Planned |
