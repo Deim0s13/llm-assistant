@@ -91,6 +91,10 @@ pip install -r requirements-redis.txt      # redis-py client (persistence)
 python main.py
 ```
 
+## Local Setup
+
+See **[docs/SETUP.md](docs/SETUP.md)** for a full environment setup guide, `.env` overrides, and testing instructions.
+
 ### Run with Redis (optional)
 
 ```bash
@@ -226,13 +230,15 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for milestone‑level detail.
 
 ## Useful Links
 
-* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
-* 📑 [Scope](./docs/scope.md)
-* 🪵 [Release Notes](./docs/release_notes.md)
-* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
-* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
-* 🗄️ [Memory Flow](./docs/memory_flow.md)
+* Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
+* [Scope](./docs/scope.md)
+* [Release Notes](./docs/release_notes.md)
+* [Experiments Tracker](./docs/experiments_tracker.md)
+* [Summarisation Planning](./docs/summarisation_planning.md)
+* [Memory Flow](./docs/memory_flow.md)
 * [Summarisation Trigger Logic Spec](./docs/Technical_Specification_Summarisation_Trigger_Logic.md)
+* [Local Setup Guide](docs/SETUP.md)
+```
 
 ---
 
