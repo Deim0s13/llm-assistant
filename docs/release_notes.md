@@ -17,7 +17,7 @@ Each entry lists the headline features, notable refactors, and links to deeper d
 | **v0.4.2** | ✅ *Done* | Context-window trimming, cross-platform device detection, `.env`   |
 | **v0.4.3** | ✅ *Done* | In-process **Memory backend**, optional summarisation scaffold     |
 | **v0.4.4** | ✅ *Done* | **Persistent memory (Redis/SQLite)**, settings auto-fallback, expanded tests |
-| **v0.4.5** | 🔄 *In Progress* | **Summarisation MVP, Technical Spec, Planning docs**       |
+| **v0.4.5** | ✅ *Done* | **Summarisation MVP, Technical Spec, Planning docs**       |
 | **v0.5.0** | 🔼 *Planned* | Automated Test Suite & CI Enablement (Podman/Actions)         |
 | **v0.5.1** | 🔼 *Planned* | Containerisation & E2E Test Matrix                           |
 | **v0.6.x** | 🔼 *Planned* | RAG prototype (file-based Q&A)                                |
@@ -99,12 +99,18 @@ Each entry lists the headline features, notable refactors, and links to deeper d
 
 ---
 
-### v0.4.5 – Summarisation MVP & Technical Spec *(In Progress)*
+### v0.4.5 – Summarisation MVP & Technical Spec *(Completed)*
 
-* **Summarisation trigger logic**: formal technical spec in `/docs/summarisation_trigger_logic.md`
-* **Threshold-based summarisation**: summarise when token/turn limits are reached
-* **Summary block insertion**: old turns replaced by generated summary before prompt assembly
+* **Summarisation trigger logic**: formal technical spec in `/docs/Technical_Specification_Summarisation_Trigger_Logic.md`
+* **Threshold-based summarisation**: summarise when token/turn limits are reached  
+* **Summary block insertion**: old turns replaced by generated summary with proper formatting
+* **Minimum user turns logic**: prevents meaningless summaries from short conversations (MIN_USER_TURNS=3)
+* **Bug fixes**: resolved test failures and summary injection mechanics
+  - Fixed summary role formatting (summary vs user role)
+  - Fixed context building with direct summary content insertion
+  - Fixed token trimming logic to preserve summary blocks
 * **Unit tests**: coverage for summarisation triggers and edge cases
+* **Test isolation**: improved fixtures to prevent test contamination  
 * **Planning doc updates**: scope, README, design docs all refreshed
 
 ---

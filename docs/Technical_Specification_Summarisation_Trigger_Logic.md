@@ -14,6 +14,13 @@
 
   * Example: `max_history_turns = 10`
 
+* **Minimum user turns:**
+  The summariser requires at least 3 user turns before generating bullet-point summaries. 
+  With fewer than 3 user turns, a placeholder message is returned instead.
+  
+  * Purpose: Prevents meaningless summaries from very short conversations
+  * Implementation: `MIN_USER_TURNS = 3` in `utils/summariser.py`
+
 * **Configurable:**
   Both thresholds are exposed as settings. Either can be used to trigger summarisation, but the token limit is the “hard” constraint.
 
@@ -32,6 +39,16 @@
   \[SUMMARY BLOCK]   <-- summary of trimmed (oldest) turns
   \[N most recent full turns]
   \[USER input]
+
+* **Format:** 
+  Summary content is inserted with role="summary" and formatted as bullet points:
+  ```
+  [SYSTEM PROMPT]
+  • User message summary...
+  • User message summary...  
+  [N most recent full turns]
+  [USER input]
+  ```
 
 ---
 
