@@ -85,11 +85,17 @@ These values override the corresponding fields in config/settings.json during ru
 
 ## Running the App
 
-Once everything is installed:
+**Always activate your virtual environment first:**
 
 ```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Then run the app
 python main.py
 ```
+
+**Note:** On macOS, use `python3` if `python` command is not found.
 
 ---
 

@@ -1,6 +1,7 @@
 # experiments/test_memory_toggle.py
-import re, pytest, importlib
+import re, pytest, importlib, copy
 from pathlib import Path
+from typing import Generator
 
 from experiments.memory_test_utils import set_memory_enabled
 from utils.memory import memory
@@ -26,8 +27,18 @@ SPEC = _MAIN.load_specialized_prompts()
 _MAIN.SETTINGS["context"]["max_prompt_tokens"] = 2048
 
 # ──────────────────────────────────────────────────────────────
+@pytest.fixture()
+def restore_settings() -> Generator[None, None, None]:
+    # snapshot & restore global SETTINGS so tests don't leak config
+    from config.settings_loader import load_settings
+    clean_settings = load_settings()
+    snap = copy.deepcopy(_MAIN.SETTINGS)
+    yield
+    _MAIN.SETTINGS.clear()
+    _MAIN.SETTINGS.update(clean_settings)
+
 @pytest.mark.parametrize("mem_on", [True, False])
-def test_memory_toggle(mem_on):
+def test_memory_toggle(mem_on, restore_settings):
     set_memory_enabled(mem_on)
     _MAIN.SETTINGS["memory"]["enabled"] = mem_on  # keep prepare_context in sync
     _MAIN.memory.clear()

@@ -18,7 +18,7 @@ What began as a single‑file chatbot has grown into a modular playground for **
 | Track             | Version      | Notes                                                                                                       |
 | ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
 | **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
-| **In progress**   | **`v0.4.5`** | **CI matrix & guard-rails edge-cases**, **typing/IDE hygiene**                                         |
+| **In progress**   | **`v0.4.5`** | **Summarisation**                                         |
 | **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
 
 *See the full changelog → **[Release Notes](./docs/release_notes.md)**.*
@@ -42,11 +42,11 @@ What began as a single‑file chatbot has grown into a modular playground for **
 │   └── specialized_prompts.json
 │   ├── memory.py           # Memory façade (in-memory | redis)
 │   ├── summariser.py       # summarise_context() scaffold
-├── experiments/            # Exploratory scripts & notebooks
+├── experiments/            # Exploratory scripts & prototypes  
 │   ├── summarisation_playground.py  # simple summary prototype
-│   ├── test_memory_backends.py
-│   └── …                    # memory toggle / context tests
-├── tests/                  # **PyTest** suites (memory, context …)
+│   ├── memory_test_utils.py # testing utilities for development
+│   └── …                    # one-off experiments & research
+├── tests/                  # **PyTest** unit & integration tests
 ├── scripts/
 │   └── activate_tests.sh   # helper → sets PYTHONPATH + runs smoke tests
 └── docs/                   # Roadmap · Scope · Dev checklist · …
@@ -212,16 +212,23 @@ More detail & troubleshooting → **Cross‑Platform Dev Checklist**.
 
 ## Unit‑tests
 
-Run smoke tests & memory‑toggle checks:
+Run the test suite:
 
 ```bash
-source scripts/activate_tests.sh       # sets PYTHONPATH + runs tests
-# or
-pytest -q                              # full suite
+source venv/bin/activate               # activate virtual environment
+pytest tests/                         # run all tests  
+pytest tests/test_summariser.py       # run specific test file
+pytest -q                             # quiet mode
 mypy .                                 # static-type pass (strict on src)
 ```
 
-CI integration arrives in **v0.4.4** (lint + tests on every PR).
+*Or use the helper script:*
+
+```bash
+source scripts/activate_tests.sh      # sets PYTHONPATH + runs tests
+```
+
+Automated CI integration planned for **v0.5.0** (CI pipeline + matrix testing).
 
 ---
 
@@ -237,12 +244,13 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for the detailed timeline.
 
 ## Useful Links
 
-* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
-* 📑 [Scope](./docs/scope.md)
-* 🪵 [Release Notes](./docs/release_notes.md)
-* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
-* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
-* 🗄️ [Memory Flow](./docs/memory_flow.md)`
+* [Board](https://github.com/users/Deim0s13/projects/4/views/1)
+* [Scope](./docs/scope.md)
+* [Release Notes](./docs/release_notes.md)
+* [Experiments Tracker](./docs/experiments_tracker.md)
+* [Summarisation Planning](./docs/summarisation_planning.md)
+* [Memory Flow](./docs/memory_flow.md)`
+* [Summarisation Trigger Logic Spec](./docs/summarisation_trigger_logic.md)
 
 ---
 

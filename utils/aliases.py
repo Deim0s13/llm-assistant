@@ -53,7 +53,7 @@ def load_prompt_aliases(path: str | Path = PROMPT_ALIAS_PATH) -> Dict[str, str]:
                 LOGGER.error("[Aliases] %s must map strings to strings.", p)
                 return {}
 
-        aliases = dict(data)  # type: ignore[call-arg]  # safe: validated above
+        aliases = dict(data)  # safe: validated above
         LOGGER.info("[Aliases] loaded %d aliases from %s", len(aliases), p)
         return aliases
 
