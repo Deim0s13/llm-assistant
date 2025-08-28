@@ -42,11 +42,11 @@ What began as a single‑file chatbot has grown into a modular playground for **
 │   └── specialized_prompts.json
 │   ├── memory.py           # Memory façade (in-memory | redis)
 │   ├── summariser.py       # summarise_context() scaffold
-├── experiments/            # Exploratory scripts & notebooks
+├── experiments/            # Exploratory scripts & prototypes  
 │   ├── summarisation_playground.py  # simple summary prototype
-│   ├── test_memory_backends.py
-│   └── …                    # memory toggle / context tests
-├── tests/                  # **PyTest** suites (memory, context …)
+│   ├── memory_test_utils.py # testing utilities for development
+│   └── …                    # one-off experiments & research
+├── tests/                  # **PyTest** unit & integration tests
 ├── scripts/
 │   └── activate_tests.sh   # helper → sets PYTHONPATH + runs smoke tests
 └── docs/                   # Roadmap · Scope · Dev checklist · …
@@ -212,16 +212,23 @@ More detail & troubleshooting → **Cross‑Platform Dev Checklist**.
 
 ## Unit‑tests
 
-Run smoke tests & memory‑toggle checks:
+Run the test suite:
 
 ```bash
-source scripts/activate_tests.sh       # sets PYTHONPATH + runs tests
-# or
-pytest -q                              # full suite
+source venv/bin/activate               # activate virtual environment
+pytest tests/                         # run all tests  
+pytest tests/test_summariser.py       # run specific test file
+pytest -q                             # quiet mode
 mypy .                                 # static-type pass (strict on src)
 ```
 
-CI integration arrives in **v0.4.4** (lint + tests on every PR).
+*Or use the helper script:*
+
+```bash
+source scripts/activate_tests.sh      # sets PYTHONPATH + runs tests
+```
+
+Automated CI integration planned for **v0.5.0** (CI pipeline + matrix testing).
 
 ---
 
