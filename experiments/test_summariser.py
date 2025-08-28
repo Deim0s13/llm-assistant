@@ -2,7 +2,6 @@
 #  tests/test_summariser.py – unit tests for context summarisation
 # ════════════════════════════════════════════════════════════════════
 
-import pytest
 from utils.summariser import summarise_context
 
 # ──────────────────────── Test Data Fixtures ───────────────────────
@@ -32,31 +31,31 @@ NO_USER_TURNS = [
 # ──────────────────────────── Unit Tests ───────────────────────────
 
 
-def test_empty_history():
+def test_empty_history() -> None:
     assert "no prior context" in summarise_context([])
 
 
-def test_short_history_returns_placeholder():
+def test_short_history_returns_placeholder() -> None:
     result = summarise_context(SHORT_HISTORY)
     assert "no prior context" in result
 
 
-def test_no_user_turns():
+def test_no_user_turns() -> None:
     result = summarise_context(NO_USER_TURNS)
     assert "no user turns" in result
 
 
-def test_enough_turns_gives_bullets():
+def test_enough_turns_gives_bullets() -> None:
     result = summarise_context(ENOUGH_TURNS)
     # Should produce up to 3 bullets
-    lines = [l for l in result.splitlines() if l.startswith("• ")]
+    lines = [line for line in result.splitlines() if line.startswith("• ")]
     assert 1 <= len(lines) <= 3
     # Bullets should match last few user turns
     assert lines[-1].startswith("• Fifth user turn")
-    assert all(len(l) <= 122 for l in lines)  # bullet + char limit
+    assert all(len(line) <= 122 for line in lines)  # bullet + char limit
 
 
-def test_bullet_trimming_and_format():
+def test_bullet_trimming_and_format() -> None:
     custom_history = [
         {"role": "user", "content": "A" * 200},
         {"role": "user", "content": "B" * 200},
@@ -69,14 +68,14 @@ def test_bullet_trimming_and_format():
         {"role": "user", "content": "I" * 200},
     ]
     result = summarise_context(custom_history)
-    lines = [l for l in result.splitlines() if l.startswith("• ")]
+    lines = [line for line in result.splitlines() if line.startswith("• ")]
     # Should be 3 bullets, each trimmed to 120 + "• " chars
     assert len(lines) == 3
     for line in lines:
         assert len(line) == 122
 
 
-def test_ignore_assistant_lines():
+def test_ignore_assistant_lines() -> None:
     history = [
         {"role": "user", "content": "User 1."},
         {"role": "assistant", "content": "Assistant 1."},
@@ -90,5 +89,5 @@ def test_ignore_assistant_lines():
         {"role": "user", "content": "User 8."},
     ]
     result = summarise_context(history)
-    lines = [l for l in result.splitlines() if l.startswith("• ")]
+    lines = [line for line in result.splitlines() if line.startswith("• ")]
     assert lines[-1] == "• User 8."

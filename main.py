@@ -129,7 +129,6 @@ def prepare_context(
 ) -> Tuple[str, str]:
     """
     Build the full prompt string that is passed to the model.
-    (Docstring unchanged)
     """
     max_turns: int = SETTINGS["context"]["max_history_turns"]
     max_tokens: int = SETTINGS["context"]["max_prompt_tokens"]
@@ -141,61 +140,66 @@ def prepare_context(
     live_turns: list[dict[str, Any]] = history[-max_turns:]
     combined: list[dict[str, Any]] = (mem_turns + live_turns)[-max_turns:]
 
-    # Apply summarization if conditions are met
+    # ── Summarisation trigger & injection (replace oldest with a single summary) ──
     summ_cfg = SETTINGS.get("summarisation", {})
-    summ_enabled: bool = summ_cfg.get("enabled", True)
-    min_summary_turns: int = summ_cfg.get("min_turns", 8)
-    summ_strategy: str = summ_cfg.get("strategy", "brief")
-    max_summary_chars: int = summ_cfg.get("max_chars", 512)
-    
-    # Check if we should trigger summarization (by turns OR tokens)
-    total_context_str: str = " ".join(turn["content"] for turn in combined if "content" in turn)
+    summ_enabled: bool = bool(summ_cfg.get("enabled", True))
+    min_summary_turns: int = int(summ_cfg.get("min_turns", 8))
+    summ_strategy: str = str(summ_cfg.get("strategy", "brief"))
+    max_summary_chars: int = int(summ_cfg.get("max_chars", 512))
+
+    total_context_str: str = " ".join(t.get("content", "") for t in combined)
     trigger_by_turns: bool = len(combined) >= min_summary_turns
-    trigger_by_tokens: bool = summ_cfg.get("trigger_by_tokens", False) and count_tokens(total_context_str) > summ_cfg.get("max_context_tokens", 2000)
-    
+    trigger_by_tokens: bool = bool(summ_cfg.get("trigger_by_tokens", False)) and \
+        count_tokens(total_context_str) > int(summ_cfg.get("max_context_tokens", 2000))
+
+    summary_text: str | None = None
     if summ_enabled and (trigger_by_turns or trigger_by_tokens):
-        # Validate strategy with fallback
-        valid_strategies = ["brief", "bullet"]  # Add more as supported
-        if summ_strategy not in valid_strategies:
+        if summ_strategy not in {"brief", "bullet"}:
             logging.warning("[Summary] Unknown strategy '%s', falling back to 'brief'", summ_strategy)
             summ_strategy = "brief"
-            
-        summary_text: str = summarise_context(
-            combined, 
-            style=summ_strategy,
-            max_chars=max_summary_chars
-        )
-        
-        if summary_text.strip():
-            # Inject summary as synthetic "user" turn
-            combined = [{"role": "user", "content": summary_text}] + combined[-(max_turns-1):]
-            trigger_reason = "turns" if trigger_by_turns else "tokens"
-            logging.debug("[Summary] Injected summary (trigger: %s), turns=%d, chars=%d", 
-                         trigger_reason, len(combined), len(summary_text))
+
+        produced = summarise_context(combined, style=summ_strategy, max_chars=max_summary_chars).strip()
+        if produced:
+            summary_text = produced
+            summary_turn = {"role": "summary", "content": summary_text}
+            # Keep a compressed tail (e.g., half the turns) and prepend summary
+            keep_count = max(1, len(combined) // 2)
+            tail = combined[-keep_count:]
+            combined = [summary_turn] + tail
+            logging.debug(
+                "[Summary] Injected summary (trigger: %s), turns=%d, chars=%d",
+                "turns" if trigger_by_turns else "tokens", len(combined), len(summary_text)
+            )
 
     if DEBUG_MODE:
         logging.debug(
             "[Memory] session=%s | injected=%d | live=%d | combined=%d",
-            session_id,
-            len(mem_turns),
-            len(live_turns),
-            len(combined),
+            session_id, len(mem_turns), len(live_turns), len(combined),
         )
 
     def build(hist_slice: list[dict[str, Any]]) -> str:
         ctx: str = spec_prompt or base_prompt
         for turn in hist_slice:
-            ctx += f"\n{turn['role'].capitalize()}: {turn['content']}"
+            if turn['role'] == 'summary':
+                # Summary content is already formatted with bullets, include directly
+                ctx += f"\n{turn['content']}"
+            else:
+                ctx += f"\n{turn['role'].capitalize()}: {turn['content']}"
         ctx += f"\nUser: {msg}\nAssistant:"
         return ctx
 
+    # Build then trim to token budget, preserving summary if present
     context: str = build(combined)
-    tok_ct: int  = count_tokens(context)
+    tok_ct: int = count_tokens(context)
 
     while tok_ct > max_tokens and len(combined) > 1:
-        combined = combined[1:]
-        context  = build(combined)
-        tok_ct   = count_tokens(context)
+        if summary_text is not None and combined and combined[0].get("role") == "summary":
+            # preserve summary at index 0, drop next-oldest
+            combined = [combined[0]] + combined[2:]
+        else:
+            combined = combined[1:]
+        context = build(combined)
+        tok_ct = count_tokens(context)
 
     if DEBUG_MODE:
         logging.debug("[Context] kept=%d tokens=%d", len(combined), tok_ct)
@@ -263,7 +267,7 @@ def respond(
 
 # ─────────────── Boot Phase ───────────────
 
-BASE_PROMPT: str                 = load_base_prompt()
+BASE_PROMPT: str                    = load_base_prompt()
 SPECIALIZED_PROMPTS: dict[str, str] = load_specialized_prompts()
 tokenizer, model, device = initialize_model()
 
@@ -284,10 +288,16 @@ def run_playground(
     prompt = ptxt or BASE_PROMPT
     ctx    = f"{prompt}\nUser: {test_in}\nAssistant:"
     ids    = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
-    preview = tokenizer.decode(model.generate(ids, max_new_tokens=int(mx), do_sample=sample,
-                                              temperature=float(temp),
-                                              top_p=float(top_p))[0],
-                               skip_special_tokens=True).strip()
+    preview = tokenizer.decode(
+        model.generate(
+            ids,
+            max_new_tokens=int(mx),
+            do_sample=sample,
+            temperature=float(temp),
+            top_p=float(top_p)
+        )[0],
+        skip_special_tokens=True
+    ).strip()
     score_s = f"{score:.2f}" if score else "N/A"
     return f"{concept} (conf {score_s})", prompt, preview
 

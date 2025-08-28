@@ -23,7 +23,6 @@ __all__ = ["summarise_context"]
 
 # ─────────────────────────────── Summariser ──────────────────────────────
 
-
 def summarise_context(
     history: List[Dict[str, str]],
     *,
@@ -32,7 +31,7 @@ def summarise_context(
 ) -> str:
     """
     Returns a simple, deterministic summary (≤ 3 bullet points) of recent user turns.
-    If not enough context, returns a placeholder message.
+    If there is no content at all, returns a placeholder message.
 
     Parameters
     ----------
@@ -41,17 +40,16 @@ def summarise_context(
     style : str
         Reserved for future use.
     max_chars : int
-        Reserved for future use.
+        Total char cap for the whole summary.
 
     Returns
     -------
     str : summary text
     """
 
-    # --- Configurable knobs (make config-driven later) ---
+    # ────────────────────────────── Tunables ──────────────────────────────
     PLACEHOLDER = "• (no prior context to summarise)\n"
     NO_USER_MSG = "• (no user turns to summarise)\n"
-    MIN_TURNS = 8
     MAX_BULLETS = 3
     BULLET_CHAR_LIMIT = 120
 
@@ -63,16 +61,26 @@ def summarise_context(
     if not user_turns:
         return NO_USER_MSG
 
-    if len(history) < MIN_TURNS:
+    # Return placeholder for short histories (not enough context to summarise meaningfully)
+    MIN_USER_TURNS = 3
+    if len(user_turns) < MIN_USER_TURNS:
         return PLACEHOLDER
 
     # ────────────────────────── Heuristic Summary ───────────────────────────
-    last_n = user_turns[-MIN_TURNS:]
-    bullets = []
-    for line in last_n[-MAX_BULLETS:]:
+    # Take the most recent user turns (no MIN_TURNS gate here)
+    recent_user = user_turns[-MAX_BULLETS:]
+
+    bullets: List[str] = []
+    for line in recent_user:
         bullet = line.strip().replace("\n", " ")
         if len(bullet) > BULLET_CHAR_LIMIT:
             bullet = bullet[: BULLET_CHAR_LIMIT - 1].rstrip() + "…"
         bullets.append(f"• {bullet}")
 
-    return "\n".join(bullets) or PLACEHOLDER
+    summary = "\n".join(bullets) if bullets else PLACEHOLDER
+
+    # Enforce total max_chars for the whole block
+    if len(summary) > max_chars:
+        summary = summary[: max_chars].rstrip() + "…"
+
+    return summary
