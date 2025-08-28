@@ -120,9 +120,9 @@ Want to help? Open an Issue!
 | `utils/memory.py`           | In-process memory backend (plug-in ready)         |
 | `utils/`                    | Prompt utils, safety filters, alias loader        |
 | `config/`                   | Prompts, settings.json, aliases                   |
-| `experiments/`              | One-off prototypes and versioned tests            |
+| `experiments/`              | One-off prototypes and development utilities      |
+| `tests/`                    | Unit tests and integration tests                  |
 | `docs/`                     | Roadmap, scope, dev checklist, release notes      |
-| `tests/`                    | (coming) automated unit / integration tests       |
 
 ---
 

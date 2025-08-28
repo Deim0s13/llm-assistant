@@ -85,7 +85,7 @@ Each entry lists the headline features, notable refactors, and links to deeper d
 * **Memory toggle & backend field** in `settings.json`
 * `prepare_context()` now merges *memory* & *live* history; logs injection counts
 * Placeholder `summarise_context()` scaffold (experiments)
-* New dev scripts: `experiments/test_memory_on.py` & `test_memory_off.py`
+* New dev scripts: `tests/test_memory_on.py` & `test_memory_off.py`
 
 ---
 
