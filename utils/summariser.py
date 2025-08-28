@@ -1,17 +1,19 @@
 # ════════════════════════════════════════════════════════════════════
-#  utils/summariser.py – placeholder context-summarisation helper
+#  utils/summariser.py – context-summarisation helper (heuristic)
 # ════════════════════════════════════════════════════════════════════
 """
 summariser.py
 ~~~~~~~~~~~~~
-A *stub* entry point for future summarisation.
-For now it simply returns a constant placeholder string so callers can
-integrate it without worrying about real summarisation logic.
+Lightweight, deterministic context summariser.
 
-Road-map
---------
-• v0.5.x  : naive extractive summary (e.g. last N sentences)
-• v0.6.x+ : LLM-powered compression / vector-based summary
+- v0.4.5: Implements first-pass heuristic summarisation for long chat history.
+- Future: Add LLM-powered compression, topic-aware summarisation, config integration.
+
+Features:
+---------
+• Bullet-point summary of most recent user turns (up to 3 bullets).
+• Consistent placeholder and "no user" messages for edge-cases.
+• Easy to extend for future strategies.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ from typing import List, Dict
 
 __all__ = ["summarise_context"]
 
+# ─────────────────────────────── Summariser ──────────────────────────────
 
 def summarise_context(
     history: List[Dict[str, str]],
@@ -27,25 +30,57 @@ def summarise_context(
     max_chars: int = 512,
 ) -> str:
     """
-    Return a **placeholder** summary of the supplied history.
+    Returns a simple, deterministic summary (≤ 3 bullet points) of recent user turns.
+    If there is no content at all, returns a placeholder message.
 
     Parameters
     ----------
     history : list[dict]
-        Chat turns `{"role": "user" | "assistant", "content": str}`
+        Chat turns, e.g. [{"role": "user"|"assistant", "content": str}]
     style : str
-        Future knob for 'brief', 'detailed', etc.  Ignored for now.
+        Reserved for future use.
     max_chars : int
-        Target upper bound for summary length once implemented.
+        Total char cap for the whole summary.
 
     Returns
     -------
-    str
-        Stub text to prove the call path works.
+    str : summary text
     """
-    del style, max_chars  # unused until real impl
 
+    # ────────────────────────────── Tunables ──────────────────────────────
+    PLACEHOLDER = "• (no prior context to summarise)\n"
+    NO_USER_MSG = "• (no user turns to summarise)\n"
+    MAX_BULLETS = 3
+    BULLET_CHAR_LIMIT = 120
+
+    # ────────────────────────────── Edge Cases ──────────────────────────────
     if not history:
-        return "• (no prior context to summarise)\n"
+        return PLACEHOLDER
 
-    return "• Summary of prior discussion (placeholder – real summarisation TBD)\n"
+    user_turns = [turn["content"] for turn in history if turn.get("role") == "user"]
+    if not user_turns:
+        return NO_USER_MSG
+
+    # Return placeholder for short histories (not enough context to summarise meaningfully)
+    MIN_USER_TURNS = 3
+    if len(user_turns) < MIN_USER_TURNS:
+        return PLACEHOLDER
+
+    # ────────────────────────── Heuristic Summary ───────────────────────────
+    # Take the most recent user turns (no MIN_TURNS gate here)
+    recent_user = user_turns[-MAX_BULLETS:]
+
+    bullets: List[str] = []
+    for line in recent_user:
+        bullet = line.strip().replace("\n", " ")
+        if len(bullet) > BULLET_CHAR_LIMIT:
+            bullet = bullet[: BULLET_CHAR_LIMIT - 1].rstrip() + "…"
+        bullets.append(f"• {bullet}")
+
+    summary = "\n".join(bullets) if bullets else PLACEHOLDER
+
+    # Enforce total max_chars for the whole block
+    if len(summary) > max_chars:
+        summary = summary[: max_chars].rstrip() + "…"
+
+    return summary

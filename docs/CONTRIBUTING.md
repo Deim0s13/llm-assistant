@@ -120,9 +120,24 @@ Want to help? Open an Issue!
 | `utils/memory.py`           | In-process memory backend (plug-in ready)         |
 | `utils/`                    | Prompt utils, safety filters, alias loader        |
 | `config/`                   | Prompts, settings.json, aliases                   |
-| `experiments/`              | One-off prototypes and versioned tests            |
+| `experiments/`              | **Exploratory scripts & prototypes** – one-off research, development utilities, playgrounds |
+| `tests/`                    | **Automated test suite** – pytest unit & integration tests, CI-ready |
 | `docs/`                     | Roadmap, scope, dev checklist, release notes      |
-| `tests/`                    | (coming) automated unit / integration tests       |
+
+### Testing vs Experimentation
+
+**Two distinct approaches for quality assurance:**
+
+| Directory | Purpose | When to Use |
+|-----------|---------|-------------|
+| **`tests/`** | Automated testing, CI/CD, regression prevention | Unit tests, integration tests, functionality validation |
+| **`experiments/`** | Manual exploration, prototyping, research | One-off scripts, development utilities, proof-of-concepts |
+
+**Examples:**
+- `tests/test_summariser.py` → Automated unit tests for summarisation logic
+- `experiments/summarisation_playground.py` → Manual exploration of summarisation approaches
+- `tests/test_memory_parity.py` → Automated backend compatibility testing  
+- `experiments/memory_test_utils.py` → Development utilities for manual testing
 
 ---
 
