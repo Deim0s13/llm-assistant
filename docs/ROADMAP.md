@@ -60,9 +60,9 @@ compare against the base model.
 | **v0.4.1** | Safety guardrails & post-filtering               | ✅ Done |
 | **v0.4.2** | Context trimming & debug logging                 | ✅ Done |
 | **v0.4.3** | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done |
-| **v0.4.4** | **Persistent memory, Summarise MVP, CI test pipeline** | 🔄 In Progress |
-| **v0.4.5** | Evaluation harness & extended guard-rails        | 🔜 Planned |
-| **v0.5.0** | Containerisation & full CI matrix                | 🔜 Planned |
+| **v0.4.4** | **Persistent memory (Redis/SQLite)** | ✅ Done |
+| **v0.4.5** | **Summarisation MVP, Technical Spec, Planning docs** | ✅ Done |
+| **v0.5.0** | Containerisation & full CI matrix                | 🔄 In Progress |
 | **v0.6.x** | RAG prototype (file-based Q&A)                   | 🔜 Planned |
 | **v0.7.x** | Fine-tuning foundation setup                     | 🔜 Planned |
 

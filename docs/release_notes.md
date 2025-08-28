@@ -17,7 +17,7 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 | **v0.4.3** | ✅ *Done* | In-process **Memory backend**, optional summarisation scaffold     |
 | **v0.4.4** | ✅ *Done* | **Persistent memory (Redis/SQLite)**, settings auto-fallback, expanded tests |
 | **v0.4.5** | ✅ *Done* | **Summarisation MVP, Technical Spec, Planning docs**       |
-| **v0.5.0** | 🔼 *Planned* | Automated Test Suite & CI Enablement (Podman/Actions)         |
+| **v0.5.0** | 🔄 *In Progress* | Automated Test Suite & CI Enablement (Podman/Actions)         |
 | **v0.5.1** | 🔼 *Planned* | Containerisation & E2E Test Matrix                           |
 | **v0.6.x** | 🔼 *Planned* | RAG prototype (file-based Q&A)                                |
 | **v0.7.x** | 🔼 *Planned* | Fine-tuning foundation                                        |

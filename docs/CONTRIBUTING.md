@@ -100,7 +100,7 @@ Short + present tense. Conventional-Commit style is optional but welcome.
 
 ---
 
-## 9 · Automated Tests (coming in v0.4.4)
+## 9 · Automated Tests (coming in v0.5.0)
 
 The **“Automated Testing & CI”** epic will introduce:
 
