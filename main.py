@@ -301,6 +301,7 @@ def respond(  # noqa: PLR0913
     new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
     return "", new_hist, f"Prompt source: {src}"
 
+
 # ─────────────── Boot Phase ───────────────
 
 BASE_PROMPT: str = load_base_prompt()
@@ -320,6 +321,7 @@ def count_tokens(text: str) -> int:
         return max(1, len(text.split()))
     return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
+
 # ─────────────── Playground Helper ───────────────
 
 
@@ -337,11 +339,11 @@ def run_playground(  # noqa: PLR0913
     ptxt, concept, score = get_specialized_prompt(test_in, SPECIALIZED_PROMPTS, fuzzy)
     prompt = ptxt or BASE_PROMPT
     ctx = f"{prompt}\nUser: {test_in}\nAssistant:"
-    
+
     # Check if tokenizer and model are available
     if tokenizer is None or model is None:
         return "Model not available", prompt, ""
-    
+
     ids = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
     preview = tokenizer.decode(
         model.generate(

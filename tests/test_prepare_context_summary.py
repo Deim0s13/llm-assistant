@@ -31,13 +31,13 @@ def restore_settings() -> Generator[None, None, None]:
     # Load fresh settings and make a deep copy
     clean_settings = load_settings()
     original_settings = deepcopy(SETTINGS)
-    
+
     # Clear and reset BEFORE the test runs
     SETTINGS.clear()
     SETTINGS.update(deepcopy(clean_settings))
-    
+
     yield
-    
+
     # Restore the original settings after the test
     SETTINGS.clear()
     SETTINGS.update(original_settings)
