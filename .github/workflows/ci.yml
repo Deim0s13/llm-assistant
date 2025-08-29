@@ -1,80 +1,77 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [ dev, main ]
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Ruff Lint
+  build-test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install ruff
-        run: pip install ruff
-
-      - name: Ruff check
-        run: ruff check .
-
-  typing:
-    name: Typing (mypy + pyright)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install typing tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt || true
-          pip install -r requirements-dev.txt
-      - name: mypy
-        run: mypy .
-      - name: pyright
-        run: pyright
-
-  tests:
-    name: Tests (pytest + coverage)
-    runs-on: ubuntu-latest
     env:
-      CI: true               # activates import-safe path
-      SKIP_MODEL_INIT: "1"   # also activates import-safe path
+      # Recommended: gate model init in your code using this
+      SKIP_MODEL_INIT: "1"
+      PYTHONUNBUFFERED: "1"
+      # Make sure tests can import the project
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -r requirements-dev.txt
+          # Dev/test tools
+          pip install pytest pytest-cov mypy pyright ruff
 
-      - name: Pytest (quiet) with coverage
+      - name: Print versions
         run: |
-          pytest -q tests --cov=. --cov-report=xml --cov-report=term
+          python --version
+          pytest --version
+          mypy --version
+          pyright --version
+          ruff --version
 
-      - name: Upload coverage.xml artifact
+      - name: Lint (ruff)
+        run: |
+          # Fail on style/lint issues
+          ruff check .
+          # Optional (fail if formatting needed):
+          # ruff format --check .
+
+      - name: Type check (mypy)
+        run: |
+          mypy .
+
+      - name: Type check (pyright)
+        run: |
+          pyright
+
+      - name: Run tests (pytest + coverage)
+        run: |
+          pytest -q --maxfail=1 --disable-warnings \
+                 --cov=. --cov-report=xml --cov-report=term
+
+      - name: Upload coverage artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-xml
+          name: coverage-${{ matrix.python-version }}
           path: coverage.xml
