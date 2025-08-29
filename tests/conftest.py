@@ -1,16 +1,21 @@
-import os, contextlib, sqlite3, tempfile, pathlib, logging, pytest
-from utils.memory import Memory, MemoryBackend
+import contextlib
+import sqlite3
+import logging
+from typing import Generator, Any
 
-logging.basicConfig(level=logging.DEBUG, format="[Memory-tests] %(message)s")
-
-# ── helper: spin up fake Redis (no external server) ─────────────────────────
+import pytest
 try:
     import fakeredis
 except ImportError:  # requirements-dev.txt already lists it, but guard anyway
     fakeredis = None
 
+from utils.memory import Memory, MemoryBackend
+
+logging.basicConfig(level=logging.DEBUG, format="[Memory-tests] %(message)s")
+
+# ── helper: spin up fake Redis (no external server) ─────────────────────────
 @contextlib.contextmanager
-def fake_redis_server():
+def fake_redis_server() -> Generator[Any, None, None]:
     if not fakeredis:                       # should never happen in CI
         pytest.skip("fakeredis missing")
     server = fakeredis.FakeServer()
@@ -18,7 +23,7 @@ def fake_redis_server():
 
 # ── parametrised fixture ────────────────────────────────────────────────────
 @pytest.fixture(params=["in_memory", "redis", "sqlite"])
-def mem(request, tmp_path, monkeypatch):
+def mem(request: pytest.FixtureRequest, tmp_path: Any, monkeypatch: Any) -> Generator[Memory, None, None]:
     backend = request.param
     logging.debug(f"backend = {backend}")
 
@@ -35,7 +40,9 @@ def mem(request, tmp_path, monkeypatch):
             monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
             # monkey-patch redis.Redis to return our fake connection
             import redis
-            monkeypatch.setattr(redis, "from_url", lambda *_, **__: r)
+            def fake_redis_factory(*_args: Any, **_kwargs: Any) -> Any:
+                return r
+            monkeypatch.setattr(redis, "from_url", fake_redis_factory)
             m = Memory(backend=MemoryBackend.REDIS)
             m.clear()
             yield m
@@ -49,6 +56,6 @@ def mem(request, tmp_path, monkeypatch):
         m.clear()
         yield m
         # optional: sanity check row-count vs. file on disk
-        with sqlite3.connect(db_file) as con:
+        with sqlite3.connect(str(db_file)) as con:
             assert con.execute("SELECT COUNT(*) FROM turns").fetchone()[0] == 0
         return

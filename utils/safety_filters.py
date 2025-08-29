@@ -24,9 +24,6 @@ from typing import Any, Dict, Optional, Tuple
 # ─────────────────────────────────────────────────────── Static data ──
 _DEFAULT_PROFANITY: Tuple[str, ...] = ("damn", "hell", "shit", "fuck")
 
-from functools import lru_cache
-import re
-
 
 @lru_cache(maxsize=1)
 def _default_regex() -> re.Pattern[str]:

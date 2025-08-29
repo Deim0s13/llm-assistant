@@ -10,7 +10,8 @@ import os
 import sqlite3
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, final, override
+from typing import Dict, List, Optional, final
+from typing_extensions import override
 
 from memory.backends.redis_memory_backend import BaseMemoryBackend, InMemoryBackend
 

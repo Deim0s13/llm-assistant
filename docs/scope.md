@@ -28,8 +28,8 @@ This document couples the **learning journey** with the **delivery roadmap** so 
 | **0.4.2**         | Context trimming & debug logging                        | ✅ Done        |
 | **0.4.3**         | In-memory backend + summarisation scaffold              | ✅ Done        |
 | **0.4.4**         | **Persistent memory (Redis/SQLite)**                    | ✅ Done        |
-| **0.4.5**         | **Summarisation MVP + Technical Spec + Planning**       | 🔄 In Progress |
-| **0.5.0**         | Automated Test Suite & CI Enablement (Podman/Actions)   | 🔜 Planned     |
+| **0.4.5**         | **Summarisation MVP + Technical Spec + Planning**       | ✅ Done.       |
+| **0.5.0**         | Automated Test Suite & CI Enablement (Podman/Actions)   | 🔄 In Progress |
 | **0.5.1**         | Containerisation & E2E Test Matrix                      | 🔜 Planned     |
 | **0.6.x**         | RAG prototype (file-based Q&A)                          | 🔜 Planned     |
 | **0.7.x**         | Fine-tuning foundation                                  | 🔜 Planned     |

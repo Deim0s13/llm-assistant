@@ -93,7 +93,7 @@ def _normalise(raw: str) -> str:
 
 
 @runtime_checkable
-class _BackendProto(Protocol):
+class _BackendProto(Protocol):  # noqa: F811
     def add_turn(self, role: str, content: str, *, cid: str = "default") -> None: ...
     def get_recent(
         self, *, limit: int = 50, cid: str = "default"

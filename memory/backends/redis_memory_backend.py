@@ -8,15 +8,14 @@ from __future__ import annotations
 import json
 import logging
 import os
+from typing_extensions import override
 from typing import (
     Any,
     Dict,
     List,
     Optional,
-    cast,
     Protocol,
     runtime_checkable,
-    override,
     Tuple,
 )
 
@@ -120,9 +119,9 @@ class RedisMemoryBackend(BaseMemoryBackend):
         url = redis_url or os.getenv("REDIS_URL")
         try:
             if url:
-                client_any: Any = cast(Any, redis).from_url(url, decode_responses=True)
+                client_any: Any = redis.from_url(url, decode_responses=True)
             else:
-                client_any = cast(Any, redis).Redis(
+                client_any = redis.Redis(
                     host=host,
                     port=port,
                     db=db,
@@ -131,8 +130,8 @@ class RedisMemoryBackend(BaseMemoryBackend):
                 )
 
             # Verify connection
-            cast(_RedisClient, client_any).ping()
-            self._client = cast(_RedisClient, client_any)
+            client_any.ping()
+            self._client = client_any
             self._using_fallback = False
             LOGGER.debug("[Redis] Connected ✔")
         except Exception as exc:
