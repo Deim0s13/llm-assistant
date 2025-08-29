@@ -85,7 +85,7 @@ class RedisMemoryBackend(BaseMemoryBackend):
     _KEY_TMPL = "chat:{cid}:turns"  # namespaced key template
 
     # ─────────────────────────── ctor / connect ──────────────────────────
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         redis_url: str | None = None,

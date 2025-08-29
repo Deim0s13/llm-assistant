@@ -1,3 +1,8 @@
+import json
+import logging
+from pathlib import Path
+from typing import Any
+
 # ════════════════════════════════════════════════════════════════════
 #  utils/aliases.py – alias-to-concept mapping loader
 # ════════════════════════════════════════════════════════════════════
@@ -16,16 +21,9 @@ Example
 """
 
 # ───────────────────────────────────────────────────────── Logging ──
-import logging
-
 LOGGER = logging.getLogger(__name__)  # (inherit root config set in main)
 
 # ───────────────────────────────────────────────────────── Imports ──
-import json
-from pathlib import Path
-from typing import Any
-
-# ─────────────────────────────────────────── File-system helpers ──
 # utils/aliases.py  →  utils/  →  project root  →  config/
 _CURRENT_DIR = Path(__file__).resolve().parent
 PROMPT_ALIAS_PATH = Path("config/aliases.json")

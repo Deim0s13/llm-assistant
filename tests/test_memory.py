@@ -21,6 +21,10 @@ import pytest
 
 import main
 from config.settings_loader import load_settings
+from utils import memory as mem_mod
+
+# ─────────────────────────────────────────────────────── Constants ──
+EXPECTED_HISTORY_COUNT = 2
 
 
 # ───────────────────────────── helper utils ─────────────────────────────
@@ -64,7 +68,6 @@ def specialised_prompts(tmp_path, monkeypatch):
 # ───────────────────────────── test cases ───────────────────────────────
 def test_memory_enabled_with_data(monkeypatch, base_prompt, specialised_prompts):
     """Memory ON – stored turns must precede live history."""
-    from utils import memory as mem_mod
 
     # 1) Patch settings
     monkeypatch.setattr(
@@ -91,7 +94,6 @@ def test_memory_enabled_with_data(monkeypatch, base_prompt, specialised_prompts)
 
 def test_memory_enabled_empty(monkeypatch, base_prompt, specialised_prompts):
     """Memory ON but empty – context should contain only live history."""
-    from utils import memory as mem_mod
 
     monkeypatch.setattr(
         "config.settings_loader.load_settings",
@@ -103,7 +105,7 @@ def test_memory_enabled_empty(monkeypatch, base_prompt, specialised_prompts):
     live_history = [_turn("user", "just now")]
     ctx, _ = m.prepare_context("just now", live_history, base_prompt, specialised_prompts, False)
 
-    assert ctx.count("just now") == 2  # in history + user line
+    assert ctx.count("just now") == EXPECTED_HISTORY_COUNT  # in history + user line
     assert "hello from memory" not in ctx  # nothing injected
 
 

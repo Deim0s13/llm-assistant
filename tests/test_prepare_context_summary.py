@@ -3,9 +3,11 @@
 # ════════════════════════════════════════════════════════════════════
 
 from collections.abc import Generator
+from copy import deepcopy
 
 import pytest
 
+from config.settings_loader import load_settings
 from main import SETTINGS, prepare_context
 
 # ───────────────────────────── Helpers ─────────────────────────────
@@ -26,17 +28,19 @@ def _build_naive_context(history: list[dict[str, str]], msg: str, base_prompt: s
 @pytest.fixture(autouse=True)
 def restore_settings() -> Generator[None, None, None]:
     # snapshot & restore global SETTINGS so tests don't leak config
-    # Load fresh settings instead of using potentially contaminated state
-    from config.settings_loader import load_settings
-
+    # Load fresh settings and make a deep copy
     clean_settings = load_settings()
+    original_settings = deepcopy(SETTINGS)
+    
     # Clear and reset BEFORE the test runs
     SETTINGS.clear()
-    SETTINGS.update(clean_settings)
+    SETTINGS.update(deepcopy(clean_settings))
+    
     yield
-    # Also restore after the test
+    
+    # Restore the original settings after the test
     SETTINGS.clear()
-    SETTINGS.update(clean_settings)
+    SETTINGS.update(original_settings)
 
 
 @pytest.fixture

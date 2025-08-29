@@ -23,10 +23,10 @@ def mem(request, monkeypatch):
 
     if backend == "redis":
         # patch BEFORE backend import so RedisMemoryBackend uses FakeRedis
-        import memory.backends.redis_memory_backend as rb
-
-        monkeypatch.setattr(rb, "redis", fakeredis.FakeRedis, raising=True)
-        importlib.reload(rb)  # re-evaluate with fake client
+        monkeypatch.setattr(
+            "memory.backends.redis_memory_backend.redis", fakeredis.FakeRedis, raising=True
+        )
+        importlib.reload(importlib.import_module("memory.backends.redis_memory_backend"))
 
     _reset_singleton()
     yield Memory(backend=backend)

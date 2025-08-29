@@ -1,6 +1,20 @@
 # ════════════════════════════════════════════════════════════════════
 #  config/settings_loader.py – centralised settings utility
 # ════════════════════════════════════════════════════════════════════
+
+import json
+import os
+from typing import Any
+
+from dotenv import load_dotenv
+
+# ───────────────────────────────────────────────────────── Logging ──
+import logging
+
+LOGGER = logging.getLogger(__name__)  # inherit root config from main
+
+# ──────────────────────────────────────────────────────────
+
 """
 • loads config/settings.json
 • falls back to hard-coded defaults when the file is missing/invalid
@@ -12,18 +26,6 @@ The resulting dict can be imported anywhere in the project:
     SETTINGS = load_settings()
 """
 
-# ───────────────────────────────────────────────────────── Logging ──
-import logging
-
-LOGGER = logging.getLogger(__name__)  # inherit root config from main
-
-# ───────────────────────────────────────────────────────── Imports ──
-import json
-import os
-from typing import Any
-
-from dotenv import load_dotenv
-
 # ───────────────────────────────────────────── Paths & defaults ──
 DEFAULT_SETTINGS_PATH: str = "config/settings.json"
 
@@ -32,7 +34,9 @@ FALLBACK_SETTINGS: dict[str, Any] = {
         "profanity_filter": True,
         "sensitivity_level": "moderate",
         "log_triggered_filters": True,
-        "blocked_response_template": "I'm unable to respond to that request due to safety policies.",
+        "blocked_response_template": (
+            "I'm unable to respond to that request due to safety policies.",
+        ),
     },
     "memory": {  # ← new default block
         "backend": "none",  # "in_memory", "redis", …

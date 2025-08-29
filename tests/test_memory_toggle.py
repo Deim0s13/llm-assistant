@@ -36,7 +36,7 @@ def restore_settings() -> Generator[None, None, None]:
     from config.settings_loader import load_settings
 
     clean_settings = load_settings()
-    snap = copy.deepcopy(_MAIN.SETTINGS)
+    copy.deepcopy(_MAIN.SETTINGS)  # snapshot but don't assign
     yield
     _MAIN.SETTINGS.clear()
     _MAIN.SETTINGS.update(clean_settings)

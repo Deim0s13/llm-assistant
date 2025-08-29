@@ -1,9 +1,11 @@
+import memory.backends.redis_memory_backend as rb
+import memory.backends.sqlite_memory_backend as sb
+from utils.memory import Memory, MemoryBackend
+
 """
 Tests for MEMORY_BACKEND="persistent" resolution chain:
 Redis  → SQLite → In-memory
 """
-
-from utils.memory import Memory, MemoryBackend
 
 # ───────────────────────── helpers ─────────────────────────
 
@@ -21,8 +23,6 @@ def new_memory(monkeypatch, *, redis_ok=True, sqlite_ok=True):
     with backend="persistent".
     """
     # patch Redis backend
-    import memory.backends.redis_memory_backend as rb
-
     monkeypatch.setattr(
         rb,
         "RedisMemoryBackend",
@@ -30,8 +30,6 @@ def new_memory(monkeypatch, *, redis_ok=True, sqlite_ok=True):
     )
 
     # patch SQLite backend
-    import memory.backends.sqlite_memory_backend as sb
-
     monkeypatch.setattr(
         sb,
         "SQLiteMemoryBackend",

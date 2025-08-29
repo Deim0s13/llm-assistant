@@ -28,6 +28,10 @@ NO_USER_TURNS = [
     {"role": "assistant", "content": "Still just the bot."},
 ]
 
+# ─────────────────────────────────────────────────────── Constants ──
+MAX_BULLETS = 3
+MAX_LINE_LENGTH = 122
+
 # ──────────────────────────── Unit Tests ───────────────────────────
 
 
@@ -49,10 +53,10 @@ def test_enough_turns_gives_bullets() -> None:
     result = summarise_context(ENOUGH_TURNS)
     # Should produce up to 3 bullets
     lines = [line for line in result.splitlines() if line.startswith("• ")]
-    assert 1 <= len(lines) <= 3
+    assert 1 <= len(lines) <= MAX_BULLETS
     # Bullets should match last few user turns
     assert lines[-1].startswith("• Fifth user turn")
-    assert all(len(line) <= 122 for line in lines)  # bullet + char limit
+    assert all(len(line) <= MAX_LINE_LENGTH for line in lines)  # bullet + char limit
 
 
 def test_bullet_trimming_and_format() -> None:
@@ -70,9 +74,9 @@ def test_bullet_trimming_and_format() -> None:
     result = summarise_context(custom_history)
     lines = [line for line in result.splitlines() if line.startswith("• ")]
     # Should be 3 bullets, each trimmed to 120 + "• " chars
-    assert len(lines) == 3
+    assert len(lines) == MAX_BULLETS
     for line in lines:
-        assert len(line) == 122
+        assert len(line) == MAX_LINE_LENGTH
 
 
 def test_ignore_assistant_lines() -> None:

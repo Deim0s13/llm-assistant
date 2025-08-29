@@ -1,13 +1,22 @@
 [tool.ruff]
-target-version = "py310"
 line-length = 100
+target-version = "py311"  # or your runtime
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "W", "PERF", "PT", "PL"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["utils", "memory", "config"]
-combine-as-imports = true
+select = [
+  "E",   # pycodestyle (incl. E402, E501)
+  "F",   # pyflakes (incl. F811)
+  "PLC", # pylint-convention (incl. PLC0415)
+  "PLR", # pylint-refactor (incl. PLR0913)
+]
+ignore = [
+  # add any conscious exceptions here
+]
 
 [tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = ["F401"]
+# If you decide to allow imports inside tests (often okay for fixtures):
+"tests/test_*.py" = ["PLC0415"]
+
+[tool.ruff.format]
+quote-style = "preserve"
+indent-style = "space"

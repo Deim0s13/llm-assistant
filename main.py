@@ -5,11 +5,6 @@
 # ───────────────────────────── Imports ─────────────────────────────
 
 import os
-
-IS_CI: bool = (
-    os.getenv("CI", "").lower() in ("1", "true") or os.getenv("SKIP_MODEL_INIT", "") == "1"
-)
-
 import difflib
 import json
 import logging
@@ -25,6 +20,14 @@ from utils.memory import memory
 from utils.prompt_utils import alias_in_message
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
 from utils.summariser import summarise_context
+
+IS_CI: bool = (
+    os.getenv("CI", "").lower() in ("1", "true") or os.getenv("SKIP_MODEL_INIT", "") == "1"
+)
+
+# ────────────────────────── Constants ─────────────────────────────
+
+SIMILARITY_THRESHOLD = 0.7
 
 # ────────────────────────── Logging Configuration ──────────────────
 DEBUG_MODE: bool = True
@@ -47,11 +50,6 @@ logging.debug(
     _mem_cfg.get("enabled", False),
     _mem_cfg.get("backend", "none"),
 )
-
-
-def count_tokens(text: str) -> int:
-    """Return #tokens a string yields with current tokenizer."""
-    return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
 
 def initialize_model(model_name: str = "google/flan-t5-base") -> tuple[Any, Any, str]:
@@ -121,7 +119,7 @@ def get_specialized_prompt(
         score: float = 0.0
         for alias in KEYWORD_ALIASES:
             sim = difflib.SequenceMatcher(None, norm, alias).ratio()
-            if sim > score and sim >= 0.7:
+            if sim > score and sim >= SIMILARITY_THRESHOLD:
                 best, score = alias, sim
         if best and KEYWORD_ALIASES[best] in prompts:
             concept = KEYWORD_ALIASES[best]
@@ -236,7 +234,7 @@ def prepare_context(
 # ─────────────── Chat Generation ───────────────
 
 
-def chat(
+def chat(  # noqa: PLR0913
     msg: str,
     history: list[dict[str, Any]],
     mx: int,
@@ -264,6 +262,10 @@ def chat(
     }
     logging.debug("[Gen] %s", gen_cfg)
 
+    # Check if tokenizer and model are available
+    if tokenizer is None or model is None:
+        return history, "Model not available"
+
     ids = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
     out = model.generate(ids, **gen_cfg)
     text = tokenizer.decode(out[0], skip_special_tokens=True).strip()
@@ -284,7 +286,7 @@ def chat(
 # ─────────────── Gradio Wrappers ───────────────
 
 
-def respond(
+def respond(  # noqa: PLR0913
     msg: str,
     history: list[dict[str, Any]],
     mx: int,
@@ -298,7 +300,6 @@ def respond(
     history = history or []
     new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
     return "", new_hist, f"Prompt source: {src}"
-
 
 # ─────────────── Boot Phase ───────────────
 
@@ -319,11 +320,10 @@ def count_tokens(text: str) -> int:
         return max(1, len(text.split()))
     return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
-
 # ─────────────── Playground Helper ───────────────
 
 
-def run_playground(
+def run_playground(  # noqa: PLR0913
     test_in: str,
     mx: int,
     temp: float,
@@ -337,6 +337,11 @@ def run_playground(
     ptxt, concept, score = get_specialized_prompt(test_in, SPECIALIZED_PROMPTS, fuzzy)
     prompt = ptxt or BASE_PROMPT
     ctx = f"{prompt}\nUser: {test_in}\nAssistant:"
+    
+    # Check if tokenizer and model are available
+    if tokenizer is None or model is None:
+        return "Model not available", prompt, ""
+    
     ids = tokenizer(ctx, return_tensors="pt").input_ids.to(device)
     preview = tokenizer.decode(
         model.generate(

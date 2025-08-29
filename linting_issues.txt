@@ -1,0 +1,298 @@
+E402 Module level import not at top of file
+  --> config/settings_loader.py:21:1
+   |
+20 | # ───────────────────────────────────────────────────────── Imports ──
+21 | import json
+   | ^^^^^^^^^^^
+22 | import os
+23 | from typing import Any
+   |
+
+E402 Module level import not at top of file
+  --> config/settings_loader.py:22:1
+   |
+20 | # ───────────────────────────────────────────────────────── Imports ──
+21 | import json
+22 | import os
+   | ^^^^^^^^^
+23 | from typing import Any
+   |
+
+E402 Module level import not at top of file
+  --> config/settings_loader.py:23:1
+   |
+21 | import json
+22 | import os
+23 | from typing import Any
+   | ^^^^^^^^^^^^^^^^^^^^^^
+24 |
+25 | from dotenv import load_dotenv
+   |
+
+E402 Module level import not at top of file
+  --> config/settings_loader.py:25:1
+   |
+23 | from typing import Any
+24 |
+25 | from dotenv import load_dotenv
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+26 |
+27 | # ───────────────────────────────────────────── Paths & defaults ──
+   |
+
+E501 Line too long (101 > 100)
+  --> config/settings_loader.py:35:101
+   |
+33 |         "sensitivity_level": "moderate",
+34 |         "log_triggered_filters": True,
+35 |         "blocked_response_template": "I'm unable to respond to that request due to safety policies.",
+   |                                                                                                     ^
+36 |     },
+37 |     "memory": {  # ← new default block
+   |
+
+E402 Module level import not at top of file
+  --> main.py:13:1
+   |
+11 | )
+12 |
+13 | import difflib
+   | ^^^^^^^^^^^^^^
+14 | import json
+15 | import logging
+   |
+
+E402 Module level import not at top of file
+  --> main.py:14:1
+   |
+13 | import difflib
+14 | import json
+   | ^^^^^^^^^^^
+15 | import logging
+16 | from typing import Any
+   |
+
+E402 Module level import not at top of file
+  --> main.py:15:1
+   |
+13 | import difflib
+14 | import json
+15 | import logging
+   | ^^^^^^^^^^^^^^
+16 | from typing import Any
+   |
+
+E402 Module level import not at top of file
+  --> main.py:16:1
+   |
+14 | import json
+15 | import logging
+16 | from typing import Any
+   | ^^^^^^^^^^^^^^^^^^^^^^
+17 |
+18 | import gradio as gr
+   |
+
+E402 Module level import not at top of file
+  --> main.py:18:1
+   |
+16 | from typing import Any
+17 |
+18 | import gradio as gr
+   | ^^^^^^^^^^^^^^^^^^^
+19 | import torch
+20 | from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+   |
+
+E402 Module level import not at top of file
+  --> main.py:19:1
+   |
+18 | import gradio as gr
+19 | import torch
+   | ^^^^^^^^^^^^
+20 | from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+   |
+
+E402 Module level import not at top of file
+  --> main.py:20:1
+   |
+18 | import gradio as gr
+19 | import torch
+20 | from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 |
+22 | from config.settings_loader import load_settings
+   |
+
+E402 Module level import not at top of file
+  --> main.py:22:1
+   |
+20 | from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+21 |
+22 | from config.settings_loader import load_settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23 | from utils.aliases import KEYWORD_ALIASES
+24 | from utils.memory import memory
+   |
+
+E402 Module level import not at top of file
+  --> main.py:23:1
+   |
+22 | from config.settings_loader import load_settings
+23 | from utils.aliases import KEYWORD_ALIASES
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+24 | from utils.memory import memory
+25 | from utils.prompt_utils import alias_in_message
+   |
+
+E402 Module level import not at top of file
+  --> main.py:24:1
+   |
+22 | from config.settings_loader import load_settings
+23 | from utils.aliases import KEYWORD_ALIASES
+24 | from utils.memory import memory
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+25 | from utils.prompt_utils import alias_in_message
+26 | from utils.safety_filters import apply_profanity_filter, evaluate_safety
+   |
+
+E402 Module level import not at top of file
+  --> main.py:25:1
+   |
+23 | from utils.aliases import KEYWORD_ALIASES
+24 | from utils.memory import memory
+25 | from utils.prompt_utils import alias_in_message
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+26 | from utils.safety_filters import apply_profanity_filter, evaluate_safety
+27 | from utils.summariser import summarise_context
+   |
+
+E402 Module level import not at top of file
+  --> main.py:26:1
+   |
+24 | from utils.memory import memory
+25 | from utils.prompt_utils import alias_in_message
+26 | from utils.safety_filters import apply_profanity_filter, evaluate_safety
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+27 | from utils.summariser import summarise_context
+   |
+
+E402 Module level import not at top of file
+  --> main.py:27:1
+   |
+25 | from utils.prompt_utils import alias_in_message
+26 | from utils.safety_filters import apply_profanity_filter, evaluate_safety
+27 | from utils.summariser import summarise_context
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+28 |
+29 | # ────────────────────────── Constants ─────────────────────────────
+   |
+
+PLR0913 Too many arguments in function definition (7 > 5)
+   --> main.py:242:5
+    |
+242 | def chat(
+    |     ^^^^
+243 |     msg: str,
+244 |     history: list[dict[str, Any]],
+    |
+
+PLR0913 Too many arguments in function definition (8 > 5)
+   --> main.py:290:5
+    |
+290 | def respond(
+    |     ^^^^^^^
+291 |     msg: str,
+292 |     history: list[dict[str, Any]],
+    |
+
+F811 Redefinition of unused `count_tokens` from line 55
+   --> main.py:319:5
+    |
+319 | def count_tokens(text: str) -> int:
+    |     ^^^^^^^^^^^^ `count_tokens` redefined here
+320 |     """Token count with a safe fallback when tokenizer isn't initialized (CI)."""
+321 |     if tokenizer is None:  # CI/import-safe fallback
+    |
+   ::: main.py:55:5
+    |
+ 55 | def count_tokens(text: str) -> int:
+    |     ------------ previous definition of `count_tokens` here
+ 56 |     """Return #tokens a string yields with current tokenizer."""
+ 57 |     return len(tokenizer(text, return_tensors="pt").input_ids[0])
+    |
+help: Remove definition: `count_tokens`
+
+PLR0913 Too many arguments in function definition (7 > 5)
+   --> main.py:329:5
+    |
+329 | def run_playground(
+    |     ^^^^^^^^^^^^^^
+330 |     test_in: str,
+331 |     mx: int,
+    |
+
+PLR0913 Too many arguments in function definition (8 > 5)
+  --> memory/backends/redis_memory_backend.py:88:9
+   |
+87 |     # ─────────────────────────── ctor / connect ──────────────────────────
+88 |     def __init__(
+   |         ^^^^^^^^
+89 |         self,
+90 |         *,
+   |
+
+PLC0415 `import` should be at the top-level of a file
+  --> tests/test_memory_backend.py:38:9
+   |
+36 |     if backend == "redis":
+37 |         # restore for any subsequent tests / IDE analysis
+38 |         import redis as redis_real
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+39 |
+40 |         import memory.backends.redis_memory_backend as rb
+   |
+
+PLC0415 `import` should be at the top-level of a file
+  --> tests/test_memory_backend.py:40:9
+   |
+38 |         import redis as redis_real
+39 |
+40 |         import memory.backends.redis_memory_backend as rb
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+41 |
+42 |         monkeypatch.setattr(rb, "redis", redis_real, raising=True)
+   |
+
+PLC0415 `import` should be at the top-level of a file
+  --> tests/test_memory_toggle.py:36:5
+   |
+34 | def restore_settings() -> Generator[None, None, None]:
+35 |     # snapshot & restore global SETTINGS so tests don't leak config
+36 |     from config.settings_loader import load_settings
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+37 |
+38 |     clean_settings = load_settings()
+   |
+
+E402 Module level import not at top of file
+  --> tests/test_safety.py:26:1
+   |
+24 |     sys.path.insert(0, ROOT)
+25 |
+26 | from config.settings_loader import load_settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+27 | from utils import safety_filters as sf
+   |
+
+E402 Module level import not at top of file
+  --> tests/test_safety.py:27:1
+   |
+26 | from config.settings_loader import load_settings
+27 | from utils import safety_filters as sf
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+28 |
+29 | # ───────────────────────────── pristine baseline  ─────────────────────────────
+   |
+
+Found 28 errors.

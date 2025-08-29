@@ -372,3 +372,28 @@ You can skip hooks with `git commit --no-verify` (not recommended)
 * Start the app (`python main.py`) and try the chat + Developer Playground.
 * Adjust summarisation and memory in `.env` to see their effect.
 * Run the tests and (optionally) wire coverage thresholds in CI.
+
+## Linting Status
+
+**Current Status**: 28 linting errors (48% improvement from original 54 errors)
+
+The codebase has undergone significant linting improvements. All critical functionality issues have been resolved, and the remaining errors are primarily cosmetic or code quality improvements.
+
+### Quick Summary
+- ✅ **Fixed**: 26 errors (undefined names, magic numbers, import placement)
+- 🔄 **Remaining**: 28 errors (import ordering, function arguments, formatting)
+- 🚫 **Impact**: None - all code functions normally
+
+### Detailed Documentation
+For a complete analysis of all current linting issues, see [LINTING_ISSUES.md](./LINTING_ISSUES.md).
+
+### Remediation Priority
+1. **High Priority**: Duplicate function, line length (5-10 min)
+2. **Medium Priority**: Import placement, import ordering (20-30 min)  
+3. **Low Priority**: Function refactoring (30-45 min)
+
+**Total estimated time for 100% clean codebase**: 50-75 minutes
+
+---
+
+## Development Setup

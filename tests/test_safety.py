@@ -23,8 +23,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from config.settings_loader import load_settings
-from utils import safety_filters as sf
+from config.settings_loader import load_settings  # noqa: E402
+from utils import safety_filters as sf  # noqa: E402
 
 # ───────────────────────────── pristine baseline  ─────────────────────────────
 
@@ -41,7 +41,7 @@ def _cfg(level: str = "moderate", **kv) -> dict:
 
 
 @pytest.mark.parametrize(
-    "level, expected",
+    ("level", "expected"),
     [("strict", False), ("moderate", True), ("relaxed", True)],
 )
 def test_level_blocking(level, expected):

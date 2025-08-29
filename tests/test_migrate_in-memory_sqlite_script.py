@@ -4,7 +4,11 @@ import subprocess
 
 from utils.memory import Memory, MemoryBackend
 
+# ─────────────────────────────────────────────────────── Constants ──
+EXPECTED_ROWS = 2
 
+
+# ─────────────────────────────────────────────────────── Test ──────
 def test_migration_default_session(tmp_path):
     # 1) populate RAM
     mem = Memory(backend=MemoryBackend.IN_MEMORY)
@@ -25,5 +29,5 @@ def test_migration_default_session(tmp_path):
     # 3) verify rows
     con = sqlite3.connect(db_path)
     cur = con.execute("SELECT role, content FROM turns").fetchall()
-    assert len(cur) == 2
+    assert len(cur) == EXPECTED_ROWS
     assert cur[0][1] == "hi"

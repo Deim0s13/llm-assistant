@@ -1,3 +1,8 @@
+import logging
+import re
+from functools import lru_cache
+from typing import Any
+
 # ════════════════════════════════════════════════════════════════════
 #  utils/safety_filters.py – profanity masking & safety gating
 # ════════════════════════════════════════════════════════════════════
@@ -9,17 +14,8 @@ OpenAI moderation, Perspective API, custom models) can later replace the
 `evaluate_safety()` stub without changing the main chat flow.
 """
 
-from __future__ import annotations
-
 # ───────────────────────────────────────────────────────── Logging ──
-import logging
-
 LOGGER = logging.getLogger(__name__)  # inherit root config from main
-
-# ───────────────────────────────────────────────────────── Imports ──
-import re
-from functools import lru_cache
-from typing import Any
 
 # ─────────────────────────────────────────────────────── Static data ──
 _DEFAULT_PROFANITY: tuple[str, ...] = ("damn", "hell", "shit", "fuck")

@@ -6,6 +6,9 @@ import stat
 from memory.backends.redis_memory_backend import InMemoryBackend
 from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
 
+# ─────────────────────────────────────────────────────── Constants ──
+EXPECTED_ROWS = 3
+
 
 # ────────────────────────── helpers ──────────────────────────
 def mk_sqlite(max_rows=10_000, *, path=":memory:", fallback=None):
@@ -27,7 +30,7 @@ def test_trim_oldest():
     for i in range(6):
         mem.add_turn("user", f"msg{i}")
     rows = mem.get_recent(limit=10)
-    assert len(rows) == 3
+    assert len(rows) == EXPECTED_ROWS
     assert rows[0]["content"] == "msg5"
     assert rows[-1]["content"] == "msg3"  # oldest kept
 

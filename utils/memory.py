@@ -26,6 +26,8 @@ from typing import (
     runtime_checkable,
 )
 
+from config.settings_loader import load_settings  # late import to avoid cycles
+
 __all__ = ["MemoryBackend", "Memory", "memory"]
 
 # --------------------------------------------------------------------
@@ -195,7 +197,5 @@ class Memory:
 
 
 # ───────────────────────── bootstrap default singleton ─────────────────────
-from config.settings_loader import load_settings  # late import to avoid cycles
-
 DEFAULT_BACKEND = load_settings().get("memory", {}).get("backend", "none")
 memory: Memory = Memory(backend=DEFAULT_BACKEND)

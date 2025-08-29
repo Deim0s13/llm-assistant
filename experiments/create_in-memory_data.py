@@ -1,9 +1,19 @@
-from utils.memory import Memory, MemoryBackend
+import sys
+from pathlib import Path
 
-mem = Memory(backend=MemoryBackend.IN_MEMORY)  # force RAM
-mem.clear()  # start clean
-for i in range(5):
-    mem.save({"role": "user", "content": f"msg {i}"})
-    mem.save({"role": "assistant", "content": f"reply {i}"})
+from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
 
-assert len(mem.load()) == 10
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
+
+# ─────────────────────────────────────────────────────── Constants ──
+EXPECTED_TURNS = 10
+
+# ─────────────────────────────────────────────────────── Main ──────
+mem = SQLiteMemoryBackend(db_path=":memory:", persist=False)
+
+for i in range(EXPECTED_TURNS):
+    mem.add_turn("assistant", f"reply {i}")
+
+assert len(mem.get_recent(limit=10)) == EXPECTED_TURNS
+print("✅ Created in-memory data successfully")
