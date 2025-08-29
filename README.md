@@ -1,3 +1,5 @@
+[![CI](https://github.com/Deim0s13/llm-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/Deim0s13/llm-assistant/actions/workflows/ci.yml)
+
 # LLM‑Assistant Starter Kit
 
 A hands‑on project for **learning** how to structure, prompt, extend, *and eventually fine‑tune* LLM‑powered applications. What began as a single‑file chatbot has grown into a modular playground for **prompt engineering**, **memory handling**, **summarisation**, and (next) **RAG** & **fine‑tuning**.
@@ -41,7 +43,7 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 │   ├── settings.json               # Runtime config (memory, model, logging …)
 │   ├── prompt_template.txt         # Base system prompt
 │   └── specialized_prompts.json
-├── experiments/                    # Exploratory scripts & prototypes  
+├── experiments/                    # Exploratory scripts & prototypes
 │   ├── summarisation_playground.py # simple summary prototype
 │   ├── memory_test_utils.py        # testing utilities for development
 │   └── …                           # one-off experiments & research
@@ -201,7 +203,7 @@ Run the test suite:
 
 ```bash
 source venv/bin/activate               # activate virtual environment
-pytest tests/                         # run all tests  
+pytest tests/                         # run all tests
 pytest tests/test_summariser.py       # run specific test file
 pytest -q                             # quiet mode
 mypy .                                 # static-type pass (strict on src)

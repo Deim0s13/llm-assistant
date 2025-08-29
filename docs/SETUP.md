@@ -6,7 +6,7 @@ A step-by-step guide to get the **LLM Assistant** running locally for developmen
 
 ---
 
-## 1) Prerequisites
+## Prerequisites
 
 * **Python**: 3.10+ (3.11/3.12 fine)
 * **Git**: latest recommended
@@ -20,7 +20,7 @@ A step-by-step guide to get the **LLM Assistant** running locally for developmen
 
 ---
 
-## 2) Clone the repository
+## Clone the repository
 
 ```bash
 git clone https://github.com/Deim0s13/llm-assistant.git
@@ -29,7 +29,7 @@ cd llm-assistant
 
 ---
 
-## 3) Create a virtual environment
+## Create a virtual environment
 
 ### macOS / Linux
 
@@ -49,7 +49,7 @@ python -m venv venv
 
 ---
 
-## 4) Install dependencies
+## Install dependencies
 
 Install the runtime and dev tools:
 
@@ -68,7 +68,7 @@ pip install redis fakeredis
 
 ---
 
-## 5) Configuration overview
+## Configuration overview
 
 The app reads configuration in this order:
 
@@ -79,7 +79,7 @@ The app reads configuration in this order:
 
 ---
 
-## 6) Create a `.env` (optional but recommended)
+## Create a `.env` (optional but recommended)
 
 Create a file named `.env` in the project root. Example:
 
@@ -115,7 +115,7 @@ REDIS_URL=redis://localhost:6379/0
 
 ---
 
-## 7) Key settings in `config/settings.json`
+## Key settings in `config/settings.json`
 
 Typical sections:
 
@@ -150,7 +150,7 @@ Typical sections:
 
 ---
 
-## 8) Run the app
+## Run the app
 
 ```bash
 python main.py
@@ -171,7 +171,7 @@ Open that URL in your browser.
 
 ---
 
-## 9) Running tests
+## Running tests
 
 All automated tests live under `tests/`.
 
@@ -195,7 +195,7 @@ Common suites include:
 
 ---
 
-## 10) Optional: Redis backend locally
+## Optional: Redis backend locally
 
 1. Install Redis:
 
@@ -212,8 +212,6 @@ REDIS_URL=redis://localhost:6379/0
 3. Run the app and verify the boot log shows the Redis backend.
 
 ---
-
-## 11) 
 
 ## Type Checking
 
@@ -278,15 +276,6 @@ pyright
       content: str
   ```
 
-### Troubleshooting
-
-* **“Cannot find implementation or library stub for module …”**
-  Ensure the package is installed in your venv, or add a stub package (e.g., `pip install types-requests`).
-* **“Module level import not at top of file (E402)”** (shown by Ruff, but relevant here):
-  Move imports to the file top unless there’s a valid reason (cycle avoidance).
-* **False positives on tests**
-  You can locally relax checks for a file with a per-file `type: ignore` or adapt test helpers with `typing.cast`.
-
 ### CI (future)
 
 Type checking will also run in CI and block merges on failure once the workflow is enabled. For now, keep your local runs clean:
@@ -297,10 +286,26 @@ mypy . && pyright
 
 If both complete without errors, you’re good.
 
+## Pre-commit Hooks (Optional)
+
+This project supports [pre-commit](https://pre-commit.com/) to automatically run linting, type-checking, and tests before each commit.
+
+1. Install pre-commit:
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+
+2. On each commit, hooks will run:
+   * Ruff (lint + format)
+   * mypy (strict tye-chcking)
+   * pytest (unit tests)
+
+You can skip hooks with `git commit --no-verify` (not recommended)
 
 ---
 
-## 12) Troubleshooting
+## Troubleshooting
 
 * **Port already in use (7860)**
   Run with a different port:
@@ -318,9 +323,18 @@ If both complete without errors, you’re good.
 * **Import errors in tests**
   Ensure you activated the `venv`, and run tests from the repo root so `tests/` can import project modules.
 
+* **“Cannot find implementation or library stub for module …”**
+  Ensure the package is installed in your venv, or add a stub package (e.g., `pip install types-requests`).
+
+* **“Module level import not at top of file (E402)”** (shown by Ruff, but relevant here):
+  Move imports to the file top unless there’s a valid reason (cycle avoidance).
+
+* **False positives on tests**
+  You can locally relax checks for a file with a per-file `type: ignore` or adapt test helpers with `typing.cast`.
+
 ---
 
-## 13) Project structure (simplified)
+## Project structure (simplified)
 
 ```text
 .
@@ -353,7 +367,7 @@ If both complete without errors, you’re good.
 
 ---
 
-## 14) Next steps
+## Next steps
 
 * Start the app (`python main.py`) and try the chat + Developer Playground.
 * Adjust summarisation and memory in `.env` to see their effect.
