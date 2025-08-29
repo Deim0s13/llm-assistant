@@ -19,7 +19,11 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 | **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
 | **In progress**   | **`v0.4.5`** | **Summarisation**                                         |
 | **Planned next**  | **`v0.5.0`** | Containerisation, automated test workflow                                                                |
+
+
+
 *See the full history → **[Release Notes](./docs/release_notes.md)**.*
+*See detailed changes → **[Changes Summary](./docs/CHANGES_SUMMARY.md)**.*
 
 ---
 

@@ -17,6 +17,7 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 | **v0.4.3** | ✅ *Done* | In-process **Memory backend**, optional summarisation scaffold     |
 | **v0.4.4** | ✅ *Done* | **Persistent memory (Redis/SQLite)**, settings auto-fallback, expanded tests |
 | **v0.4.5** | ✅ *Done* | **Summarisation MVP, Technical Spec, Planning docs**       |
+
 | **v0.5.0** | 🔼 *Planned* | Automated Test Suite & CI Enablement (Podman/Actions)         |
 | **v0.5.1** | 🔼 *Planned* | Containerisation & E2E Test Matrix                           |
 | **v0.6.x** | 🔼 *Planned* | RAG prototype (file-based Q&A)                                |
@@ -118,7 +119,7 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 * **Test isolation**: improved fixtures to prevent test contamination  
 * **Planning doc updates**: scope, README, design docs all refreshed
 
----
+
 
 ## Upcoming Roadmap
 
@@ -143,3 +144,11 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 ---
 
 Stay tuned — each milestone will be appended here upon completion. 🚀
+
+---
+
+## Additional Documentation
+
+For detailed information about recent maintenance work and current status, see:
+- **[CHANGES_SUMMARY.md](./CHANGES_SUMMARY.md)** - Comprehensive documentation of recent linting remediation and improvements
+- **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** - Current project status and next steps
