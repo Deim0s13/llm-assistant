@@ -10,6 +10,7 @@ Covered scenarios
 3. Memory disabled via settings flag         → live turns only
 4. Backend forced to NONE (simulated error)  → behave like disabled
 """
+
 from __future__ import annotations
 
 import importlib
@@ -42,7 +43,7 @@ def _turn(role: str, text: str) -> dict:
 
 
 # ────────────────────────────── fixtures ────────────────────────────────
-@pytest.fixture()
+@pytest.fixture
 def base_prompt(tmp_path, monkeypatch):
     """Create a throw-away base prompt file and patch the path in `main`."""
     fp = tmp_path / "prompt_template.txt"
@@ -51,7 +52,7 @@ def base_prompt(tmp_path, monkeypatch):
     return fp.read_text().strip()
 
 
-@pytest.fixture()
+@pytest.fixture
 def specialised_prompts(tmp_path, monkeypatch):
     """Provide an empty specialised-prompts file to keep tests isolated."""
     sp = tmp_path / "specialised_prompts.json"
@@ -79,12 +80,13 @@ def test_memory_enabled_with_data(monkeypatch, base_prompt, specialised_prompts)
     m = _reload_main()
 
     live_history = [_turn("user", "latest question")]
-    ctx, _ = m.prepare_context("latest question", live_history,
-                               base_prompt, specialised_prompts, fuzzy=False)
+    ctx, _ = m.prepare_context(
+        "latest question", live_history, base_prompt, specialised_prompts, fuzzy=False
+    )
 
     assert "hello from memory" in ctx
     before, _ = ctx.split("latest question", 1)
-    assert "hello from memory" in before   # mem lines appear first
+    assert "hello from memory" in before  # mem lines appear first
 
 
 def test_memory_enabled_empty(monkeypatch, base_prompt, specialised_prompts):
@@ -99,11 +101,10 @@ def test_memory_enabled_empty(monkeypatch, base_prompt, specialised_prompts):
     m = _reload_main()
 
     live_history = [_turn("user", "just now")]
-    ctx, _ = m.prepare_context("just now", live_history,
-                               base_prompt, specialised_prompts, False)
+    ctx, _ = m.prepare_context("just now", live_history, base_prompt, specialised_prompts, False)
 
-    assert ctx.count("just now") == 2          # in history + user line
-    assert "hello from memory" not in ctx      # nothing injected
+    assert ctx.count("just now") == 2  # in history + user line
+    assert "hello from memory" not in ctx  # nothing injected
 
 
 def test_memory_disabled(monkeypatch, base_prompt, specialised_prompts):
@@ -115,8 +116,7 @@ def test_memory_disabled(monkeypatch, base_prompt, specialised_prompts):
     m = _reload_main()
 
     live_history = [_turn("user", "no-mem turn")]
-    ctx, _ = m.prepare_context("no-mem turn", live_history,
-                               base_prompt, specialised_prompts, False)
+    ctx, _ = m.prepare_context("no-mem turn", live_history, base_prompt, specialised_prompts, False)
 
     assert "no-mem turn" in ctx
     assert "hello from memory" not in ctx
@@ -131,8 +131,9 @@ def test_memory_backend_none(monkeypatch, base_prompt, specialised_prompts):
     m = _reload_main()
 
     live_history = [_turn("user", "fallback check")]
-    ctx, _ = m.prepare_context("fallback check", live_history,
-                               base_prompt, specialised_prompts, False)
+    ctx, _ = m.prepare_context(
+        "fallback check", live_history, base_prompt, specialised_prompts, False
+    )
 
     assert "fallback check" in ctx
     assert "hello from memory" not in ctx

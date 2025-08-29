@@ -1,8 +1,9 @@
 # experiments/test_history_short.py
 
-import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import main
 from config.settings_loader import load_settings
@@ -25,11 +26,7 @@ history = [
 msg = "Tell me a joke."
 
 context, source = main.prepare_context(
-    msg,
-    history,
-    base_prompt,
-    specialized_prompts,
-    fuzzy_matching_enabled
+    msg, history, base_prompt, specialized_prompts, fuzzy_matching_enabled
 )
 
 print("\n=== Short History Test ===")

@@ -19,10 +19,10 @@ LOGGER = logging.getLogger(__name__)  # inherit root config from main
 # ───────────────────────────────────────────────────────── Imports ──
 import re
 from functools import lru_cache
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 # ─────────────────────────────────────────────────────── Static data ──
-_DEFAULT_PROFANITY: Tuple[str, ...] = ("damn", "hell", "shit", "fuck")
+_DEFAULT_PROFANITY: tuple[str, ...] = ("damn", "hell", "shit", "fuck")
 
 
 @lru_cache(maxsize=1)
@@ -35,8 +35,8 @@ def _default_regex() -> re.Pattern[str]:
 # ─────────────────────────────── Regex builder (cached) ──────────────
 @lru_cache(maxsize=8)
 def _build_profanity_regex(
-    strict_terms: Tuple[str, ...] = (),
-    extra_terms: Tuple[str, ...] = (),
+    strict_terms: tuple[str, ...] = (),
+    extra_terms: tuple[str, ...] = (),
 ) -> re.Pattern[str]:
     """
     Compile  ❱  ( default ∪ strict_terms ∪ extra_terms )  ❰
@@ -68,8 +68,8 @@ def apply_profanity_filter(text: str, regex: re.Pattern[str] | None = None) -> s
 # ─────────────────────────────── Safety pre-generation ───────────────
 def evaluate_safety(
     message: str,
-    settings: Dict[str, Any],
-) -> Tuple[bool, Optional[str]]:
+    settings: dict[str, Any],
+) -> tuple[bool, str | None]:
     """
     Light safety gate that checks *input* for profanity before we call the model.
 
@@ -92,11 +92,11 @@ def evaluate_safety(
     log_triggers = bool(cfg.get("log_triggered_filters", False))
 
     # Optional lists/dicts in settings; coerce to expected shapes
-    strict_terms: Tuple[str, ...] = tuple(cfg.get("strict_terms", ()))
+    strict_terms: tuple[str, ...] = tuple(cfg.get("strict_terms", ()))
     whitelist = {str(w).lower() for w in cfg.get("relaxed_whitelist", ())}
 
     # `extra_phrases` may be a dict of {phrase: …}; keys become terms
-    extra_terms: Tuple[str, ...] = tuple(
+    extra_terms: tuple[str, ...] = tuple(
         getattr(cfg.get("extra_phrases", {}), "keys", lambda: ())()
     )
 

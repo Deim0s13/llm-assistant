@@ -18,15 +18,16 @@ import logging
 LOGGER = logging.getLogger(__name__)  # inherit root config from main
 
 # ───────────────────────────────────────────────────────── Imports ──
-from dotenv import load_dotenv
 import json
 import os
-from typing import Any, Dict
+from typing import Any
+
+from dotenv import load_dotenv
 
 # ───────────────────────────────────────────── Paths & defaults ──
 DEFAULT_SETTINGS_PATH: str = "config/settings.json"
 
-FALLBACK_SETTINGS: Dict[str, Any] = {
+FALLBACK_SETTINGS: dict[str, Any] = {
     "safety": {
         "profanity_filter": True,
         "sensitivity_level": "moderate",
@@ -67,7 +68,7 @@ FALLBACK_SETTINGS: Dict[str, Any] = {
 
 
 # ───────────────────────────────────────────────────────── Loader ──
-def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> Dict[str, Any]:
+def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     """Load settings from JSON and apply .env overrides."""
     load_dotenv()  # make .env variables available via os.getenv
 
@@ -75,9 +76,9 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> Dict[str, Any]:
     try:
         if not os.path.exists(filepath):
             LOGGER.warning("[Settings] %s not found – using defaults", filepath)
-            settings: Dict[str, Any] = dict(FALLBACK_SETTINGS)
+            settings: dict[str, Any] = dict(FALLBACK_SETTINGS)
         else:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 data: Any = json.load(f)
 
             if not isinstance(data, dict):
@@ -98,9 +99,7 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> Dict[str, Any]:
 
     # logging
     log_cfg = settings.setdefault("logging", {})
-    log_cfg["debug_mode"] = env_bool(
-        "DEBUG_MODE", bool(log_cfg.get("debug_mode", False))
-    )
+    log_cfg["debug_mode"] = env_bool("DEBUG_MODE", bool(log_cfg.get("debug_mode", False)))
 
     # context
     if (v := os.getenv("MAX_HISTORY_TURNS")) is not None:
@@ -115,9 +114,7 @@ def load_settings(filepath: str = DEFAULT_SETTINGS_PATH) -> Dict[str, Any]:
 
     # ── debug prints ─────────────────────────────────────────────────
     LOGGER.debug("[Settings] DEBUG_MODE = %s", settings["logging"]["debug_mode"])
-    LOGGER.debug(
-        "[Settings] MAX_HISTORY_TURNS = %s", settings["context"]["max_history_turns"]
-    )
+    LOGGER.debug("[Settings] MAX_HISTORY_TURNS = %s", settings["context"]["max_history_turns"])
     LOGGER.debug(
         "[Settings] MEMORY backend = %s | enabled = %s",
         settings["memory"]["backend"],

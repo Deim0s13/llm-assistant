@@ -7,25 +7,24 @@
 import os
 
 IS_CI: bool = (
-    os.getenv("CI", "").lower() in ("1", "true")
-    or os.getenv("SKIP_MODEL_INIT", "") == "1"
+    os.getenv("CI", "").lower() in ("1", "true") or os.getenv("SKIP_MODEL_INIT", "") == "1"
 )
 
-import logging
-import json
 import difflib
-from typing import Any, Tuple
+import json
+import logging
+from typing import Any
 
 import gradio as gr
 import torch
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
+from config.settings_loader import load_settings
 from utils.aliases import KEYWORD_ALIASES
+from utils.memory import memory
 from utils.prompt_utils import alias_in_message
 from utils.safety_filters import apply_profanity_filter, evaluate_safety
-from utils.memory import memory
 from utils.summariser import summarise_context
-from config.settings_loader import load_settings
 
 # ────────────────────────── Logging Configuration ──────────────────
 DEBUG_MODE: bool = True
@@ -55,7 +54,7 @@ def count_tokens(text: str) -> int:
     return len(tokenizer(text, return_tensors="pt").input_ids[0])
 
 
-def initialize_model(model_name: str = "google/flan-t5-base") -> Tuple[Any, Any, str]:
+def initialize_model(model_name: str = "google/flan-t5-base") -> tuple[Any, Any, str]:
     """Load tokenizer/model and move model onto best device."""
     tok = AutoTokenizer.from_pretrained(model_name)  # type: ignore[attr-defined]
     mdl = AutoModelForSeq2SeqLM.from_pretrained(model_name)  # type: ignore[attr-defined]
@@ -102,7 +101,7 @@ def _memory_turns(max_turns: int, session: str = "default") -> list[dict[str, An
 
 def get_specialized_prompt(
     msg: str, prompts: dict[str, str], fuzzy: bool
-) -> Tuple[str, str, float | None]:
+) -> tuple[str, str, float | None]:
     """
     Return (prompt_text, concept, match_score|None).
     If no match → ("", "base_prompt", None)
@@ -142,7 +141,7 @@ def prepare_context(
     base_prompt: str,
     spec_prompts: dict[str, str],
     fuzzy: bool,
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Build the full prompt string that is passed to the model.
     """
@@ -165,11 +164,9 @@ def prepare_context(
 
     total_context_str: str = " ".join(t.get("content", "") for t in combined)
     trigger_by_turns: bool = len(combined) >= min_summary_turns
-    trigger_by_tokens: bool = bool(
-        summ_cfg.get("trigger_by_tokens", False)
-    ) and count_tokens(total_context_str) > int(
-        summ_cfg.get("max_context_tokens", 2000)
-    )
+    trigger_by_tokens: bool = bool(summ_cfg.get("trigger_by_tokens", False)) and count_tokens(
+        total_context_str
+    ) > int(summ_cfg.get("max_context_tokens", 2000))
 
     summary_text: str | None = None
     if summ_enabled and (trigger_by_turns or trigger_by_tokens):
@@ -222,11 +219,7 @@ def prepare_context(
     tok_ct: int = count_tokens(context)
 
     while tok_ct > max_tokens and len(combined) > 1:
-        if (
-            summary_text is not None
-            and combined
-            and combined[0].get("role") == "summary"
-        ):
+        if summary_text is not None and combined and combined[0].get("role") == "summary":
             # preserve summary at index 0, drop next-oldest
             combined = [combined[0]] + combined[2:]
         else:
@@ -251,7 +244,7 @@ def chat(
     top_p: float,
     sample: bool,
     fuzzy: bool,
-) -> Tuple[list[dict[str, Any]], str]:
+) -> tuple[list[dict[str, Any]], str]:
     allowed, block_msg = evaluate_safety(msg, SETTINGS)
     if not allowed:
         logging.debug("[Safety] blocked input")
@@ -300,7 +293,7 @@ def respond(
     sample: bool,
     fuzzy: bool,
     safety: str,
-) -> Tuple[str, list[dict[str, Any]], str]:
+) -> tuple[str, list[dict[str, Any]], str]:
     SETTINGS["safety"]["sensitivity_level"] = safety
     history = history or []
     new_hist, src = chat(msg, history, mx, temp, top_p, sample, fuzzy)
@@ -338,7 +331,7 @@ def run_playground(
     sample: bool,
     fuzzy: bool,
     force: bool,
-) -> Tuple[str, str, str]:
+) -> tuple[str, str, str]:
     if not force:
         return "", "", ""
     ptxt, concept, score = get_specialized_prompt(test_in, SPECIALIZED_PROMPTS, fuzzy)
@@ -369,9 +362,7 @@ with gr.Blocks() as demo:
     diag_box = gr.Textbox(label="Diagnostics", interactive=False)
 
     with gr.Row():
-        txt = gr.Textbox(
-            show_label=False, placeholder="Enter your message and press Enter"
-        )
+        txt = gr.Textbox(show_label=False, placeholder="Enter your message and press Enter")
 
     # sliders & toggles
     with gr.Row():

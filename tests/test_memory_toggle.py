@@ -1,11 +1,13 @@
 # experiments/test_memory_toggle.py
-import re, pytest, importlib, copy
+import copy
+import importlib
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
-from experiments.memory_test_utils import set_memory_enabled
-from utils.memory import memory
+import pytest
+
 import main as _main
+from experiments.memory_test_utils import set_memory_enabled
 
 # ──────────────────────────────────────────────────────────────
 # Patch prompt paths so the test uses *tiny* files, ensuring
@@ -15,27 +17,30 @@ _MAIN = importlib.reload(_main)
 
 tiny_prompt_path = Path(__file__).with_suffix(".base_prompt.txt")
 tiny_prompt_path.write_text("You are a **test** assistant.")
-_MAIN.BASE_PROMPT_PATH = str(tiny_prompt_path)          # type: ignore[attr-defined]
+_MAIN.BASE_PROMPT_PATH = str(tiny_prompt_path)  # type: ignore[attr-defined]
 
 empty_spec_path = Path(__file__).with_suffix(".spec.json")
 empty_spec_path.write_text("{}")
-_MAIN.SPECIALIZED_PROMPTS_PATH = str(empty_spec_path)   # type: ignore[attr-defined]
+_MAIN.SPECIALIZED_PROMPTS_PATH = str(empty_spec_path)  # type: ignore[attr-defined]
 
 BASE = _MAIN.load_base_prompt()
 SPEC = _MAIN.load_specialized_prompts()
 
 _MAIN.SETTINGS["context"]["max_prompt_tokens"] = 2048
 
+
 # ──────────────────────────────────────────────────────────────
-@pytest.fixture()
+@pytest.fixture
 def restore_settings() -> Generator[None, None, None]:
     # snapshot & restore global SETTINGS so tests don't leak config
     from config.settings_loader import load_settings
+
     clean_settings = load_settings()
     snap = copy.deepcopy(_MAIN.SETTINGS)
     yield
     _MAIN.SETTINGS.clear()
     _MAIN.SETTINGS.update(clean_settings)
+
 
 @pytest.mark.parametrize("mem_on", [True, False])
 def test_memory_toggle(mem_on, restore_settings):
@@ -53,12 +58,12 @@ def test_memory_toggle(mem_on, restore_settings):
 
     # common assertions
     assert ctx.startswith(BASE), "Base prompt missing or altered"
-    assert "User: Pong" in ctx,  "Current turn missing"
+    assert "User: Pong" in ctx, "Current turn missing"
 
     # mode-specific assertions
     if mem_on:
-        assert any(tok in ctx for tok in ("Hello", "Hi!")), \
-            "Memory not injected while enabled"
+        assert any(tok in ctx for tok in ("Hello", "Hi!")), "Memory not injected while enabled"
     else:
-        assert all(tok not in ctx for tok in ("Hello", "Hi!")), \
+        assert all(tok not in ctx for tok in ("Hello", "Hi!")), (
             "Memory surfaced even though disabled"
+        )

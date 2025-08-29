@@ -21,13 +21,13 @@ import json
 import random
 from pathlib import Path
 
-from utils.summariser import summarise_context          # scaffold function
-from config.settings_loader import load_settings        # just to demo import
+from config.settings_loader import load_settings  # just to demo import
+from utils.summariser import summarise_context  # scaffold function
 
-settings = load_settings()      # not used yet but handy for future tweaks
+settings = load_settings()  # not used yet but handy for future tweaks
 
 # ───────────────────────── Fake chat-history generator ─────────────────────────
-USERS = ["Alice", "Bob"]   # (future: per-user summaries)
+USERS = ["Alice", "Bob"]  # (future: per-user summaries)
 TOPICS = [
     "Tell me about the history of Rome.",
     "Why is the sky blue?",
@@ -67,6 +67,7 @@ user_only = [t for t in history if t["role"] == "user"]
 # ───────────────────────── Strategy 3 – Stub summariser call ───────────────────
 scaffold_summary = summarise_context(history)
 
+
 # ───────────────────────── Nicely print results to console ─────────────────────
 def pp(label: str, obj):
     print(f"\n=== {label} ===")
@@ -100,5 +101,5 @@ OUT.write_text(
 try:
     rel = OUT.resolve().relative_to(Path.cwd())
 except ValueError:
-    rel = OUT.resolve()          # fallback → absolute path
+    rel = OUT.resolve()  # fallback → absolute path
 print(f"\nResults written → {rel}")

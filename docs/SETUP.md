@@ -213,7 +213,94 @@ REDIS_URL=redis://localhost:6379/0
 
 ---
 
-## 11) Troubleshooting
+## 11) 
+
+## Type Checking
+
+We use **mypy** and **Pyright** in strict mode to catch typing issues early and keep IDE hints accurate.
+
+### Install (if not already)
+
+```bash
+pip install mypy pyright
+```
+
+> Both are also listed in `requirements-dev.txt` if you’re using the dev extras.
+
+### Run mypy
+
+```bash
+mypy .
+```
+
+* Exits non-zero on any typing error.
+* Configuration lives in `pyproject.toml` (see the `[tool.mypy]` section).
+* We aim for **0 errors** on core code. Tests may be less strict.
+
+### Run Pyright
+
+```bash
+pyright
+```
+
+* Uses `pyproject.toml` `[tool.pyright]` config.
+* Also targets **0 errors** on the main codebase.
+
+### Editor integration (Cursor / VS Code)
+
+* **Cursor** (and VS Code) will surface Pyright diagnostics automatically if the Python extension is enabled.
+* mypy diagnostics can be shown via the “Mypy Type Checker” extension or by running `mypy` in the integrated terminal.
+
+### Typical layout & expectations
+
+* **Core code** (`main.py`, `utils/`, `memory/`) — must be clean under mypy & Pyright.
+* **Tests** (`tests/`) — type checking allowed but may be relaxed; assertions and fixtures sometimes require `# type: ignore[...]` or `typing.cast` to keep readable.
+
+### Common fixes
+
+* Add explicit types to parameters and return values:
+
+  ```python
+  def get_prompt(text: str) -> str: ...
+  ```
+* Parameterize generics:
+
+  ```python
+  from typing import Any
+  data: dict[str, Any] = {}
+  ```
+* Avoid dynamic attribute assignment; prefer `TypedDict`/`dataclass` for structured dicts:
+
+  ```python
+  from typing import TypedDict
+  class Turn(TypedDict):
+      role: str
+      content: str
+  ```
+
+### Troubleshooting
+
+* **“Cannot find implementation or library stub for module …”**
+  Ensure the package is installed in your venv, or add a stub package (e.g., `pip install types-requests`).
+* **“Module level import not at top of file (E402)”** (shown by Ruff, but relevant here):
+  Move imports to the file top unless there’s a valid reason (cycle avoidance).
+* **False positives on tests**
+  You can locally relax checks for a file with a per-file `type: ignore` or adapt test helpers with `typing.cast`.
+
+### CI (future)
+
+Type checking will also run in CI and block merges on failure once the workflow is enabled. For now, keep your local runs clean:
+
+```bash
+mypy . && pyright
+```
+
+If both complete without errors, you’re good.
+
+
+---
+
+## 12) Troubleshooting
 
 * **Port already in use (7860)**
   Run with a different port:
@@ -233,7 +320,7 @@ REDIS_URL=redis://localhost:6379/0
 
 ---
 
-## 12) Project structure (simplified)
+## 13) Project structure (simplified)
 
 ```text
 .
@@ -266,7 +353,7 @@ REDIS_URL=redis://localhost:6379/0
 
 ---
 
-## 13) Next steps
+## 14) Next steps
 
 * Start the app (`python main.py`) and try the chat + Developer Playground.
 * Adjust summarisation and memory in `.env` to see their effect.

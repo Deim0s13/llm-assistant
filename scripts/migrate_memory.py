@@ -27,7 +27,8 @@ import json
 import os
 import pathlib
 import sys
-from typing import Any, Dict, List, Sequence, TypedDict
+from collections.abc import Sequence
+from typing import Any, TypedDict
 
 
 # ─────────────────────────────────────────── Data shapes ────────────
@@ -39,20 +40,20 @@ class Turn(TypedDict):
 # ── project imports ─────────────────────────────────────────────────
 sys.path.append(".")  # ensure repo root on PYTHONPATH
 
-from utils.memory import Memory, MemoryBackend  # noqa: E402
 from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend  # noqa: E402
+from utils.memory import Memory, MemoryBackend  # noqa: E402
 
 # ───────────────────────────────────────────────────────── Constants ──
 _ENV_KEY = "LLM_MEM_STORE_JSON"
 
 
 # ─────────────────────────────────────────── Helpers ─────────────────
-def _normalize_turns(objs: List[Dict[str, Any]]) -> List[Turn]:
+def _normalize_turns(objs: list[dict[str, Any]]) -> list[Turn]:
     """
     Convert a raw list of dicts into a typed list[Turn], discarding any
     items that don't have `role` and `content` as strings.
     """
-    out: List[Turn] = []
+    out: list[Turn] = []
     for o in objs:
         role = o.get("role")
         content = o.get("content")
@@ -61,7 +62,7 @@ def _normalize_turns(objs: List[Dict[str, Any]]) -> List[Turn]:
     return out
 
 
-def _fallback_turns_from_env(session_id: str) -> List[Turn]:
+def _fallback_turns_from_env(session_id: str) -> list[Turn]:
     """
     Read the in-memory snapshot from the LLM_MEM_STORE_JSON env var and
     extract a typed list[Turn] for `session_id`. Returns [] on any error.
@@ -75,14 +76,14 @@ def _fallback_turns_from_env(session_id: str) -> List[Turn]:
     except Exception:
         return []
 
-    store: Dict[str, List[Turn]] = {}
+    store: dict[str, list[Turn]] = {}
 
     if isinstance(obj, dict):
         for k_any, v_any in obj.items():
             if not (isinstance(k_any, str) and isinstance(v_any, list)):
                 continue
 
-            turns: List[Turn] = []
+            turns: list[Turn] = []
             for it in v_any:
                 if not isinstance(it, dict):
                     continue
@@ -92,7 +93,7 @@ def _fallback_turns_from_env(session_id: str) -> List[Turn]:
                     turns.append({"role": role, "content": content})
             store[k_any] = turns
 
-    session_list: List[Turn] = store.get(session_id, [])
+    session_list: list[Turn] = store.get(session_id, [])
     return session_list
 
 
@@ -115,10 +116,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = ap.parse_args(argv)
 
     # 1) pull turns from the (rehydrated) in-memory backend
-    raw_turns: List[Dict[str, Any]] = Memory(backend=MemoryBackend.IN_MEMORY).load(
-        args.session
-    )
-    turns: List[Turn] = _normalize_turns(raw_turns)
+    raw_turns: list[dict[str, Any]] = Memory(backend=MemoryBackend.IN_MEMORY).load(args.session)
+    turns: list[Turn] = _normalize_turns(raw_turns)
 
     # Fallback: read directly from the env snapshot if needed
     if not turns:

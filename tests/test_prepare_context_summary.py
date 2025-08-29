@@ -2,16 +2,16 @@
 #  experiments/test_prepare_context_summary.py – summary insertion tests
 # ════════════════════════════════════════════════════════════════════
 
-import copy
-from typing import Any, Dict, Generator, List
+from collections.abc import Generator
 
 import pytest
 
-from main import prepare_context, SETTINGS
+from main import SETTINGS, prepare_context
 
 # ───────────────────────────── Helpers ─────────────────────────────
 
-def _build_naive_context(history: List[Dict[str, str]], msg: str, base_prompt: str) -> str:
+
+def _build_naive_context(history: list[dict[str, str]], msg: str, base_prompt: str) -> str:
     # mirror the simple build() used in prepare_context (no summary)
     ctx: str = base_prompt
     for turn in history:
@@ -19,13 +19,16 @@ def _build_naive_context(history: List[Dict[str, str]], msg: str, base_prompt: s
     ctx += f"\nUser: {msg}\nAssistant:"
     return ctx
 
+
 # ───────────────────────────── Fixtures ────────────────────────────
+
 
 @pytest.fixture(autouse=True)
 def restore_settings() -> Generator[None, None, None]:
     # snapshot & restore global SETTINGS so tests don't leak config
     # Load fresh settings instead of using potentially contaminated state
     from config.settings_loader import load_settings
+
     clean_settings = load_settings()
     # Clear and reset BEFORE the test runs
     SETTINGS.clear()
@@ -35,39 +38,42 @@ def restore_settings() -> Generator[None, None, None]:
     SETTINGS.clear()
     SETTINGS.update(clean_settings)
 
-@pytest.fixture()
-def sample_history() -> List[Dict[str, str]]:
+
+@pytest.fixture
+def sample_history() -> list[dict[str, str]]:
     # 10 alternating user/assistant turns – enough to trigger by turns
-    hist: List[Dict[str, str]] = []
+    hist: list[dict[str, str]] = []
     for i in range(10):
         role = "user" if i % 2 == 0 else "assistant"
         hist.append({"role": role, "content": f"{role.capitalize()} message {i}"})
     return hist
 
+
 # ─────────────────── Summary insertion (enabled) ───────────────────
 
-def test_summary_injected_when_triggered_by_turns(
-    sample_history: List[Dict[str, str]]
-) -> None:
+
+def test_summary_injected_when_triggered_by_turns(sample_history: list[dict[str, str]]) -> None:
     # configure: enabled + low min_turns → guaranteed trigger
     SETTINGS.setdefault("summarisation", {})
-    SETTINGS["summarisation"].update({
-        "enabled": True,
-        "strategy": "bullet",
-        "min_turns": 8,
-        "max_chars": 512,
-    })
+    SETTINGS["summarisation"].update(
+        {
+            "enabled": True,
+            "strategy": "bullet",
+            "min_turns": 8,
+            "max_chars": 512,
+        }
+    )
     # avoid unrelated token trimming in these tests
     SETTINGS["context"]["max_prompt_tokens"] = 100_000
     SETTINGS["context"]["max_history_turns"] = 100
 
     msg: str = "what is the weather?"
     base_prompt: str = "you are a helpful assistant."
-    spec_prompts: Dict[str, str] = {}
+    spec_prompts: dict[str, str] = {}
     fuzzy: bool = False
 
     # make history *long* so summarisation compresses it
-    long_history: List[Dict[str, str]] = []
+    long_history: list[dict[str, str]] = []
     for i in range(10):
         role = "user" if i % 2 == 0 else "assistant"
         # repeat each message to ensure substantial length
@@ -92,27 +98,28 @@ def test_summary_injected_when_triggered_by_turns(
 
     # d) summary reduces overall context length (compression effect)
     assert len(context) <= len(pre_ctx), (
-        f"Expected shorter or equal context after summarisation: "
-        f"{len(context)} vs {len(pre_ctx)}"
+        f"Expected shorter or equal context after summarisation: {len(context)} vs {len(pre_ctx)}"
     )
+
 
 # ─────────────── Regression: disabled → no summary ────────────────
 
-def test_no_summary_when_disabled(
-    sample_history: List[Dict[str, str]]
-) -> None:
+
+def test_no_summary_when_disabled(sample_history: list[dict[str, str]]) -> None:
     SETTINGS.setdefault("summarisation", {})
-    SETTINGS["summarisation"].update({
-        "enabled": False,
-        "min_turns": 8,
-        "strategy": "bullet",
-    })
+    SETTINGS["summarisation"].update(
+        {
+            "enabled": False,
+            "min_turns": 8,
+            "strategy": "bullet",
+        }
+    )
     SETTINGS["context"]["max_prompt_tokens"] = 100_000
     SETTINGS["context"]["max_history_turns"] = 100
 
     msg: str = "how does it work?"
     base_prompt: str = "you are a helpful assistant."
-    spec_prompts: Dict[str, str] = {}
+    spec_prompts: dict[str, str] = {}
     fuzzy: bool = False
 
     context, _ = prepare_context(msg, sample_history, base_prompt, spec_prompts, fuzzy)
@@ -124,24 +131,26 @@ def test_no_summary_when_disabled(
     # assistant suffix remains last
     assert context.strip().endswith("Assistant:")
 
+
 # ─────────────── Order & formatting sanity checks ────────────────
 
-def test_summary_order_and_format(
-    sample_history: List[Dict[str, str]]
-) -> None:
+
+def test_summary_order_and_format(sample_history: list[dict[str, str]]) -> None:
     SETTINGS.setdefault("summarisation", {})
-    SETTINGS["summarisation"].update({
-        "enabled": True,
-        "min_turns": 6,
-        "strategy": "bullet",
-        "max_chars": 512,
-    })
+    SETTINGS["summarisation"].update(
+        {
+            "enabled": True,
+            "min_turns": 6,
+            "strategy": "bullet",
+            "max_chars": 512,
+        }
+    )
     SETTINGS["context"]["max_prompt_tokens"] = 100_000
     SETTINGS["context"]["max_history_turns"] = 100
 
     msg: str = "tell me about openai."
     base_prompt: str = "you are a helpful assistant."
-    spec_prompts: Dict[str, str] = {}
+    spec_prompts: dict[str, str] = {}
     fuzzy: bool = False
 
     context, _ = prepare_context(msg, sample_history, base_prompt, spec_prompts, fuzzy)

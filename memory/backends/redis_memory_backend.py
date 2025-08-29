@@ -8,16 +8,13 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing_extensions import override
 from typing import (
     Any,
-    Dict,
-    List,
-    Optional,
     Protocol,
     runtime_checkable,
-    Tuple,
 )
+
+from typing_extensions import override
 
 # Make the runtime import typeless so assignments are fine
 redis: Any = None
@@ -40,9 +37,7 @@ class BaseMemoryBackend:
     def add_turn(self, role: str, content: str, *, cid: str = "default") -> None:
         raise NotImplementedError
 
-    def get_recent(
-        self, *, limit: int = 50, cid: str = "default"
-    ) -> List[Dict[str, str]]:
+    def get_recent(self, *, limit: int = 50, cid: str = "default") -> list[dict[str, str]]:
         raise NotImplementedError
 
     def flush(self, *, cid: str = "default") -> None:
@@ -55,7 +50,7 @@ class _RedisClient(Protocol):
     def ping(self) -> Any: ...
     def lpush(self, name: str, value: str) -> Any: ...
     def ltrim(self, name: str, start: int, end: int) -> Any: ...
-    def lrange(self, name: str, start: int, end: int) -> List[str]: ...
+    def lrange(self, name: str, start: int, end: int) -> list[str]: ...
     def delete(self, name: str) -> Any: ...
 
 
@@ -64,16 +59,14 @@ class InMemoryBackend(BaseMemoryBackend):
     """Volatile list-based store (same semantics as utils.memory.IN_MEMORY)."""
 
     def __init__(self) -> None:
-        self._store: Dict[str, List[Tuple[str, str]]] = {}
+        self._store: dict[str, list[tuple[str, str]]] = {}
 
     @override
     def add_turn(self, role: str, content: str, *, cid: str = "default") -> None:
         self._store.setdefault(cid, []).append((role, content))
 
     @override
-    def get_recent(
-        self, *, limit: int = 50, cid: str = "default"
-    ) -> List[Dict[str, str]]:
+    def get_recent(self, *, limit: int = 50, cid: str = "default") -> list[dict[str, str]]:
         turns = self._store.get(cid, [])[-limit:][::-1]  # newest-first
         return [{"role": r, "content": c} for r, c in turns]
 
@@ -95,19 +88,19 @@ class RedisMemoryBackend(BaseMemoryBackend):
     def __init__(
         self,
         *,
-        redis_url: Optional[str] = None,
+        redis_url: str | None = None,
         host: str = "localhost",
         port: int = 6379,
         db: int = 0,
-        password: Optional[str] = None,
+        password: str | None = None,
         key_prefix: str = "chat:",
         max_turns: int = 10_000,
-        fallback: Optional[BaseMemoryBackend] = None,
+        fallback: BaseMemoryBackend | None = None,
     ) -> None:
         self._key_prefix = key_prefix
         self._max_turns = max_turns
         self._fallback = fallback or InMemoryBackend()
-        self._client: Optional[_RedisClient] = None
+        self._client: _RedisClient | None = None
         self._using_fallback = True  # default until proven connected
 
         # 1) redis-py missing → immediate fallback
@@ -169,9 +162,7 @@ class RedisMemoryBackend(BaseMemoryBackend):
 
     # ─────────────────────────── get_recent ─────────────────────────────
     @override
-    def get_recent(
-        self, *, limit: int = 50, cid: str = "default"
-    ) -> List[Dict[str, str]]:
+    def get_recent(self, *, limit: int = 50, cid: str = "default") -> list[dict[str, str]]:
         """
         Return the most-recent `limit` turns (newest-first).
         Falls back to the RAM store on any Redis error.
@@ -181,7 +172,7 @@ class RedisMemoryBackend(BaseMemoryBackend):
 
         key = self._key(cid)
         try:
-            raw: List[str] = self._client.lrange(key, 0, max(0, limit - 1))
+            raw: list[str] = self._client.lrange(key, 0, max(0, limit - 1))
             return [json.loads(x) for x in raw]
         except Exception as exc:
             LOGGER.error("Redis get_recent failed (%s) – switching to fallback", exc)

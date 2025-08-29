@@ -10,11 +10,10 @@ separate module so future prompt-utility functions stay in one place.
 """
 
 # ───────────────────────────────────────────────────────── Imports ──
-from typing import List
 
 
 # ──────────────────────────────────── Public helpers ──
-def alias_in_message(alias: str, message_tokens: List[str]) -> bool:
+def alias_in_message(alias: str, message_tokens: list[str]) -> bool:
     """
     Return **True** if *all* tokens of `alias` appear *in order* inside
     `message_tokens`.
@@ -37,6 +36,6 @@ def alias_in_message(alias: str, message_tokens: List[str]) -> bool:
     for tok in message_tokens:
         if tok == alias_tokens[idx]:
             idx += 1
-            if idx == len(alias_tokens):      # found all alias tokens
+            if idx == len(alias_tokens):  # found all alias tokens
                 return True
     return False

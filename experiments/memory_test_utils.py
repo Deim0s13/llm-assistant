@@ -13,9 +13,8 @@ Usage
 >>> set_memory_enabled(False)  # disable completely
 """
 
-from config.settings_loader import load_settings
-from utils.memory           import memory, MemoryBackend
-from main                    import SETTINGS
+from main import SETTINGS
+from utils.memory import MemoryBackend, memory
 
 
 def set_memory_enabled(flag: bool, backend: str = "in_memory") -> dict:
@@ -33,9 +32,7 @@ def set_memory_enabled(flag: bool, backend: str = "in_memory") -> dict:
     SETTINGS["memory"]["backend"] = backend if flag else "none"
 
     # swap the active backend on the singleton in real time
-    memory.backend = (
-        MemoryBackend.IN_MEMORY if flag else MemoryBackend.NONE
-    )
+    memory.backend = MemoryBackend.IN_MEMORY if flag else MemoryBackend.NONE
 
     # always begin with an empty store so tests are independent
     memory.clear()

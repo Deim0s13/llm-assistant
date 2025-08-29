@@ -15,17 +15,13 @@ Back-ends
 from __future__ import annotations
 
 import importlib
-import logging
 import json
+import logging
 import os
+from collections.abc import Callable
 from enum import Enum
 from typing import (
     Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
     Protocol,
     runtime_checkable,
 )
@@ -43,9 +39,7 @@ _ENV_KEY = "LLM_MEM_STORE_JSON"
 # ───────────────────────────── Backend factories ────────────────────────────
 def _redis_factory() -> Any | None:
     try:
-        return importlib.import_module(
-            "memory.backends.redis_memory_backend"
-        ).RedisMemoryBackend()
+        return importlib.import_module("memory.backends.redis_memory_backend").RedisMemoryBackend()
     except Exception:
         return None
 
@@ -95,13 +89,11 @@ def _normalise(raw: str) -> str:
 @runtime_checkable
 class _BackendProto(Protocol):  # noqa: F811
     def add_turn(self, role: str, content: str, *, cid: str = "default") -> None: ...
-    def get_recent(
-        self, *, limit: int = 50, cid: str = "default"
-    ) -> List[Dict[str, Any]]: ...
+    def get_recent(self, *, limit: int = 50, cid: str = "default") -> list[dict[str, Any]]: ...
     def flush(self, *, cid: str = "default") -> None: ...
 
 
-def create_memory(req: str | MemoryBackend) -> Tuple[MemoryBackend, Any | None]:
+def create_memory(req: str | MemoryBackend) -> tuple[MemoryBackend, Any | None]:
     """Return (<resolved enum>, <backend instance | None>)."""
     raw = req.value if isinstance(req, MemoryBackend) else str(req)
     name = _normalise(raw)
@@ -141,14 +133,12 @@ class Memory:
     """Unified `.save / .load / .clear` wrapper around the active backend."""
 
     backend: MemoryBackend
-    _instance: Optional["Memory"] = None
-    _store: Dict[str, List[Dict[str, Any]]] = {}  # in-process store
-    _impl: Optional[Any] = None  # real backend instance
+    _instance: Memory | None = None
+    _store: dict[str, list[dict[str, Any]]] = {}  # in-process store
+    _impl: Any | None = None  # real backend instance
 
     # ───────────────────────── ctor / (re)configure ─────────────────────────
-    def __new__(
-        cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY
-    ) -> "Memory":
+    def __new__(cls, *, backend: str | MemoryBackend = MemoryBackend.IN_MEMORY) -> Memory:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.backend = MemoryBackend.NONE
@@ -165,7 +155,7 @@ class Memory:
         return cls._instance
 
     # ─────────────────────────────── load ────────────────────────────────
-    def load(self, session_id: str = "default") -> List[Dict[str, Any]]:
+    def load(self, session_id: str = "default") -> list[dict[str, Any]]:
         # NONE → empty
         if self.backend == MemoryBackend.NONE:
             return []
@@ -181,7 +171,7 @@ class Memory:
         return list(reversed(turns))
 
     # ─────────────────────────────── save ────────────────────────────────
-    def save(self, msg: Dict[str, Any], *, session_id: str = "default") -> None:
+    def save(self, msg: dict[str, Any], *, session_id: str = "default") -> None:
         if self.backend == MemoryBackend.NONE:
             return
         if self.backend == MemoryBackend.IN_MEMORY:

@@ -1,9 +1,10 @@
 # ════════════════════════════════════════════════════════════════════
 #  tests for SQLiteMemoryBackend
 # ════════════════════════════════════════════════════════════════════
-import os, tempfile, stat, pytest
-from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
+import stat
+
 from memory.backends.redis_memory_backend import InMemoryBackend
+from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
 
 
 # ────────────────────────── helpers ──────────────────────────
@@ -28,7 +29,7 @@ def test_trim_oldest():
     rows = mem.get_recent(limit=10)
     assert len(rows) == 3
     assert rows[0]["content"] == "msg5"
-    assert rows[-1]["content"] == "msg3"   # oldest kept
+    assert rows[-1]["content"] == "msg3"  # oldest kept
 
 
 def test_flush():

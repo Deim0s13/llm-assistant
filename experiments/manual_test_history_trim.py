@@ -1,8 +1,9 @@
 # experiments/test_history_trim.py
 
-import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import main
 from config.settings_loader import load_settings
@@ -25,17 +26,13 @@ history = [
     {"role": "user", "content": "Photosynthesis"},
     {"role": "assistant", "content": "Plants use light..."},
     {"role": "user", "content": "What about animals?"},
-    {"role": "assistant", "content": "Ask away!"}
+    {"role": "assistant", "content": "Ask away!"},
 ]
 
 msg = "How do frogs breathe?"
 
 context, source = main.prepare_context(
-    msg,
-    history,
-    base_prompt,
-    specialized_prompts,
-    fuzzy_matching_enabled
+    msg, history, base_prompt, specialized_prompts, fuzzy_matching_enabled
 )
 
 print("\n=== Trimmed History Test ===")

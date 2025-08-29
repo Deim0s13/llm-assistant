@@ -1,8 +1,9 @@
 # experiments/test_history_exact.py
 
-import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import main
 from config.settings_loader import load_settings
@@ -22,17 +23,13 @@ history = [
     {"role": "assistant", "content": "Hello there!"},
     {"role": "user", "content": "Can you help with science?"},
     {"role": "assistant", "content": "Sure, what topic?"},
-    {"role": "user", "content": "Tell me about frogs"}
+    {"role": "user", "content": "Tell me about frogs"},
 ]
 
 msg = "How do frogs breathe?"
 
 context, source = main.prepare_context(
-    msg,
-    history,
-    base_prompt,
-    specialized_prompts,
-    fuzzy_matching_enabled
+    msg, history, base_prompt, specialized_prompts, fuzzy_matching_enabled
 )
 
 print("\n=== Exact History Test ===")

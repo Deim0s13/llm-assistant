@@ -6,13 +6,14 @@ Quick manual smoke-test: memory DISABLED
 • Memory store cleared
 • Context should contain *only* the live turn
 """
+
 from experiments.memory_test_utils import set_memory_enabled
-from utils.memory import memory
 from main import (
-    prepare_context,
     load_base_prompt,
     load_specialized_prompts,
+    prepare_context,
 )
+from utils.memory import memory
 
 # 1) Disable memory and reset singleton state
 set_memory_enabled(False)

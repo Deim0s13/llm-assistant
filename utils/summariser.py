@@ -17,14 +17,14 @@ Features:
 """
 
 from __future__ import annotations
-from typing import List, Dict
 
 __all__ = ["summarise_context"]
 
 # ─────────────────────────────── Summariser ──────────────────────────────
 
+
 def summarise_context(
-    history: List[Dict[str, str]],
+    history: list[dict[str, str]],
     *,
     style: str = "brief",
     max_chars: int = 512,
@@ -70,7 +70,7 @@ def summarise_context(
     # Take the most recent user turns (no MIN_TURNS gate here)
     recent_user = user_turns[-MAX_BULLETS:]
 
-    bullets: List[str] = []
+    bullets: list[str] = []
     for line in recent_user:
         bullet = line.strip().replace("\n", " ")
         if len(bullet) > BULLET_CHAR_LIMIT:
@@ -81,6 +81,6 @@ def summarise_context(
 
     # Enforce total max_chars for the whole block
     if len(summary) > max_chars:
-        summary = summary[: max_chars].rstrip() + "…"
+        summary = summary[:max_chars].rstrip() + "…"
 
     return summary

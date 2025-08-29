@@ -10,7 +10,8 @@ import os
 import sqlite3
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, final
+from typing import final
+
 from typing_extensions import override
 
 from memory.backends.redis_memory_backend import BaseMemoryBackend, InMemoryBackend
@@ -51,7 +52,7 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
         max_rows_per_session: int = 10_000,
         # tests may pass `max_rows=`; accept it as an alias
         max_rows: int | None = None,
-        fallback: Optional[BaseMemoryBackend] = None,
+        fallback: BaseMemoryBackend | None = None,
         persist: bool = True,
     ) -> None:
         # ─────────────────────────────────────────── Fields ──
@@ -121,9 +122,7 @@ class SQLiteMemoryBackend(BaseMemoryBackend):
 
     # ───────────────────────────────────────── get_recent ──
     @override
-    def get_recent(
-        self, *, limit: int = 50, cid: str = "default"
-    ) -> List[Dict[str, str]]:
+    def get_recent(self, *, limit: int = 50, cid: str = "default") -> list[dict[str, str]]:
         """
         Return the most-recent `limit` turns (newest-first).
         """

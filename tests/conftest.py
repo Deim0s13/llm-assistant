@@ -1,9 +1,11 @@
 import contextlib
-import sqlite3
 import logging
-from typing import Generator, Any
+import sqlite3
+from collections.abc import Generator
+from typing import Any
 
 import pytest
+
 try:
     import fakeredis
 except ImportError:  # requirements-dev.txt already lists it, but guard anyway
@@ -13,17 +15,21 @@ from utils.memory import Memory, MemoryBackend
 
 logging.basicConfig(level=logging.DEBUG, format="[Memory-tests] %(message)s")
 
+
 # ── helper: spin up fake Redis (no external server) ─────────────────────────
 @contextlib.contextmanager
 def fake_redis_server() -> Generator[Any, None, None]:
-    if not fakeredis:                       # should never happen in CI
+    if not fakeredis:  # should never happen in CI
         pytest.skip("fakeredis missing")
     server = fakeredis.FakeServer()
     yield fakeredis.FakeRedis(server=server)
 
+
 # ── parametrised fixture ────────────────────────────────────────────────────
 @pytest.fixture(params=["in_memory", "redis", "sqlite"])
-def mem(request: pytest.FixtureRequest, tmp_path: Any, monkeypatch: Any) -> Generator[Memory, None, None]:
+def mem(
+    request: pytest.FixtureRequest, tmp_path: Any, monkeypatch: Any
+) -> Generator[Memory, None, None]:
     backend = request.param
     logging.debug(f"backend = {backend}")
 
@@ -40,8 +46,10 @@ def mem(request: pytest.FixtureRequest, tmp_path: Any, monkeypatch: Any) -> Gene
             monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
             # monkey-patch redis.Redis to return our fake connection
             import redis
+
             def fake_redis_factory(*_args: Any, **_kwargs: Any) -> Any:
                 return r
+
             monkeypatch.setattr(redis, "from_url", fake_redis_factory)
             m = Memory(backend=MemoryBackend.REDIS)
             m.clear()

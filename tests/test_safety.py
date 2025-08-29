@@ -8,10 +8,13 @@ Covers:
 • Whitelist vs. strict override behaviour
 • Multi-word extra phrase detection
 """
+
 from __future__ import annotations
 
-import os, sys
+import os
+import sys
 from copy import deepcopy
+
 import pytest
 
 # ─────────────────────────────  ensure repo root on PYTHONPATH ─────────────────────────────
@@ -20,12 +23,13 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from utils import safety_filters as sf
 from config.settings_loader import load_settings
+from utils import safety_filters as sf
 
 # ───────────────────────────── pristine baseline  ─────────────────────────────
 
 BASE_SETTINGS = load_settings()
+
 
 def _cfg(level: str = "moderate", **kv) -> dict:
     """Return a cloned settings dict with safety section tweaked."""
