@@ -1,10 +1,11 @@
 # experiments/test_memory_toggle.py
-import re, pytest, importlib, copy
+import pytest
+import importlib
+import copy
 from pathlib import Path
 from typing import Generator
 
 from experiments.memory_test_utils import set_memory_enabled
-from utils.memory import memory
 import main as _main
 
 # ──────────────────────────────────────────────────────────────

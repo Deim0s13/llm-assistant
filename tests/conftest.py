@@ -1,4 +1,7 @@
-import os, contextlib, sqlite3, tempfile, pathlib, logging, pytest
+import contextlib
+import sqlite3
+import logging
+import pytest
 from utils.memory import Memory, MemoryBackend
 
 logging.basicConfig(level=logging.DEBUG, format="[Memory-tests] %(message)s")

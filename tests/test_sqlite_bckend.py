@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
 #  tests for SQLiteMemoryBackend
 # ════════════════════════════════════════════════════════════════════
-import os, tempfile, stat, pytest
+import stat
 from memory.backends.sqlite_memory_backend import SQLiteMemoryBackend
 from memory.backends.redis_memory_backend import InMemoryBackend
 
