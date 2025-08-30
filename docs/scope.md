@@ -29,8 +29,12 @@ This document couples the **learning journey** with the **delivery roadmap** so 
 | **0.4.3**         | In-memory backend + summarisation scaffold              | ✅ Done        |
 | **0.4.4**         | **Persistent memory (Redis/SQLite)**                    | ✅ Done        |
 | **0.4.5**         | **Summarisation MVP + Technical Spec + Planning**       | 🔄 In Progress |
-| **0.5.0**         | Automated Test Suite & CI Enablement (Podman/Actions)   | 🔜 Planned     |
-| **0.5.1**         | Containerisation & E2E Test Matrix                      | 🔜 Planned     |
+| **0.5.0**         | Containerisation & full CI matrix                       | 🔜 Planned     |
+| **0.5.1**         | Model upgrade (FLAN → Mistral 7B) + config toggle      | 🔜 Planned     |
+| **0.5.2**         | Prompt/response quality improvements & structured outputs | 🔜 Planned     |
+| **0.5.3**         | CI enhancements: coverage thresholds, artefact uploads  | 🔜 Planned     |
+| **0.5.4**         | Container publishing (Podman build → GHCR/DockerHub)    | 🔜 Planned     |
+| **0.5.5**         | Consolidated evaluation harness & model comparison     | 🔜 Planned     |
 | **0.6.x**         | RAG prototype (file-based Q&A)                          | 🔜 Planned     |
 | **0.7.x**         | Fine-tuning foundation                                  | 🔜 Planned     |
 
@@ -86,19 +90,45 @@ This document couples the **learning journey** with the **delivery roadmap** so 
 
 ## 5 Upcoming Roadmap
 
-1. **v0.5.0 — Automated Test Suite & CI Enablement**
-   * Full PyTest coverage for critical modules, typing checks.
-   * GitHub Action: lint, test, coverage, branch protection.
-   * Pre-commit hooks (optional).
+1. **v0.5.0 — Containerisation & Full CI Matrix**
+   * Containerisation with Podman/Docker
+   * Full CI matrix and automated testing
+   * Deployment pipeline setup
 
-2. **v0.5.1 — Containerisation & E2E Test Matrix**
-   * Podman image, multi-arch builds, end-to-end test pipeline.
+2. **v0.5.1 — Model Upgrade & Configuration**
+   * Model upgrade from FLAN-T5 to Mistral 7B
+   * Enhanced configuration management
+   * Model switching capabilities
 
-3. **v0.6.x — RAG Prototype**
-   * File embedding + retrieval "Ask my PDF" flow.
+3. **v0.5.2 — Prompt & Response Quality**
+   * Base prompt improvements
+   * Structured output capabilities
+   * Response quality enhancements
 
-4. **v0.7.x — Fine-tuning Playground**
-   * LoRA/QLoRA scripts, W&B integration.
+4. **v0.5.3 — CI Enhancements**
+   * Coverage thresholds implementation
+   * Artefact uploads and management
+   * Advanced CI pipeline features
+
+5. **v0.5.4 — Container Publishing**
+   * Podman build automation
+   * GitHub Container Registry integration
+   * Docker Hub publishing
+
+6. **v0.5.5 — Evaluation & Model Comparison**
+   * Consolidated evaluation harness
+   * Prompt quality assessment
+   * Model comparison framework
+
+7. **v0.6.x — RAG Prototype**
+   * File embedding + retrieval "Ask my PDF" flow
+   * Vector database integration
+   * Document Q&A capabilities
+
+8. **v0.7.x — Fine-tuning Foundation**
+   * LoRA/QLoRA scripts
+   * Weights & Biases integration
+   * Fine-tuning pipeline setup
 
 ---
 

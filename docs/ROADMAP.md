@@ -18,14 +18,14 @@ GitHub Milestone and reflected on the project board.
 
 **Core Goals**
 
-| Status | Item |
-|----|------|
-| ✅ | Load & run pre-trained models (FLAN-T5, Mistral-7B) |
-| ✅ | Gradio chat UI with multi-turn history |
-| ✅ | Externalise prompts, specialised prompt matching |
-| ✅ | Add safety guard-rails (strict / moderate / relaxed) |
-| 🟡 | **Stretch** – add RAG file-based Q&A |
-| 🟡 | **Stretch** – containerise with Podman / Docker |
+| Status | Item                                                 |
+| ------ | ---------------------------------------------------- |
+| ✅      | Load & run pre-trained models (FLAN-T5, Mistral-7B)  |
+| ✅      | Gradio chat UI with multi-turn history               |
+| ✅      | Externalise prompts, specialised prompt matching     |
+| ✅      | Add safety guard-rails (strict / moderate / relaxed) |
+| 🟡     | **Stretch** – add RAG file-based Q\&A                |
+| 🟡     | **Stretch** – containerise with Podman / Docker      |
 
 ---
 
@@ -51,20 +51,25 @@ compare against the base model.
 
 ## Delivery Milestones by Version
 
-| Version | Focus Area (Epic)                                  | Status |
-|---------|----------------------------------------------------|--------|
-| **v0.1.0** | Minimal static chatbot                           | ✅ Done |
-| **v0.2.0 – 0.2.5** | Multi-turn memory, UI controls              | ✅ Done |
-| **v0.3.0** | Experiments & diagnostics panel                  | ✅ Done |
-| **v0.4.0** | Alias-driven prompt matching                     | ✅ Done |
-| **v0.4.1** | Safety guardrails & post-filtering               | ✅ Done |
-| **v0.4.2** | Context trimming & debug logging                 | ✅ Done |
-| **v0.4.3** | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done |
-| **v0.4.4** | **Persistent memory, Summarise MVP, CI test pipeline** | 🔄 In Progress |
-| **v0.4.5** | Evaluation harness & extended guard-rails        | 🔜 Planned |
-| **v0.5.0** | Containerisation & full CI matrix                | 🔜 Planned |
-| **v0.6.x** | RAG prototype (file-based Q&A)                   | 🔜 Planned |
-| **v0.7.x** | Fine-tuning foundation setup                     | 🔜 Planned |
+| Version            | Focus Area (Epic)                                                           | Status     |
+| ------------------ | --------------------------------------------------------------------------- | ---------- |
+| **v0.1.0**         | Minimal static chatbot                                                      | ✅ Done     |
+| **v0.2.0 – 0.2.5** | Multi-turn memory, UI controls                                              | ✅ Done     |
+| **v0.3.0**         | Experiments & diagnostics panel                                             | ✅ Done     |
+| **v0.4.0**         | Alias-driven prompt matching                                                | ✅ Done     |
+| **v0.4.1**         | Safety guardrails & post-filtering                                          | ✅ Done     |
+| **v0.4.2**         | Context trimming & debug logging                                            | ✅ Done     |
+| **v0.4.3**         | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done     |
+| **v0.4.4**         | **Persistent memory, Summarise MVP, CI test pipeline**                      | ✅ Done     |
+| **v0.4.5**         | Evaluation harness & extended guard-rails                                   | ✅ Done     |
+| **v0.5.0**         | Containerisation & full CI matrix                                           | 🔄 In Progress |
+| **v0.5.1**         | Model upgrade (e.g. FLAN → Mistral 7B) + config toggle                      | 🔜 Planned |
+| **v0.5.2**         | Prompt/response quality improvements (base prompt, structured outputs)      | 🔜 Planned |
+| **v0.5.3**         | CI enhancements: coverage thresholds, artefact uploads                      | 🔜 Planned |
+| **v0.5.4**         | Container publishing (Podman build → GHCR/DockerHub)                        | 🔜 Planned |
+| **v0.5.5**         | Consolidated evaluation harness (prompt quality + model comparison)         | 🔜 Planned |
+| **v0.6.x**         | RAG prototype (file-based Q\&A)                                             | 🔜 Planned |
+| **v0.7.x**         | Fine-tuning foundation setup                                                | 🔜 Planned |
 
 *(milestone titles match what will be created in GitHub → feel free to rename)*
 

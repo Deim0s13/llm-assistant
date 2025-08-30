@@ -18,8 +18,12 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 | **v0.4.4** | ✅ *Done* | **Persistent memory (Redis/SQLite)**, settings auto-fallback, expanded tests |
 | **v0.4.5** | ✅ *Done* | **Summarisation MVP, Technical Spec, Planning docs**       |
 
-| **v0.5.0** | 🔼 *Planned* | Automated Test Suite & CI Enablement (Podman/Actions)         |
-| **v0.5.1** | 🔼 *Planned* | Containerisation & E2E Test Matrix                           |
+| **v0.5.0** | 🔼 *Planned* | Containerisation & full CI matrix                           |
+| **v0.5.1** | 🔼 *Planned* | Model upgrade (FLAN → Mistral 7B) + config toggle          |
+| **v0.5.2** | 🔼 *Planned* | Prompt/response quality improvements & structured outputs   |
+| **v0.5.3** | 🔼 *Planned* | CI enhancements: coverage thresholds, artefact uploads      |
+| **v0.5.4** | 🔼 *Planned* | Container publishing (Podman build → GHCR/DockerHub)        |
+| **v0.5.5** | 🔼 *Planned* | Consolidated evaluation harness & model comparison          |
 | **v0.6.x** | 🔼 *Planned* | RAG prototype (file-based Q&A)                                |
 | **v0.7.x** | 🔼 *Planned* | Fine-tuning foundation                                        |
 
@@ -123,23 +127,53 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 
 ## Upcoming Roadmap
 
-### v0.5.0 – Automated Test Suite & CI Enablement
+### v0.5.0 – Containerisation & Full CI Matrix
 
-* Full PyTest coverage for critical modules, typing checks
-* GitHub Action: lint, test, coverage, branch protection
-* Optional pre-commit hooks
+* Containerisation with Podman/Docker
+* Full CI matrix and automated testing
+* Deployment pipeline setup
 
-### v0.5.1 – Containerisation & E2E Test Matrix
+### v0.5.1 – Model Upgrade & Configuration
 
-* Podman image, multi-arch builds, end-to-end test matrix
+* Model upgrade from FLAN-T5 to Mistral 7B
+* Enhanced configuration management
+* Model switching capabilities
+
+### v0.5.2 – Prompt & Response Quality
+
+* Base prompt improvements
+* Structured output capabilities
+* Response quality enhancements
+
+### v0.5.3 – CI Enhancements
+
+* Coverage thresholds implementation
+* Artefact uploads and management
+* Advanced CI pipeline features
+
+### v0.5.4 – Container Publishing
+
+* Podman build automation
+* GitHub Container Registry integration
+* Docker Hub publishing
+
+### v0.5.5 – Evaluation & Model Comparison
+
+* Consolidated evaluation harness
+* Prompt quality assessment
+* Model comparison framework
 
 ### v0.6.x – RAG Prototype
 
 * File embedding + retrieval ("Ask my PDF" flow)
+* Vector database integration
+* Document Q&A capabilities
 
-### v0.7.x – Fine-tuning Playground
+### v0.7.x – Fine-tuning Foundation
 
-* LoRA/QLoRA scripts, W&B integration
+* LoRA/QLoRA scripts
+* Weights & Biases integration
+* Fine-tuning pipeline setup
 
 ---
 
