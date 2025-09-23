@@ -10,11 +10,21 @@ services:
     environment:
       MEMORY__ENABLED: "true"
       MEMORY__BACKEND: "redis"
-      MEMORY__REDIS_URL: "redis://redis:6379/0"
+      MEMORY__REDIS__HOST: "redis"
+      MEMORY__REDIS__PORT: "6379"
+      MEMORY__REDIS__DB: "0"
+      # MEMORY__REDIS__PASSWORD: ""    # (optional) set if you want auth
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    command: ["python", "main.py"]
 
   redis:
     image: docker.io/library/redis:7
     # ephemeral (no persistence); you can enable volumes later if needed
     command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

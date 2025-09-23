@@ -186,6 +186,19 @@ Supported keys & examples → **docs/dev\_checklist.md**
 
 ---
 
+## Running in Containers
+
+The assistant can also be built and run inside a container for consistency across envrioments.
+
+```bash
+podman build -t llm-assistant:dev .
+podman run --rm -p 7860:7860 llm-assistant:dev
+```
+
+See [Container Setup](./docs/CONTAINER.md) for complete instructions, including environment variables, REDIS integration, and multip-service setup.
+
+---
+
 ### Platform Setup
 
 | OS                   | Key steps                                                                                                               |
@@ -231,13 +244,14 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for milestone‑level detail.
 
 ## Useful Links
 
-* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
-* 📑 [Scope](./docs/scope.md)
-* 🪵 [Release Notes](./docs/release_notes.md)
-* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
-* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
-* 🗄️ [Memory Flow](./docs/memory_flow.md)
+* Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
+* [Scope](./docs/scope.md)
+* [Release Notes](./docs/release_notes.md)
+* [Experiments Tracker](./docs/experiments_tracker.md)
+* [Summarisation Planning](./docs/summarisation_planning.md)
+* [Memory Flow](./docs/memory_flow.md)
 * [Summarisation Trigger Logic Spec](./docs/Technical_Specification_Summarisation_Trigger_Logic.md)
+* [Container Setup](./docs/CONTAINER.md)
 
 ---
 
