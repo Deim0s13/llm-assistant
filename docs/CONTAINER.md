@@ -127,6 +127,37 @@ podman compose down
 
 ---
 
+## 🔄 Development with Volumes
+
+If you want to live-edit code on your host and run it inside the container, mount the repo into the container:
+
+```bash
+podman run --rm -p 7860:7860 \
+  -v $(pwd):/app \
+  llm-assistant:dev
+```
+
+This way, any code changes you make locally are reflected immediately in the container runtime.
+*(Note: this does not auto-reload the app; restart the container to pick up changes.)*
+
+---
+
+## 🍏 Apple Silicon Notes (M1/M2/M3)
+
+The base image (`python:3.13-slim`) is multi-arch and supports both `amd64` (Intel/AMD) and `arm64` (Apple Silicon).
+Podman/Docker will automatically pull the correct variant for your machine.
+
+* If a dependency isn’t available on `arm64` (rare, but e.g. `bitsandbytes`), you can force x86 emulation:
+
+```bash
+podman build --platform linux/amd64 -t llm-assistant:dev -f Containerfile .
+podman run --rm -p 7860:7860 --platform linux/amd64 llm-assistant:dev
+```
+
+Be aware: emulation is slower and more resource-intensive.
+
+---
+
 ## Troubleshooting
 
 * **Blank page in Safari**: Some Safari versions don’t render Gradio correctly. Try a Chromium-based browser (Chrome/Brave) or Firefox.
