@@ -2,3 +2,5 @@
 pytest>=8
 fakeredis>=2.20
 mypy
+ruff>=0.1.0
+pyright>=1.1.0

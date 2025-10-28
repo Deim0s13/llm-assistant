@@ -171,6 +171,19 @@ Open that URL in your browser.
 
 ---
 
+## Running with Containers
+
+As an alternative to running directly in your Python environment, you can containerise the assistant using Podman (or Docker):
+
+```bash
+podman build -t llm-assistant:dev .
+podman run --rm -p 7860:7860 llm-assistant:dev
+```
+
+For advanced container usage (e.g. Redis backend, Docker Compose), see the detailed guide in [Container Setup](./docs/CONTAINER.md)
+
+---
+
 ## Running tests
 
 All automated tests live under `tests/`.
@@ -407,12 +420,55 @@ The codebase has undergone significant linting improvements as part of ongoing m
 
 ---
 
+## Continuous Integration (CI)
+
+This project uses GitHub Actions for automated testing across multiple platforms.
+
+### CI Pipeline
+
+The CI workflow runs on:
+- **Operating Systems:** Ubuntu (Linux), macOS, Windows
+- **Python Versions:** 3.10, 3.11
+- **Checks:** Linting (Ruff), Type checking (mypy, Pyright), Tests (pytest)
+- **Container Testing:** Docker build validation on Linux
+
+**Current Status:** 
+- Tests pass on all platforms
+- Linting checks are non-blocking during cleanup phase
+- Container builds successfully
+
+See **[CI.md](./CI.md)** for complete CI documentation.
+
+### Running CI Checks Locally
+
+Before pushing, you can run the same checks locally:
+
+```bash
+# Linting
+ruff check .
+ruff format --check .
+
+# Type checking  
+mypy .
+pyright
+
+# Tests
+pytest -v
+
+# Container build
+docker build -t llm-assistant:local -f Containerfile .
+```
+
+---
+
 ## Documentation
 
 ### Core Documentation
 - **[SETUP.md](./SETUP.md)** - This file - setup and configuration guide
+- **[CI.md](./CI.md)** - Continuous Integration documentation
 - **[scope.md](./scope.md)** - Project scope and boundaries
 - **[release_notes.md](./release_notes.md)** - Version history and changes
+- **[Container Setup](./CONTAINER.md)** - Detailed overview of container setup
 
 ### Current Status & Changes
 - **[CURRENT_STATUS.md](./CURRENT_STATUS.md)** - Quick snapshot of current project state
