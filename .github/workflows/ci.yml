@@ -66,10 +66,7 @@ jobs:
         continue-on-error: true  # TODO: Set to false once type checking is clean
       
       - name: Run tests with pytest
-        run: |
-          # Skip known failing tests in CI until they're fixed
-          pytest -v --tb=short --color=yes \
-            --ignore=tests/test_prepare_context_summary.py
+        run: pytest -v --tb=short --color=yes --ignore=tests/test_prepare_context_summary.py
         env:
           PYTHONPATH: ${{ github.workspace }}
       
