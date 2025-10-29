@@ -188,14 +188,32 @@ Supported keys & examples → **docs/dev\_checklist.md**
 
 ## Running in Containers
 
-The assistant can also be built and run inside a container for consistency across envrioments.
+The assistant can run in containers for consistent deployment across environments.
+
+### Using Published Images (Recommended)
+
+Pre-built images are available from GitHub Container Registry:
+
+```bash
+# Pull and run the latest version
+docker pull ghcr.io/deim0s13/llm-assistant:latest
+docker run --rm -p 7860:7860 ghcr.io/deim0s13/llm-assistant:latest
+
+# Or with Podman
+podman pull ghcr.io/deim0s13/llm-assistant:latest
+podman run --rm -p 7860:7860 ghcr.io/deim0s13/llm-assistant:latest
+```
+
+### Building Locally
+
+For development or customization:
 
 ```bash
 podman build -t llm-assistant:dev .
 podman run --rm -p 7860:7860 llm-assistant:dev
 ```
 
-See [Container Setup](./docs/CONTAINER.md) for complete instructions, including environment variables, REDIS integration, and multip-service setup.
+See [Container Setup](./docs/CONTAINER.md) for complete instructions, including environment variables, Redis integration, and multi-service setup.
 
 ---
 

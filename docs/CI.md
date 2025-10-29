@@ -92,7 +92,47 @@ Validates that the application builds and runs correctly in a containerized envi
 
 ---
 
-### 3. CI Success (Summary Job)
+### 3. Publish to GHCR (Main & Tags Only)
+
+Publishes container images to GitHub Container Registry when changes are merged to main or version tags are created.
+
+**Triggers:**
+- Push to `main` branch
+- Push of version tags (e.g., `v0.5.0`, `v1.0.0`)
+
+**Platform:** `ubuntu-latest` only
+
+#### Steps
+
+1. **Checkout code** - Clone the repository
+2. **Set up Docker Buildx** - Enable multi-platform builds
+3. **Log in to GHCR** - Authenticate using `GITHUB_TOKEN`
+4. **Extract metadata** - Generate tags and labels from git metadata
+5. **Build and push** - Build for multiple architectures and push to GHCR
+6. **Output summary** - Display published image information
+
+#### Multi-Architecture Support
+
+Images are built for:
+- `linux/amd64` (Intel/AMD)
+- `linux/arm64` (Apple Silicon, ARM servers)
+
+#### Tagging Strategy
+
+| Git Event | Tags Generated | Example |
+|-----------|----------------|---------|
+| Push to main | `latest`, `main-<sha>` | `ghcr.io/deim0s13/llm-assistant:latest` |
+| Tag `v1.2.3` | `1.2.3`, `1.2`, `1` | `ghcr.io/deim0s13/llm-assistant:1.2.3` |
+
+#### Permissions
+
+The job requires:
+- `contents: read` - Read repository contents
+- `packages: write` - Push to GitHub Container Registry
+
+---
+
+### 4. CI Success (Summary Job)
 
 A required status check that aggregates results from all other jobs.
 
