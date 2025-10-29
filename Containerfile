@@ -13,7 +13,10 @@ COPY requirements.txt requirements.txt
 # If you have dev/test deps:
 # COPY requirements-dev.txt requirements-dev.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Install PyTorch CPU-only version to save ~4GB of space
+# Then install other dependencies
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir transformers gradio python-dotenv
 # For dev images (optional):
 # RUN pip install --no-cache-dir -r requirements-dev.txt
 
