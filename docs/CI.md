@@ -104,6 +104,12 @@ docker run --rm llm-assistant:ci-test pytest -v \
 - ✅ Validates PYTHONPATH and imports in container
 - ✅ Ensures test suite works with containerized runtime
 
+**Tests Skipped in Container:**
+- `test_prepare_context_summary.py` - Test isolation issues
+- `test_sqlite_bckend.py::test_fallback_on_unwritable` - Permission handling differs in containers
+
+These tests still run in host-based CI jobs on all platforms.
+
 #### Artifacts
 
 **Test Results** (JUnit XML format):

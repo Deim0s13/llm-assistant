@@ -140,6 +140,7 @@ jobs:
             sh -c "pip install --no-cache-dir pytest-cov fakeredis && \
                    pytest -v --tb=short \
                      --ignore=tests/test_prepare_context_summary.py \
+                     --deselect=tests/test_sqlite_bckend.py::test_fallback_on_unwritable \
                      --junitxml=/app/test-results/junit.xml \
                      --cov=. \
                      --cov-report=xml:/app/test-results/coverage.xml \
