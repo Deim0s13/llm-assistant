@@ -155,7 +155,7 @@ Images are built for:
 
 | Git Event | Tags Generated | Example |
 |-----------|----------------|---------|
-| Push to main | `latest`, `main-<sha>` | `ghcr.io/deim0s13/llm-assistant:latest` |
+| Push to main | `latest`, `sha-<short-sha>` | `ghcr.io/deim0s13/llm-assistant:latest` |
 | Tag `v1.2.3` | `1.2.3`, `1.2`, `1` | `ghcr.io/deim0s13/llm-assistant:1.2.3` |
 
 #### Permissions

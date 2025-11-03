@@ -137,7 +137,7 @@ jobs:
             -v ${{ github.workspace }}/test-results:/app/test-results \
             -e PYTHONPATH=/app \
             llm-assistant:ci-test \
-            sh -c "pip install pytest-cov && \
+            sh -c "pip install --no-cache-dir pytest-cov fakeredis && \
                    pytest -v --tb=short \
                      --ignore=tests/test_prepare_context_summary.py \
                      --junitxml=/app/test-results/junit.xml \
@@ -249,7 +249,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             # Use git sha as tag for traceability
-            type=sha,prefix={{branch}}-,format=short
+            type=sha,prefix=sha-,format=short
       
       - name: Build and push container image
         uses: docker/build-push-action@v5
