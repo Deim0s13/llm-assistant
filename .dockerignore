@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+
+# Node/other (just in case)
+node_modules/
+
+# VCS & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Data / cache / artifacts
+data/
+cache/
+debug.log
+*.db
+*.sqlite

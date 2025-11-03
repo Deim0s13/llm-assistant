@@ -13,7 +13,6 @@ Usage
 >>> set_memory_enabled(False)  # disable completely
 """
 
-from config.settings_loader import load_settings
 from utils.memory           import memory, MemoryBackend
 from main                    import SETTINGS
 

@@ -1,5 +1,6 @@
 # tests/test_migration_script.py
-import subprocess, sqlite3, tempfile, json
+import subprocess
+import sqlite3
 from utils.memory import Memory, MemoryBackend
 
 def test_migration_default_session(tmp_path):

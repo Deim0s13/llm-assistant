@@ -1,4 +1,5 @@
-import sqlite3, pathlib
+import sqlite3
+import pathlib
 
 db_path = pathlib.Path("data/memory.sqlite")
 with sqlite3.connect(db_path) as db:

@@ -3,8 +3,6 @@ Tests for MEMORY_BACKEND="persistent" resolution chain:
 Redis  → SQLite → In-memory
 """
 
-import importlib
-import types
 from utils.memory import Memory, MemoryBackend
 
 # ───────────────────────── helpers ─────────────────────────

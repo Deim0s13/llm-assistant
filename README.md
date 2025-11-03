@@ -186,6 +186,37 @@ Supported keys & examples → **docs/dev\_checklist.md**
 
 ---
 
+## Running in Containers
+
+The assistant can run in containers for consistent deployment across environments.
+
+### Using Published Images (Recommended)
+
+Pre-built images are available from GitHub Container Registry:
+
+```bash
+# Pull and run the latest version
+docker pull ghcr.io/deim0s13/llm-assistant:latest
+docker run --rm -p 7860:7860 ghcr.io/deim0s13/llm-assistant:latest
+
+# Or with Podman
+podman pull ghcr.io/deim0s13/llm-assistant:latest
+podman run --rm -p 7860:7860 ghcr.io/deim0s13/llm-assistant:latest
+```
+
+### Building Locally
+
+For development or customization:
+
+```bash
+podman build -t llm-assistant:dev .
+podman run --rm -p 7860:7860 llm-assistant:dev
+```
+
+See [Container Setup](./docs/CONTAINER.md) for complete instructions, including environment variables, Redis integration, and multi-service setup.
+
+---
+
 ### Platform Setup
 
 | OS                   | Key steps                                                                                                               |
@@ -215,7 +246,7 @@ mypy .                                 # static-type pass (strict on src)
 source scripts/activate_tests.sh      # sets PYTHONPATH + runs tests
 ```
 
-CI (GitHub Actions) kicks off in **v0.4.4** (Ruff + PyTest on every PR).
+CI (GitHub Actions) runs on every push/PR across **Linux, macOS, and Windows** with **Python 3.10 & 3.11**. See [CI Documentation](./docs/CI.md) for details.
 
 ---
 
@@ -231,12 +262,14 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for milestone‑level detail.
 
 ## Useful Links
 
-* 🗂 Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
-* 📑 [Scope](./docs/scope.md)
-* 🪵 [Release Notes](./docs/release_notes.md)
-* 🔬 [Experiments Tracker](./docs/experiments_tracker.md)
-* 📝 [Summarisation Planning](./docs/summarisation_planning.md)
-* 🗄️ [Memory Flow](./docs/memory_flow.md)
+* Board – [https://github.com/users/Deim0s13/projects/4/views/1](https://github.com/users/Deim0s13/projects/4/views/1)
+* [Scope](./docs/scope.md)
+* [Release Notes](./docs/release_notes.md)
+* [CI Documentation](./docs/CI.md)
+* [Container Setup](./docs/CONTAINER.md)
+* [Experiments Tracker](./docs/experiments_tracker.md)
+* [Summarisation Planning](./docs/summarisation_planning.md)
+* [Memory Flow](./docs/memory_flow.md)
 * [Summarisation Trigger Logic Spec](./docs/Technical_Specification_Summarisation_Trigger_Logic.md)
 
 ---

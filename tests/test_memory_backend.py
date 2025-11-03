@@ -1,8 +1,9 @@
 # tests/test_memory_backends.py
 import importlib
-import pytest, fakeredis
+import pytest
+import fakeredis
 
-from utils.memory import Memory, MemoryBackend
+from utils.memory import Memory
 
 # ───────────────────────── helpers ─────────────────────────
 
