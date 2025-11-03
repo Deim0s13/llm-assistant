@@ -62,7 +62,7 @@ compare against the base model.
 | **v0.4.3**         | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done     |
 | **v0.4.4**         | **Persistent memory, Summarise MVP, CI test pipeline**                      | ✅ Done     |
 | **v0.4.5**         | Evaluation harness & extended guard-rails                                   | ✅ Done     |
-| **v0.5.0**         | Containerisation & full CI matrix                                           | 🔄 In Progress |
+| **v0.5.0**         | Containerisation & full CI matrix                                           | 🔄 In Progress (CI matrix ✅) |
 | **v0.5.1**         | Model upgrade (e.g. FLAN → Mistral 7B) + config toggle                      | 🔜 Planned |
 | **v0.5.2**         | Prompt/response quality improvements (base prompt, structured outputs)      | 🔜 Planned |
 | **v0.5.3**         | CI enhancements: coverage thresholds, artefact uploads                      | 🔜 Planned |

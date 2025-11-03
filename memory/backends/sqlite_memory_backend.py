@@ -8,9 +8,16 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, final, override
+from typing import Dict, List, Optional, final
+
+# override was added in Python 3.12, use typing_extensions for older versions
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 from memory.backends.redis_memory_backend import BaseMemoryBackend, InMemoryBackend
 

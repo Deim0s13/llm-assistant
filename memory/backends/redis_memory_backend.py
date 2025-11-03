@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 from typing import (
     Any,
     Dict,
@@ -16,9 +17,14 @@ from typing import (
     cast,
     Protocol,
     runtime_checkable,
-    override,
     Tuple,
 )
+
+# override was added in Python 3.12, use typing_extensions for older versions
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
 
 # Make the runtime import typeless so assignments are fine
 redis: Any = None

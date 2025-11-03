@@ -30,5 +30,37 @@ venv/
 experiments/*.log
 debug.log
 
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Python distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Documentation builds
+docs/_build/
+
+# Jupyter Notebook checkpoints
+*.ipynb_checkpoints
+
+# Temporary files
+*.tmp
+*.temp
+
 # User-specific config (customize as needed)
 config/settings.json
