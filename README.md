@@ -18,10 +18,10 @@ A hands‑on project for **learning** how to structure, prompt, extend, *and eve
 
 | Track             | Version      | Notes                                                                                                       |
 | ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| **Latest stable** | **`v0.4.4`** | **Redis-backed persistent memory**, typing clean-up, unit-test parity                                       |
-| **In progress**   | **`v0.4.5`** | **Summarisation**                                         |
-| **Planned next**  | **`v0.5.0`** | Containerisation & full CI matrix                         |
-| **Future**        | **`v0.5.1-5.5`** | Model upgrades, CI enhancements, evaluation harness    |
+| **Latest stable** | **`v0.4.5`** | **Summarisation MVP**, technical specifications, planning docs                                              |
+| **In progress**   | **`v0.5.1`** | **Multi-environment CI** (Linux/macOS/Windows), **GHCR publishing**, **in-container testing**               |
+| **Planned next**  | **`v0.5.2`** | Model upgrade (FLAN → Mistral 7B) + config toggle                                                          |
+| **Future**        | **`v0.5.3-5.5`** | Prompt quality improvements, evaluation harness, RAG prototype                                          |
 
 *See the full history → **[Release Notes](./docs/release_notes.md)**.*
 *See detailed changes → **[Changes Summary](./docs/CHANGES_SUMMARY.md)**.*
@@ -277,9 +277,9 @@ See **[`ROADMAP.md`](./docs/roadmap.md)** for milestone‑level detail.
 ## Future Vision ✨
 
 * Vector‑DB (FAISS / Milvus) for semantic memory
-* Automated regression tests & CI matrix
 * RAG pipelines for knowledge‑base answers
-* Containerised deployment (Podman / OpenShift)
+* Fine-tuning playground for custom models
+* Advanced observability & metrics
 * Dev‑agent capabilities & self‑evaluation loops
 
 > **Stay curious. Iterate often. Share your learnings.**

@@ -73,21 +73,61 @@ This pragmatic approach allows CI to pass while the codebase is being cleaned up
 ### 2. Container Build & Test (Linux Only)
 
 Validates that the application builds and runs correctly in a containerized environment.
+**Tests run INSIDE the container** to ensure parity with production deployment.
 
 **Platform:** `ubuntu-latest` only
 
 #### Steps
 
-1. **Checkout code** - Clone the repository
-2. **Set up Docker Buildx** - Enable multi-platform builds
-3. **Build container image** - Build using the `Containerfile`
-4. **Test container starts** - Verify the container runs successfully
-5. **Upload container logs** - Archive logs for debugging
+1. **Free up disk space** - Remove unnecessary software (~15GB)
+2. **Checkout code** - Clone the repository
+3. **Set up Docker Buildx** - Enable multi-platform builds
+4. **Build container image** - Build using the `Containerfile`
+5. **Run tests inside container** - Execute pytest with coverage inside container ⭐
+6. **Test container starts** - Smoke test to verify container runs
+7. **Upload test results** - Archive JUnit XML and coverage reports
+
+#### In-Container Testing ⭐
+
+Tests run **inside the container** to catch container-specific issues:
+
+```bash
+docker run --rm llm-assistant:ci-test pytest -v \
+  --junitxml=/app/test-results/junit.xml \
+  --cov=. \
+  --cov-report=xml:/app/test-results/coverage.xml
+```
+
+**Benefits:**
+- ✅ Tests run in production-like environment
+- ✅ Catches container-specific dependency issues
+- ✅ Validates PYTHONPATH and imports in container
+- ✅ Ensures test suite works with containerized runtime
+
+**Tests Skipped in Container:**
+- `test_prepare_context_summary.py` - Test isolation issues
+- `test_sqlite_bckend.py::test_fallback_on_unwritable` - Permission handling differs in containers
+
+These tests still run in host-based CI jobs on all platforms.
+
+#### Artifacts
+
+**Test Results** (JUnit XML format):
+- Path: `test-results/junit.xml`
+- Retention: 30 days
+- Visible in PR checks
+- Can be used by test reporting tools
+
+**Coverage Report** (XML format):
+- Path: `test-results/coverage.xml`
+- Retention: 30 days
+- Can be integrated with coverage services (Codecov, Coveralls)
 
 #### Build Optimizations
 
 - **Layer caching** via GitHub Actions cache
 - **Cache strategy:** `type=gha,mode=max`
+- **Disk cleanup** before build (~15GB freed)
 - Significantly reduces build time on subsequent runs
 
 ---
@@ -121,7 +161,7 @@ Images are built for:
 
 | Git Event | Tags Generated | Example |
 |-----------|----------------|---------|
-| Push to main | `latest`, `main-<sha>` | `ghcr.io/deim0s13/llm-assistant:latest` |
+| Push to main | `latest`, `sha-<short-sha>` | `ghcr.io/deim0s13/llm-assistant:latest` |
 | Tag `v1.2.3` | `1.2.3`, `1.2`, `1` | `ghcr.io/deim0s13/llm-assistant:1.2.3` |
 
 #### Permissions

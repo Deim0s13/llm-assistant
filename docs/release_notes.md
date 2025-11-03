@@ -17,12 +17,12 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 | **v0.4.3** | ✅ *Done* | In-process **Memory backend**, optional summarisation scaffold     |
 | **v0.4.4** | ✅ *Done* | **Persistent memory (Redis/SQLite)**, settings auto-fallback, expanded tests |
 | **v0.4.5** | ✅ *Done* | **Summarisation MVP, Technical Spec, Planning docs**       |
+| **v0.5.0** | ✅ *Done* | **Multi-environment CI matrix** (Linux/macOS/Windows), Python 3.10+3.11, Containerisation |
+| **v0.5.1** | ✅ *Done* | **GHCR publishing** + **in-container test execution** with coverage |
 
-| **v0.5.0** | 🔼 *Planned* | Containerisation & full CI matrix                           |
-| **v0.5.1** | 🔼 *Planned* | Model upgrade (FLAN → Mistral 7B) + config toggle          |
-| **v0.5.2** | 🔼 *Planned* | Prompt/response quality improvements & structured outputs   |
-| **v0.5.3** | 🔼 *Planned* | CI enhancements: coverage thresholds, artefact uploads      |
-| **v0.5.4** | 🔼 *Planned* | Container publishing (Podman build → GHCR/DockerHub)        |
+| **v0.5.2** | 🔼 *Planned* | Model upgrade (FLAN → Mistral 7B) + config toggle          |
+| **v0.5.3** | 🔼 *Planned* | Prompt/response quality improvements & structured outputs   |
+| **v0.5.4** | 🔼 *Planned* | CI enhancements: coverage thresholds, test dashboards      |
 | **v0.5.5** | 🔼 *Planned* | Consolidated evaluation harness & model comparison          |
 | **v0.6.x** | 🔼 *Planned* | RAG prototype (file-based Q&A)                                |
 | **v0.7.x** | 🔼 *Planned* | Fine-tuning foundation                                        |
@@ -109,7 +109,7 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 
 ---
 
-### v0.4.5 – Summarisation MVP & Technical Spec *(Completed)*
+### v0.4.5 – Summarisation MVP & Technical Spec *(2025‑08‑15)*
 
 * **Summarisation trigger logic**: formal technical spec in `/docs/Technical_Specification_Summarisation_Trigger_Logic.md`
 * **Threshold-based summarisation**: summarise when token/turn limits are reached  
@@ -123,17 +123,132 @@ A chronological changelog for the **LLM‑Assistant Starter Kit**. Each entry li
 * **Test isolation**: improved fixtures to prevent test contamination  
 * **Planning doc updates**: scope, README, design docs all refreshed
 
+---
 
+## v0.5.x Track – CI/CD Infrastructure & Automation
+
+### v0.5.0 – Multi-Environment CI Matrix *(2025‑11‑03)*
+
+**Headline**: Comprehensive CI/CD implementation with multi-platform testing, containerization, and automated validation.
+
+#### Multi-Platform Testing
+* **GitHub Actions workflow** (`.github/workflows/ci.yml`) with OS matrix:
+  - **Ubuntu Linux** (ubuntu-latest)
+  - **macOS** (macos-latest)
+  - **Windows** (windows-latest)
+* **Python version matrix**: 3.10 and 3.11
+* **6 parallel test jobs**: 3 OS × 2 Python versions
+* **Quality checks**: Ruff (lint + format), mypy, Pyright type checking
+* **Test artifacts**: JUnit XML, coverage reports, debug logs
+
+#### Python 3.10/3.11 Compatibility
+* **Conditional imports** for `typing.override` decorator:
+  - Import from `typing` on Python 3.12+
+  - Import from `typing_extensions` on Python 3.10/3.11
+* **Files updated**:
+  - `memory/backends/sqlite_memory_backend.py`
+  - `memory/backends/redis_memory_backend.py`
+* **Dependencies added**: `typing-extensions>=4.8.0` to `requirements-dev.txt`
+
+#### Cross-Platform Fixes
+* **Case-sensitivity fix**: Renamed `utils/Prompt_utils.py` → `utils/prompt_utils.py`
+  - Resolved `ModuleNotFoundError` on Linux (case-sensitive filesystem)
+  - Windows and macOS were unaffected (case-insensitive)
+* **Windows test handling**: Documented and skipped SQLite tests with known timing issues:
+  - `test_migrate_in-memory_sqlite_script.py` - subprocess execution
+  - `test_sqlite_bckend.py::test_fallback_on_unwritable` - permission handling
+  - `test_sqlite_bckend.py::test_roundtrip_default` - timing issues
+  - `test_sqlite_bckend.py::test_trim_oldest` - timing issues
+
+#### Container Build Pipeline
+* **Docker/Podman image builds** on Linux runners
+* **Container validation**: Automated startup tests
+* **Layer caching**: GitHub Actions cache for faster rebuilds
+* **Build artifacts**: Container logs for debugging
+
+#### Documentation
+* **Created `docs/CI.md`**: Comprehensive CI/CD documentation
+  - Workflow triggers and jobs
+  - Caching strategies
+  - Troubleshooting guide
+  - Platform-specific handling
+* **Updated `docs/CONTAINER.md`**: Container setup and usage
+* **Updated `README.md`**: CI badge and quick-start instructions
+
+---
+
+### v0.5.1 – GHCR Publishing & In-Container Testing *(2025‑11‑03)*
+
+**Headline**: Automated container publishing to GitHub Container Registry with in-container test execution and coverage reporting.
+
+#### Container Publishing to GHCR
+* **Automated publishing** on `main` branch pushes and version tags
+* **Registry**: `ghcr.io/deim0s13/llm-assistant`
+* **Multi-architecture builds**: `linux/amd64` and `linux/arm64`
+* **Smart tagging strategy**:
+  - `latest` - Latest main branch build
+  - Semantic versions - `1.2.3`, `1.2`, `1` for release tags
+  - Commit SHAs - `sha-8a88e19` for traceability
+* **Metadata action**: Automated tag and label generation
+* **Permissions**: Proper GITHUB_TOKEN permissions for package publishing
+
+#### Disk Space Optimization
+* **GitHub Actions cleanup**: Pre-build removal of unnecessary software
+  ```bash
+  sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+  sudo docker image prune --all --force
+  ```
+  - Freed ~15GB of disk space
+* **CPU-only PyTorch**: Reduced image size by ~4GB (50% reduction)
+  ```dockerfile
+  RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+  ```
+  - Final image size: ~4GB (down from ~8GB)
+
+#### In-Container Test Execution
+* **Full pytest suite** runs inside built container image
+* **Test dependencies**: Runtime installation of `pytest-cov` and `fakeredis`
+  - Keeps production image lean
+  - Ensures test dependencies available for CI
+* **Coverage reporting**: 
+  - JUnit XML for test results
+  - Cobertura XML for coverage analysis
+* **Artifacts**: 30-day retention for test results and coverage
+* **Container-specific handling**:
+  - Skip `test_prepare_context_summary.py` - test isolation issues
+  - Skip `test_sqlite_bckend.py::test_fallback_on_unwritable` - permission handling
+
+#### Build Summary Output
+* **GitHub Actions summary**: Formatted output with published tags
+* **Pull commands**: Auto-generated for easy copy-paste
+* **Traceability**: Commit SHA and metadata in image labels
+
+#### Documentation Updates
+* **`docs/CONTAINER.md`**: Prioritized GHCR over local builds
+  - Pull and run instructions
+  - Environment variables
+  - Redis integration examples
+* **`docs/CI.md`**: Updated with GHCR publishing details
+  - Tagging strategy table
+  - In-container testing section
+  - Artifact descriptions
+* **`README.md`**: Added GHCR quick-start
+  ```bash
+  docker pull ghcr.io/deim0s13/llm-assistant:latest
+  docker run --rm -p 7860:7860 ghcr.io/deim0s13/llm-assistant:latest
+  ```
+
+#### CI Pipeline Enhancements
+* **Job dependencies**: Proper ordering with `needs` keyword
+* **Aggregated status**: `ci-success` job for branch protection
+* **Fail-fast disabled**: All OS matrix jobs run to completion
+* **PowerShell compatibility**: Fixed multi-line commands for Windows
+
+---
 
 ## Upcoming Roadmap
 
-### v0.5.0 – Containerisation & Full CI Matrix
-
-* Containerisation with Podman/Docker
-* Full CI matrix and automated testing
-* Deployment pipeline setup
-
-### v0.5.1 – Model Upgrade & Configuration
+### v0.5.2 – Model Upgrade & Configuration
 
 * Model upgrade from FLAN-T5 to Mistral 7B
 * Enhanced configuration management

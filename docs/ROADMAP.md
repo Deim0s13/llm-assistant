@@ -59,14 +59,14 @@ compare against the base model.
 | **v0.4.0**         | Alias-driven prompt matching                                                | ✅ Done     |
 | **v0.4.1**         | Safety guardrails & post-filtering                                          | ✅ Done     |
 | **v0.4.2**         | Context trimming & debug logging                                            | ✅ Done     |
-| **v0.4.3**         | *Current* — In-memory backend + summarise scaffold + **initial unit-tests** | ✅ Done     |
+| **v0.4.3**         | In-memory backend + summarise scaffold + **initial unit-tests**             | ✅ Done     |
 | **v0.4.4**         | **Persistent memory, Summarise MVP, CI test pipeline**                      | ✅ Done     |
 | **v0.4.5**         | Evaluation harness & extended guard-rails                                   | ✅ Done     |
-| **v0.5.0**         | Containerisation & full CI matrix                                           | 🔄 In Progress (CI matrix ✅) |
-| **v0.5.1**         | Model upgrade (e.g. FLAN → Mistral 7B) + config toggle                      | 🔜 Planned |
-| **v0.5.2**         | Prompt/response quality improvements (base prompt, structured outputs)      | 🔜 Planned |
-| **v0.5.3**         | CI enhancements: coverage thresholds, artefact uploads                      | 🔜 Planned |
-| **v0.5.4**         | Container publishing (Podman build → GHCR/DockerHub)                        | 🔜 Planned |
+| **v0.5.0**         | Containerisation & full CI matrix (Linux/macOS/Windows)                     | ✅ Done     |
+| **v0.5.1**         | **GHCR publishing + in-container test execution**                           | ✅ Done     |
+| **v0.5.2**         | Model upgrade (e.g. FLAN → Mistral 7B) + config toggle                      | 🔜 Planned |
+| **v0.5.3**         | Prompt/response quality improvements (base prompt, structured outputs)      | 🔜 Planned |
+| **v0.5.4**         | CI enhancements: coverage thresholds, test reporting dashboards             | 🔜 Planned |
 | **v0.5.5**         | Consolidated evaluation harness (prompt quality + model comparison)         | 🔜 Planned |
 | **v0.6.x**         | RAG prototype (file-based Q\&A)                                             | 🔜 Planned |
 | **v0.7.x**         | Fine-tuning foundation setup                                                | 🔜 Planned |
